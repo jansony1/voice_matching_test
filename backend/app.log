@@ -1,0 +1,647 @@
+2024-11-27 18:15:10,798 INFO: Received validate_credentials request with AWS credentials: AKIAT5QZODQXLFYPHXFB, us-west-2
+2024-11-27 18:15:10,799 INFO: Configuring AWS session
+2024-11-27 18:15:10,800 DEBUG: Changing event name from creating-client-class.iot-data to creating-client-class.iot-data-plane
+2024-11-27 18:15:10,802 DEBUG: Changing event name from before-call.apigateway to before-call.api-gateway
+2024-11-27 18:15:10,803 DEBUG: Changing event name from request-created.machinelearning.Predict to request-created.machine-learning.Predict
+2024-11-27 18:15:10,804 DEBUG: Changing event name from before-parameter-build.autoscaling.CreateLaunchConfiguration to before-parameter-build.auto-scaling.CreateLaunchConfiguration
+2024-11-27 18:15:10,804 DEBUG: Changing event name from before-parameter-build.route53 to before-parameter-build.route-53
+2024-11-27 18:15:10,804 DEBUG: Changing event name from request-created.cloudsearchdomain.Search to request-created.cloudsearch-domain.Search
+2024-11-27 18:15:10,805 DEBUG: Changing event name from docs.*.autoscaling.CreateLaunchConfiguration.complete-section to docs.*.auto-scaling.CreateLaunchConfiguration.complete-section
+2024-11-27 18:15:10,807 DEBUG: Changing event name from before-parameter-build.logs.CreateExportTask to before-parameter-build.cloudwatch-logs.CreateExportTask
+2024-11-27 18:15:10,807 DEBUG: Changing event name from docs.*.logs.CreateExportTask.complete-section to docs.*.cloudwatch-logs.CreateExportTask.complete-section
+2024-11-27 18:15:10,807 DEBUG: Changing event name from before-parameter-build.cloudsearchdomain.Search to before-parameter-build.cloudsearch-domain.Search
+2024-11-27 18:15:10,807 DEBUG: Changing event name from docs.*.cloudsearchdomain.Search.complete-section to docs.*.cloudsearch-domain.Search.complete-section
+2024-11-27 18:15:10,807 DEBUG: Setting config variable for region to 'us-west-2'
+2024-11-27 18:15:10,812 INFO: Validating AWS credentials
+2024-11-27 18:15:10,813 DEBUG: Loading JSON file: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/botocore/data/endpoints.json
+2024-11-27 18:15:10,828 DEBUG: Loading JSON file: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/botocore/data/sdk-default-configuration.json
+2024-11-27 18:15:10,828 DEBUG: Event choose-service-name: calling handler <function handle_service_name_alias at 0x10709c5e0>
+2024-11-27 18:15:10,885 DEBUG: Loading JSON file: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/botocore/data/sts/2011-06-15/service-2.json.gz
+2024-11-27 18:15:10,914 DEBUG: Loading JSON file: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/botocore/data/sts/2011-06-15/endpoint-rule-set-1.json.gz
+2024-11-27 18:15:10,914 DEBUG: Loading JSON file: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/botocore/data/partitions.json
+2024-11-27 18:15:10,915 DEBUG: Event creating-client-class.sts: calling handler <function add_generate_presigned_url at 0x107015b20>
+2024-11-27 18:15:10,915 DEBUG: Looking for endpoint for sts via: environment_service
+2024-11-27 18:15:10,915 DEBUG: Looking for endpoint for sts via: environment_global
+2024-11-27 18:15:10,915 DEBUG: Looking for endpoint for sts via: config_service
+2024-11-27 18:15:10,915 DEBUG: Looking for endpoint for sts via: config_global
+2024-11-27 18:15:10,915 DEBUG: No configured endpoint found.
+2024-11-27 18:15:10,919 DEBUG: Setting sts timeout as (60, 60)
+2024-11-27 18:15:10,921 DEBUG: Loading JSON file: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/botocore/data/_retry.json
+2024-11-27 18:15:10,921 DEBUG: Registering retry handlers for service: sts
+2024-11-27 18:15:10,922 DEBUG: Event before-parameter-build.sts.GetCallerIdentity: calling handler <function generate_idempotent_uuid at 0x1070bf060>
+2024-11-27 18:15:10,922 DEBUG: Calling endpoint provider with parameters: {'Region': 'us-west-2', 'UseDualStack': False, 'UseFIPS': False, 'UseGlobalEndpoint': True}
+2024-11-27 18:15:10,922 DEBUG: Endpoint provider result: https://sts.amazonaws.com
+2024-11-27 18:15:10,922 DEBUG: Selecting from endpoint provider's list of auth schemes: "sigv4". User selected auth scheme is: "None"
+2024-11-27 18:15:10,922 DEBUG: Selected auth type "v4" as "v4" with signing context params: {'region': 'us-east-1', 'signing_name': 'sts'}
+2024-11-27 18:15:10,922 DEBUG: Event before-call.sts.GetCallerIdentity: calling handler <function add_recursion_detection_header at 0x1070bd940>
+2024-11-27 18:15:10,922 DEBUG: Event before-call.sts.GetCallerIdentity: calling handler <function add_query_compatibility_header at 0x1070e5b20>
+2024-11-27 18:15:10,922 DEBUG: Event before-call.sts.GetCallerIdentity: calling handler <function inject_api_version_header_if_needed at 0x1070e4b80>
+2024-11-27 18:15:10,922 DEBUG: Making request for OperationModel(name=GetCallerIdentity) with params: {'url_path': '/', 'query_string': '', 'method': 'POST', 'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8', 'User-Agent': 'Boto3/1.35.69 md/Botocore#1.35.69 md/awscrt#0.16.26 ua/2.0 os/macos#23.5.0 md/arch#arm64 lang/python#3.11.0 md/pyimpl#CPython cfg/retry-mode#legacy Botocore/1.35.69'}, 'body': {'Action': 'GetCallerIdentity', 'Version': '2011-06-15'}, 'url': 'https://sts.amazonaws.com/', 'context': {'client_region': 'us-west-2', 'client_config': <botocore.config.Config object at 0x107c64a10>, 'has_streaming_input': False, 'auth_type': 'v4', 'unsigned_payload': None, 'signing': {'region': 'us-east-1', 'signing_name': 'sts'}, 'endpoint_properties': {'authSchemes': [{'name': 'sigv4', 'signingName': 'sts', 'signingRegion': 'us-east-1'}]}}}
+2024-11-27 18:15:10,923 DEBUG: Event request-created.sts.GetCallerIdentity: calling handler <bound method RequestSigner.handler of <botocore.signers.RequestSigner object at 0x107c7f610>>
+2024-11-27 18:15:10,923 DEBUG: Event choose-signer.sts.GetCallerIdentity: calling handler <function set_operation_specific_signer at 0x1070bee80>
+2024-11-27 18:15:10,923 DEBUG: Event request-created.sts.GetCallerIdentity: calling handler <function add_retry_headers at 0x1070e53a0>
+2024-11-27 18:15:10,923 DEBUG: Sending http request: <AWSPreparedRequest stream_output=False, method=POST, url=https://sts.amazonaws.com/, headers={'Content-Type': b'application/x-www-form-urlencoded; charset=utf-8', 'User-Agent': b'Boto3/1.35.69 md/Botocore#1.35.69 md/awscrt#0.16.26 ua/2.0 os/macos#23.5.0 md/arch#arm64 lang/python#3.11.0 md/pyimpl#CPython cfg/retry-mode#legacy Botocore/1.35.69', 'host': b'sts.amazonaws.com', 'X-Amz-Date': b'20241127T101510Z', 'Authorization': b'AWS4-HMAC-SHA256 Credential=AKIAT5QZODQXLFYPHXFB/20241127/us-east-1/sts/aws4_request, SignedHeaders=content-type;host;x-amz-date, Signature=3fd467f27f1285e1a19c8a608916c137d3ef5b9d9717f64172a59ed044f8413d', 'amz-sdk-invocation-id': b'84e65a10-90aa-4555-8d4b-7ee868cec426', 'amz-sdk-request': b'attempt=1', 'Content-Length': '43'}>
+2024-11-27 18:15:10,923 DEBUG: Certificate path: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/certifi/cacert.pem
+2024-11-27 18:15:10,923 DEBUG: Starting new HTTPS connection (1): sts.amazonaws.com:443
+2024-11-27 18:15:12,424 DEBUG: https://sts.amazonaws.com:443 "POST / HTTP/11" 200 406
+2024-11-27 18:15:12,425 DEBUG: Response headers: {'x-amzn-RequestId': '80e6daad-a9a8-4a56-a1a3-a2fe3e1a8abb', 'Content-Type': 'text/xml', 'Content-Length': '406', 'Date': 'Wed, 27 Nov 2024 10:15:11 GMT'}
+2024-11-27 18:15:12,425 DEBUG: Response body:
+b'<GetCallerIdentityResponse xmlns="https://sts.amazonaws.com/doc/2011-06-15/">\n  <GetCallerIdentityResult>\n    <Arn>arn:aws:iam::269562551342:user/zhenyu_op</Arn>\n    <UserId>AIDAJJGL22BTF2DN5WG5M</UserId>\n    <Account>269562551342</Account>\n  </GetCallerIdentityResult>\n  <ResponseMetadata>\n    <RequestId>80e6daad-a9a8-4a56-a1a3-a2fe3e1a8abb</RequestId>\n  </ResponseMetadata>\n</GetCallerIdentityResponse>\n'
+2024-11-27 18:15:12,426 DEBUG: Event needs-retry.sts.GetCallerIdentity: calling handler <botocore.retryhandler.RetryHandler object at 0x107c94d10>
+2024-11-27 18:15:12,426 DEBUG: No retry needed.
+2024-11-27 18:15:12,426 INFO: Credentials validated successfully
+2024-11-27 18:15:15,663 INFO: WebSocket connection established for client client-id
+2024-11-27 18:15:17,503 DEBUG: Received audio chunk of size 24723 bytes for client client-id
+2024-11-27 18:15:17,503 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:15:17,503 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:15:17,503 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:15:17,503 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:15:17,503 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:15:17,503 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:15:22,504 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:15:27,505 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:15:32,506 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:15:37,507 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:15:42,507 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:15:47,509 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:15:52,509 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:15:57,510 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:16:02,511 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:16:07,512 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:16:12,511 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:16:17,513 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:16:22,514 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:16:27,516 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:16:32,517 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:16:37,519 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:16:42,520 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:16:47,521 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:16:52,522 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:16:57,524 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:17:02,524 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:17:07,524 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:17:12,526 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:17:17,528 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:17:22,529 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:17:27,531 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:17:32,533 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:17:37,533 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:17:42,534 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:17:47,536 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:17:52,537 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:17:57,537 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:18:02,538 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:18:07,539 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:18:12,539 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:18:17,542 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:18:22,543 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:18:27,543 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:18:32,545 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:18:37,545 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:18:42,546 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:18:47,547 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:18:52,548 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:18:57,549 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:19:02,550 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:19:07,552 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:19:12,552 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:19:17,554 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:19:22,555 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:19:27,556 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:19:32,556 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:19:37,557 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:19:42,557 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:19:47,558 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:19:52,558 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:19:57,560 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:20:02,561 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:20:07,561 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:20:12,562 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:20:17,564 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:20:22,564 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:20:27,564 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:20:32,566 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:20:37,566 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:20:42,567 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:20:47,569 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:20:52,569 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:20:57,569 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:21:02,570 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:21:07,572 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:21:12,573 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:21:17,575 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:21:22,576 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:21:27,577 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:21:32,578 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:21:37,579 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:21:42,580 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:21:47,581 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:21:52,582 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:21:57,583 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:22:02,585 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:22:07,586 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:22:12,586 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:22:17,588 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:22:22,588 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:22:27,589 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:22:32,589 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:22:37,590 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:22:42,591 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:22:47,592 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:22:52,593 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:22:57,594 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:23:02,598 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:23:07,598 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:23:12,600 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:23:17,602 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:23:22,602 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:23:27,603 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:23:32,604 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:23:37,605 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:23:42,605 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:23:47,605 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:23:52,606 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:23:57,608 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:24:02,609 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:24:07,610 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:24:12,611 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:24:17,613 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:24:22,614 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:24:27,616 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:24:32,618 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:24:37,620 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:24:42,621 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:24:47,621 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:24:52,622 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:24:57,623 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:25:02,625 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:25:07,628 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:25:12,629 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:25:17,630 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:25:22,630 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:25:27,632 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:25:32,633 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:25:37,634 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:25:42,635 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:25:47,635 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:25:50,233 INFO: WebSocket disconnected for client client-id
+2024-11-27 18:25:50,233 DEBUG: Sending remaining audio chunk of size 147 bytes for client client-id
+2024-11-27 18:25:50,748 INFO: WebSocket connection closed for client client-id
+2024-11-27 18:26:14,458 INFO: Received validate_credentials request with AWS credentials: AKIAT5QZODQXLFYPHXFB, us-west-2
+2024-11-27 18:26:14,459 INFO: Configuring AWS session
+2024-11-27 18:26:14,460 DEBUG: Changing event name from creating-client-class.iot-data to creating-client-class.iot-data-plane
+2024-11-27 18:26:14,462 DEBUG: Changing event name from before-call.apigateway to before-call.api-gateway
+2024-11-27 18:26:14,463 DEBUG: Changing event name from request-created.machinelearning.Predict to request-created.machine-learning.Predict
+2024-11-27 18:26:14,464 DEBUG: Changing event name from before-parameter-build.autoscaling.CreateLaunchConfiguration to before-parameter-build.auto-scaling.CreateLaunchConfiguration
+2024-11-27 18:26:14,464 DEBUG: Changing event name from before-parameter-build.route53 to before-parameter-build.route-53
+2024-11-27 18:26:14,465 DEBUG: Changing event name from request-created.cloudsearchdomain.Search to request-created.cloudsearch-domain.Search
+2024-11-27 18:26:14,466 DEBUG: Changing event name from docs.*.autoscaling.CreateLaunchConfiguration.complete-section to docs.*.auto-scaling.CreateLaunchConfiguration.complete-section
+2024-11-27 18:26:14,469 DEBUG: Changing event name from before-parameter-build.logs.CreateExportTask to before-parameter-build.cloudwatch-logs.CreateExportTask
+2024-11-27 18:26:14,469 DEBUG: Changing event name from docs.*.logs.CreateExportTask.complete-section to docs.*.cloudwatch-logs.CreateExportTask.complete-section
+2024-11-27 18:26:14,469 DEBUG: Changing event name from before-parameter-build.cloudsearchdomain.Search to before-parameter-build.cloudsearch-domain.Search
+2024-11-27 18:26:14,470 DEBUG: Changing event name from docs.*.cloudsearchdomain.Search.complete-section to docs.*.cloudsearch-domain.Search.complete-section
+2024-11-27 18:26:14,470 DEBUG: Setting config variable for region to 'us-west-2'
+2024-11-27 18:26:14,473 INFO: Validating AWS credentials
+2024-11-27 18:26:14,475 DEBUG: Loading JSON file: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/botocore/data/endpoints.json
+2024-11-27 18:26:14,489 DEBUG: Loading JSON file: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/botocore/data/sdk-default-configuration.json
+2024-11-27 18:26:14,489 DEBUG: Event choose-service-name: calling handler <function handle_service_name_alias at 0x103de45e0>
+2024-11-27 18:26:14,538 DEBUG: Loading JSON file: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/botocore/data/sts/2011-06-15/service-2.json.gz
+2024-11-27 18:26:14,562 DEBUG: Loading JSON file: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/botocore/data/sts/2011-06-15/endpoint-rule-set-1.json.gz
+2024-11-27 18:26:14,563 DEBUG: Loading JSON file: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/botocore/data/partitions.json
+2024-11-27 18:26:14,563 DEBUG: Event creating-client-class.sts: calling handler <function add_generate_presigned_url at 0x103d5db20>
+2024-11-27 18:26:14,563 DEBUG: Looking for endpoint for sts via: environment_service
+2024-11-27 18:26:14,563 DEBUG: Looking for endpoint for sts via: environment_global
+2024-11-27 18:26:14,563 DEBUG: Looking for endpoint for sts via: config_service
+2024-11-27 18:26:14,563 DEBUG: Looking for endpoint for sts via: config_global
+2024-11-27 18:26:14,563 DEBUG: No configured endpoint found.
+2024-11-27 18:26:14,567 DEBUG: Setting sts timeout as (60, 60)
+2024-11-27 18:26:14,568 DEBUG: Loading JSON file: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/botocore/data/_retry.json
+2024-11-27 18:26:14,568 DEBUG: Registering retry handlers for service: sts
+2024-11-27 18:26:14,568 DEBUG: Event before-parameter-build.sts.GetCallerIdentity: calling handler <function generate_idempotent_uuid at 0x103e07060>
+2024-11-27 18:26:14,568 DEBUG: Calling endpoint provider with parameters: {'Region': 'us-west-2', 'UseDualStack': False, 'UseFIPS': False, 'UseGlobalEndpoint': True}
+2024-11-27 18:26:14,569 DEBUG: Endpoint provider result: https://sts.amazonaws.com
+2024-11-27 18:26:14,569 DEBUG: Selecting from endpoint provider's list of auth schemes: "sigv4". User selected auth scheme is: "None"
+2024-11-27 18:26:14,569 DEBUG: Selected auth type "v4" as "v4" with signing context params: {'region': 'us-east-1', 'signing_name': 'sts'}
+2024-11-27 18:26:14,569 DEBUG: Event before-call.sts.GetCallerIdentity: calling handler <function add_recursion_detection_header at 0x103e05940>
+2024-11-27 18:26:14,569 DEBUG: Event before-call.sts.GetCallerIdentity: calling handler <function add_query_compatibility_header at 0x103e2db20>
+2024-11-27 18:26:14,569 DEBUG: Event before-call.sts.GetCallerIdentity: calling handler <function inject_api_version_header_if_needed at 0x103e2cb80>
+2024-11-27 18:26:14,569 DEBUG: Making request for OperationModel(name=GetCallerIdentity) with params: {'url_path': '/', 'query_string': '', 'method': 'POST', 'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8', 'User-Agent': 'Boto3/1.35.69 md/Botocore#1.35.69 md/awscrt#0.16.26 ua/2.0 os/macos#23.5.0 md/arch#arm64 lang/python#3.11.0 md/pyimpl#CPython cfg/retry-mode#legacy Botocore/1.35.69'}, 'body': {'Action': 'GetCallerIdentity', 'Version': '2011-06-15'}, 'url': 'https://sts.amazonaws.com/', 'context': {'client_region': 'us-west-2', 'client_config': <botocore.config.Config object at 0x1031f1d90>, 'has_streaming_input': False, 'auth_type': 'v4', 'unsigned_payload': None, 'signing': {'region': 'us-east-1', 'signing_name': 'sts'}, 'endpoint_properties': {'authSchemes': [{'name': 'sigv4', 'signingName': 'sts', 'signingRegion': 'us-east-1'}]}}}
+2024-11-27 18:26:14,569 DEBUG: Event request-created.sts.GetCallerIdentity: calling handler <bound method RequestSigner.handler of <botocore.signers.RequestSigner object at 0x105477850>>
+2024-11-27 18:26:14,569 DEBUG: Event choose-signer.sts.GetCallerIdentity: calling handler <function set_operation_specific_signer at 0x103e06e80>
+2024-11-27 18:26:14,569 DEBUG: Event request-created.sts.GetCallerIdentity: calling handler <function add_retry_headers at 0x103e2d3a0>
+2024-11-27 18:26:14,569 DEBUG: Sending http request: <AWSPreparedRequest stream_output=False, method=POST, url=https://sts.amazonaws.com/, headers={'Content-Type': b'application/x-www-form-urlencoded; charset=utf-8', 'User-Agent': b'Boto3/1.35.69 md/Botocore#1.35.69 md/awscrt#0.16.26 ua/2.0 os/macos#23.5.0 md/arch#arm64 lang/python#3.11.0 md/pyimpl#CPython cfg/retry-mode#legacy Botocore/1.35.69', 'host': b'sts.amazonaws.com', 'X-Amz-Date': b'20241127T102614Z', 'Authorization': b'AWS4-HMAC-SHA256 Credential=AKIAT5QZODQXLFYPHXFB/20241127/us-east-1/sts/aws4_request, SignedHeaders=content-type;host;x-amz-date, Signature=d4eb074c632b9625e4e5cfbdfe57b0f5d18f3ab4e51cfb7a905cd96cf313252e', 'amz-sdk-invocation-id': b'23241b62-eb67-4848-ac77-17bbe21bdcaf', 'amz-sdk-request': b'attempt=1', 'Content-Length': '43'}>
+2024-11-27 18:26:14,570 DEBUG: Certificate path: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/certifi/cacert.pem
+2024-11-27 18:26:14,570 DEBUG: Starting new HTTPS connection (1): sts.amazonaws.com:443
+2024-11-27 18:26:16,154 DEBUG: https://sts.amazonaws.com:443 "POST / HTTP/11" 200 406
+2024-11-27 18:26:16,154 DEBUG: Response headers: {'x-amzn-RequestId': '67845967-3c40-498e-b4e8-e4eb4e38db17', 'Content-Type': 'text/xml', 'Content-Length': '406', 'Date': 'Wed, 27 Nov 2024 10:26:15 GMT'}
+2024-11-27 18:26:16,154 DEBUG: Response body:
+b'<GetCallerIdentityResponse xmlns="https://sts.amazonaws.com/doc/2011-06-15/">\n  <GetCallerIdentityResult>\n    <Arn>arn:aws:iam::269562551342:user/zhenyu_op</Arn>\n    <UserId>AIDAJJGL22BTF2DN5WG5M</UserId>\n    <Account>269562551342</Account>\n  </GetCallerIdentityResult>\n  <ResponseMetadata>\n    <RequestId>67845967-3c40-498e-b4e8-e4eb4e38db17</RequestId>\n  </ResponseMetadata>\n</GetCallerIdentityResponse>\n'
+2024-11-27 18:26:16,155 DEBUG: Event needs-retry.sts.GetCallerIdentity: calling handler <botocore.retryhandler.RetryHandler object at 0x10548cd10>
+2024-11-27 18:26:16,155 DEBUG: No retry needed.
+2024-11-27 18:26:16,155 INFO: Credentials validated successfully
+2024-11-27 18:26:19,195 INFO: WebSocket connection established for client client-id
+2024-11-27 18:26:20,714 ERROR: 1
+2024-11-27 18:26:20,714 DEBUG: Received audio chunk of size 115851 bytes for client client-id
+2024-11-27 18:26:20,714 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:26:20,714 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:26:20,714 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:26:20,715 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:26:20,715 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:26:20,715 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:26:20,715 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:26:20,715 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:26:20,715 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:26:20,715 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:26:20,715 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:26:20,715 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:26:20,715 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:26:20,715 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:26:20,715 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:26:20,715 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:26:20,715 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:26:20,716 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:26:20,716 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:26:20,716 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:26:20,716 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:26:20,716 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:26:20,716 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:26:20,716 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:26:20,716 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:26:20,716 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:26:20,716 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:26:20,716 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:26:25,715 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:26:30,716 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:26:35,717 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:26:40,717 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:26:45,719 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:26:50,721 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:26:55,722 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:27:00,723 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:27:05,724 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:27:10,725 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:27:15,725 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:27:20,726 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:27:22,728 INFO: WebSocket disconnected for client client-id
+2024-11-27 18:27:22,728 DEBUG: Sending remaining audio chunk of size 1163 bytes for client client-id
+2024-11-27 18:27:23,582 ERROR: 2
+2024-11-27 18:27:23,582 INFO: WebSocket connection closed for client client-id
+2024-11-27 18:27:28,601 INFO: WebSocket connection established for client client-id
+2024-11-27 18:27:30,015 ERROR: 1
+2024-11-27 18:27:30,015 INFO: 3
+2024-11-27 18:27:30,015 DEBUG: Received audio chunk of size 41298 bytes for client client-id
+2024-11-27 18:27:30,015 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:27:30,015 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:27:30,015 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:27:30,015 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:27:30,016 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:27:30,016 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:27:30,016 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:27:30,016 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:27:30,016 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:27:30,016 DEBUG: Sending audio chunk of size 4096 bytes for client client-id
+2024-11-27 18:27:30,016 INFO: 3
+2024-11-27 18:27:35,016 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:27:40,016 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:27:45,017 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:27:50,019 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:27:55,019 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:28:00,019 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:28:05,020 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:28:10,021 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:28:15,023 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:28:20,023 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:28:25,024 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:28:30,025 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:28:35,026 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:28:40,026 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:28:45,027 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:28:50,028 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:28:55,028 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:29:00,029 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:29:05,029 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:29:10,029 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:29:15,030 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:29:20,031 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:29:25,032 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:29:30,033 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:29:35,033 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:29:40,035 DEBUG: Sent keep-alive audio chunk
+2024-11-27 18:29:44,879 INFO: WebSocket disconnected for client client-id
+2024-11-27 18:29:44,880 DEBUG: Sending remaining audio chunk of size 338 bytes for client client-id
+2024-11-27 18:29:45,037 ERROR: Error in keep-alive mechanism: Stream is completed and doesn't support further writes.
+2024-11-27 18:29:45,355 ERROR: 2
+2024-11-27 18:29:45,355 INFO: WebSocket connection closed for client client-id
+2024-11-27 19:54:49,477 INFO: Received validate_credentials request with AWS credentials: AKIAT5QZODQXLFYPHXFB, us-west-2
+2024-11-27 19:54:49,479 INFO: Configuring AWS session
+2024-11-27 19:54:49,481 DEBUG: Changing event name from creating-client-class.iot-data to creating-client-class.iot-data-plane
+2024-11-27 19:54:49,483 DEBUG: Changing event name from before-call.apigateway to before-call.api-gateway
+2024-11-27 19:54:49,484 DEBUG: Changing event name from request-created.machinelearning.Predict to request-created.machine-learning.Predict
+2024-11-27 19:54:49,485 DEBUG: Changing event name from before-parameter-build.autoscaling.CreateLaunchConfiguration to before-parameter-build.auto-scaling.CreateLaunchConfiguration
+2024-11-27 19:54:49,485 DEBUG: Changing event name from before-parameter-build.route53 to before-parameter-build.route-53
+2024-11-27 19:54:49,485 DEBUG: Changing event name from request-created.cloudsearchdomain.Search to request-created.cloudsearch-domain.Search
+2024-11-27 19:54:49,486 DEBUG: Changing event name from docs.*.autoscaling.CreateLaunchConfiguration.complete-section to docs.*.auto-scaling.CreateLaunchConfiguration.complete-section
+2024-11-27 19:54:49,487 DEBUG: Changing event name from before-parameter-build.logs.CreateExportTask to before-parameter-build.cloudwatch-logs.CreateExportTask
+2024-11-27 19:54:49,487 DEBUG: Changing event name from docs.*.logs.CreateExportTask.complete-section to docs.*.cloudwatch-logs.CreateExportTask.complete-section
+2024-11-27 19:54:49,487 DEBUG: Changing event name from before-parameter-build.cloudsearchdomain.Search to before-parameter-build.cloudsearch-domain.Search
+2024-11-27 19:54:49,487 DEBUG: Changing event name from docs.*.cloudsearchdomain.Search.complete-section to docs.*.cloudsearch-domain.Search.complete-section
+2024-11-27 19:54:49,488 DEBUG: Setting config variable for region to 'us-west-2'
+2024-11-27 19:54:49,491 INFO: Validating AWS credentials
+2024-11-27 19:54:49,492 DEBUG: Loading JSON file: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/botocore/data/endpoints.json
+2024-11-27 19:54:49,503 DEBUG: Loading JSON file: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/botocore/data/sdk-default-configuration.json
+2024-11-27 19:54:49,504 DEBUG: Event choose-service-name: calling handler <function handle_service_name_alias at 0x1050685e0>
+2024-11-27 19:54:49,557 DEBUG: Loading JSON file: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/botocore/data/sts/2011-06-15/service-2.json.gz
+2024-11-27 19:54:49,580 DEBUG: Loading JSON file: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/botocore/data/sts/2011-06-15/endpoint-rule-set-1.json.gz
+2024-11-27 19:54:49,581 DEBUG: Loading JSON file: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/botocore/data/partitions.json
+2024-11-27 19:54:49,581 DEBUG: Event creating-client-class.sts: calling handler <function add_generate_presigned_url at 0x104d95b20>
+2024-11-27 19:54:49,581 DEBUG: Looking for endpoint for sts via: environment_service
+2024-11-27 19:54:49,581 DEBUG: Looking for endpoint for sts via: environment_global
+2024-11-27 19:54:49,581 DEBUG: Looking for endpoint for sts via: config_service
+2024-11-27 19:54:49,582 DEBUG: Looking for endpoint for sts via: config_global
+2024-11-27 19:54:49,582 DEBUG: No configured endpoint found.
+2024-11-27 19:54:49,586 DEBUG: Setting sts timeout as (60, 60)
+2024-11-27 19:54:49,587 DEBUG: Loading JSON file: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/botocore/data/_retry.json
+2024-11-27 19:54:49,587 DEBUG: Registering retry handlers for service: sts
+2024-11-27 19:54:49,588 DEBUG: Event before-parameter-build.sts.GetCallerIdentity: calling handler <function generate_idempotent_uuid at 0x10508b060>
+2024-11-27 19:54:49,588 DEBUG: Calling endpoint provider with parameters: {'Region': 'us-west-2', 'UseDualStack': False, 'UseFIPS': False, 'UseGlobalEndpoint': True}
+2024-11-27 19:54:49,588 DEBUG: Endpoint provider result: https://sts.amazonaws.com
+2024-11-27 19:54:49,588 DEBUG: Selecting from endpoint provider's list of auth schemes: "sigv4". User selected auth scheme is: "None"
+2024-11-27 19:54:49,588 DEBUG: Selected auth type "v4" as "v4" with signing context params: {'region': 'us-east-1', 'signing_name': 'sts'}
+2024-11-27 19:54:49,588 DEBUG: Event before-call.sts.GetCallerIdentity: calling handler <function add_recursion_detection_header at 0x105089940>
+2024-11-27 19:54:49,588 DEBUG: Event before-call.sts.GetCallerIdentity: calling handler <function add_query_compatibility_header at 0x1050b1b20>
+2024-11-27 19:54:49,588 DEBUG: Event before-call.sts.GetCallerIdentity: calling handler <function inject_api_version_header_if_needed at 0x1050b0b80>
+2024-11-27 19:54:49,588 DEBUG: Making request for OperationModel(name=GetCallerIdentity) with params: {'url_path': '/', 'query_string': '', 'method': 'POST', 'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8', 'User-Agent': 'Boto3/1.35.69 md/Botocore#1.35.69 md/awscrt#0.16.26 ua/2.0 os/macos#23.5.0 md/arch#arm64 lang/python#3.11.0 md/pyimpl#CPython cfg/retry-mode#legacy Botocore/1.35.69'}, 'body': {'Action': 'GetCallerIdentity', 'Version': '2011-06-15'}, 'url': 'https://sts.amazonaws.com/', 'context': {'client_region': 'us-west-2', 'client_config': <botocore.config.Config object at 0x105b5ca10>, 'has_streaming_input': False, 'auth_type': 'v4', 'unsigned_payload': None, 'signing': {'region': 'us-east-1', 'signing_name': 'sts'}, 'endpoint_properties': {'authSchemes': [{'name': 'sigv4', 'signingName': 'sts', 'signingRegion': 'us-east-1'}]}}}
+2024-11-27 19:54:49,588 DEBUG: Event request-created.sts.GetCallerIdentity: calling handler <bound method RequestSigner.handler of <botocore.signers.RequestSigner object at 0x10592f1d0>>
+2024-11-27 19:54:49,588 DEBUG: Event choose-signer.sts.GetCallerIdentity: calling handler <function set_operation_specific_signer at 0x10508ae80>
+2024-11-27 19:54:49,590 DEBUG: Event request-created.sts.GetCallerIdentity: calling handler <function add_retry_headers at 0x1050b13a0>
+2024-11-27 19:54:49,590 DEBUG: Sending http request: <AWSPreparedRequest stream_output=False, method=POST, url=https://sts.amazonaws.com/, headers={'Content-Type': b'application/x-www-form-urlencoded; charset=utf-8', 'User-Agent': b'Boto3/1.35.69 md/Botocore#1.35.69 md/awscrt#0.16.26 ua/2.0 os/macos#23.5.0 md/arch#arm64 lang/python#3.11.0 md/pyimpl#CPython cfg/retry-mode#legacy Botocore/1.35.69', 'host': b'sts.amazonaws.com', 'X-Amz-Date': b'20241127T115449Z', 'Authorization': b'AWS4-HMAC-SHA256 Credential=AKIAT5QZODQXLFYPHXFB/20241127/us-east-1/sts/aws4_request, SignedHeaders=content-type;host;x-amz-date, Signature=3a57e1e34e80c08bc928b3f9293ce861b9c1209956810013e37c8dc461c2e3c7', 'amz-sdk-invocation-id': b'f79e27b2-3d55-4bb8-a3fa-7fc5c7d9db48', 'amz-sdk-request': b'attempt=1', 'Content-Length': '43'}>
+2024-11-27 19:54:49,590 DEBUG: Certificate path: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/certifi/cacert.pem
+2024-11-27 19:54:49,590 DEBUG: Starting new HTTPS connection (1): sts.amazonaws.com:443
+2024-11-27 19:54:53,522 INFO: Received validate_credentials request with AWS credentials: AKIAT5QZODQXLFYPHXFB, us-west-2
+2024-11-27 19:54:53,522 INFO: Configuring AWS session
+2024-11-27 19:54:53,523 DEBUG: Changing event name from creating-client-class.iot-data to creating-client-class.iot-data-plane
+2024-11-27 19:54:53,526 DEBUG: Changing event name from before-call.apigateway to before-call.api-gateway
+2024-11-27 19:54:53,528 DEBUG: Changing event name from request-created.machinelearning.Predict to request-created.machine-learning.Predict
+2024-11-27 19:54:53,530 DEBUG: Changing event name from before-parameter-build.autoscaling.CreateLaunchConfiguration to before-parameter-build.auto-scaling.CreateLaunchConfiguration
+2024-11-27 19:54:53,530 DEBUG: Changing event name from before-parameter-build.route53 to before-parameter-build.route-53
+2024-11-27 19:54:53,531 DEBUG: Changing event name from request-created.cloudsearchdomain.Search to request-created.cloudsearch-domain.Search
+2024-11-27 19:54:53,531 DEBUG: Changing event name from docs.*.autoscaling.CreateLaunchConfiguration.complete-section to docs.*.auto-scaling.CreateLaunchConfiguration.complete-section
+2024-11-27 19:54:53,540 DEBUG: Changing event name from before-parameter-build.logs.CreateExportTask to before-parameter-build.cloudwatch-logs.CreateExportTask
+2024-11-27 19:54:53,540 DEBUG: Changing event name from docs.*.logs.CreateExportTask.complete-section to docs.*.cloudwatch-logs.CreateExportTask.complete-section
+2024-11-27 19:54:53,540 DEBUG: Changing event name from before-parameter-build.cloudsearchdomain.Search to before-parameter-build.cloudsearch-domain.Search
+2024-11-27 19:54:53,540 DEBUG: Changing event name from docs.*.cloudsearchdomain.Search.complete-section to docs.*.cloudsearch-domain.Search.complete-section
+2024-11-27 19:54:53,540 DEBUG: Setting config variable for region to 'us-west-2'
+2024-11-27 19:54:53,543 INFO: Validating AWS credentials
+2024-11-27 19:54:53,544 DEBUG: Loading JSON file: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/botocore/data/endpoints.json
+2024-11-27 19:54:53,558 DEBUG: Loading JSON file: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/botocore/data/sdk-default-configuration.json
+2024-11-27 19:54:53,558 DEBUG: Event choose-service-name: calling handler <function handle_service_name_alias at 0x1050685e0>
+2024-11-27 19:54:53,590 DEBUG: Loading JSON file: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/botocore/data/sts/2011-06-15/service-2.json.gz
+2024-11-27 19:54:53,608 DEBUG: Loading JSON file: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/botocore/data/sts/2011-06-15/endpoint-rule-set-1.json.gz
+2024-11-27 19:54:53,609 DEBUG: Loading JSON file: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/botocore/data/partitions.json
+2024-11-27 19:54:53,609 DEBUG: Event creating-client-class.sts: calling handler <function add_generate_presigned_url at 0x104d95b20>
+2024-11-27 19:54:53,609 DEBUG: Looking for endpoint for sts via: environment_service
+2024-11-27 19:54:53,609 DEBUG: Looking for endpoint for sts via: environment_global
+2024-11-27 19:54:53,609 DEBUG: Looking for endpoint for sts via: config_service
+2024-11-27 19:54:53,609 DEBUG: Looking for endpoint for sts via: config_global
+2024-11-27 19:54:53,609 DEBUG: No configured endpoint found.
+2024-11-27 19:54:53,610 DEBUG: Setting sts timeout as (60, 60)
+2024-11-27 19:54:53,610 DEBUG: Loading JSON file: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/botocore/data/_retry.json
+2024-11-27 19:54:53,610 DEBUG: Registering retry handlers for service: sts
+2024-11-27 19:54:53,611 DEBUG: Event before-parameter-build.sts.GetCallerIdentity: calling handler <function generate_idempotent_uuid at 0x10508b060>
+2024-11-27 19:54:53,611 DEBUG: Calling endpoint provider with parameters: {'Region': 'us-west-2', 'UseDualStack': False, 'UseFIPS': False, 'UseGlobalEndpoint': True}
+2024-11-27 19:54:53,611 DEBUG: Endpoint provider result: https://sts.amazonaws.com
+2024-11-27 19:54:53,611 DEBUG: Selecting from endpoint provider's list of auth schemes: "sigv4". User selected auth scheme is: "None"
+2024-11-27 19:54:53,611 DEBUG: Selected auth type "v4" as "v4" with signing context params: {'region': 'us-east-1', 'signing_name': 'sts'}
+2024-11-27 19:54:53,611 DEBUG: Event before-call.sts.GetCallerIdentity: calling handler <function add_recursion_detection_header at 0x105089940>
+2024-11-27 19:54:53,611 DEBUG: Event before-call.sts.GetCallerIdentity: calling handler <function add_query_compatibility_header at 0x1050b1b20>
+2024-11-27 19:54:53,611 DEBUG: Event before-call.sts.GetCallerIdentity: calling handler <function inject_api_version_header_if_needed at 0x1050b0b80>
+2024-11-27 19:54:53,611 DEBUG: Making request for OperationModel(name=GetCallerIdentity) with params: {'url_path': '/', 'query_string': '', 'method': 'POST', 'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8', 'User-Agent': 'Boto3/1.35.69 md/Botocore#1.35.69 md/awscrt#0.16.26 ua/2.0 os/macos#23.5.0 md/arch#arm64 lang/python#3.11.0 md/pyimpl#CPython cfg/retry-mode#legacy Botocore/1.35.69'}, 'body': {'Action': 'GetCallerIdentity', 'Version': '2011-06-15'}, 'url': 'https://sts.amazonaws.com/', 'context': {'client_region': 'us-west-2', 'client_config': <botocore.config.Config object at 0x106163e10>, 'has_streaming_input': False, 'auth_type': 'v4', 'unsigned_payload': None, 'signing': {'region': 'us-east-1', 'signing_name': 'sts'}, 'endpoint_properties': {'authSchemes': [{'name': 'sigv4', 'signingName': 'sts', 'signingRegion': 'us-east-1'}]}}}
+2024-11-27 19:54:53,611 DEBUG: Event request-created.sts.GetCallerIdentity: calling handler <bound method RequestSigner.handler of <botocore.signers.RequestSigner object at 0x105bcb510>>
+2024-11-27 19:54:53,611 DEBUG: Event choose-signer.sts.GetCallerIdentity: calling handler <function set_operation_specific_signer at 0x10508ae80>
+2024-11-27 19:54:53,611 DEBUG: Event request-created.sts.GetCallerIdentity: calling handler <function add_retry_headers at 0x1050b13a0>
+2024-11-27 19:54:53,611 DEBUG: Sending http request: <AWSPreparedRequest stream_output=False, method=POST, url=https://sts.amazonaws.com/, headers={'Content-Type': b'application/x-www-form-urlencoded; charset=utf-8', 'User-Agent': b'Boto3/1.35.69 md/Botocore#1.35.69 md/awscrt#0.16.26 ua/2.0 os/macos#23.5.0 md/arch#arm64 lang/python#3.11.0 md/pyimpl#CPython cfg/retry-mode#legacy Botocore/1.35.69', 'host': b'sts.amazonaws.com', 'X-Amz-Date': b'20241127T115453Z', 'Authorization': b'AWS4-HMAC-SHA256 Credential=AKIAT5QZODQXLFYPHXFB/20241127/us-east-1/sts/aws4_request, SignedHeaders=content-type;host;x-amz-date, Signature=7ff2500e11c59cadeba6e82475f3849e54d0492c0eb9573a4e8e20832de7db5a', 'amz-sdk-invocation-id': b'a7a41608-4896-4b5d-9d9a-5a236ca9d427', 'amz-sdk-request': b'attempt=1', 'Content-Length': '43'}>
+2024-11-27 19:54:53,612 DEBUG: Certificate path: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/certifi/cacert.pem
+2024-11-27 19:54:53,612 DEBUG: Starting new HTTPS connection (1): sts.amazonaws.com:443
+2024-11-27 19:54:58,051 DEBUG: https://sts.amazonaws.com:443 "POST / HTTP/11" 200 406
+2024-11-27 19:54:58,053 DEBUG: Response headers: {'x-amzn-RequestId': '0427cc8e-2f69-4b58-ad8f-c5ad59d34270', 'Content-Type': 'text/xml', 'Content-Length': '406', 'Date': 'Wed, 27 Nov 2024 11:54:52 GMT'}
+2024-11-27 19:54:58,053 DEBUG: Response body:
+b'<GetCallerIdentityResponse xmlns="https://sts.amazonaws.com/doc/2011-06-15/">\n  <GetCallerIdentityResult>\n    <Arn>arn:aws:iam::269562551342:user/zhenyu_op</Arn>\n    <UserId>AIDAJJGL22BTF2DN5WG5M</UserId>\n    <Account>269562551342</Account>\n  </GetCallerIdentityResult>\n  <ResponseMetadata>\n    <RequestId>0427cc8e-2f69-4b58-ad8f-c5ad59d34270</RequestId>\n  </ResponseMetadata>\n</GetCallerIdentityResponse>\n'
+2024-11-27 19:54:58,057 DEBUG: Event needs-retry.sts.GetCallerIdentity: calling handler <botocore.retryhandler.RetryHandler object at 0x105b8d150>
+2024-11-27 19:54:58,058 DEBUG: No retry needed.
+2024-11-27 19:54:58,058 INFO: Credentials validated successfully
+2024-11-27 19:55:01,693 DEBUG: https://sts.amazonaws.com:443 "POST / HTTP/11" 200 406
+2024-11-27 19:55:01,694 DEBUG: Response headers: {'x-amzn-RequestId': 'e26126b8-4bd9-4a69-9786-514c4d082f93', 'Content-Type': 'text/xml', 'Content-Length': '406', 'Date': 'Wed, 27 Nov 2024 11:54:59 GMT'}
+2024-11-27 19:55:01,694 DEBUG: Response body:
+b'<GetCallerIdentityResponse xmlns="https://sts.amazonaws.com/doc/2011-06-15/">\n  <GetCallerIdentityResult>\n    <Arn>arn:aws:iam::269562551342:user/zhenyu_op</Arn>\n    <UserId>AIDAJJGL22BTF2DN5WG5M</UserId>\n    <Account>269562551342</Account>\n  </GetCallerIdentityResult>\n  <ResponseMetadata>\n    <RequestId>e26126b8-4bd9-4a69-9786-514c4d082f93</RequestId>\n  </ResponseMetadata>\n</GetCallerIdentityResponse>\n'
+2024-11-27 19:55:01,695 DEBUG: Event needs-retry.sts.GetCallerIdentity: calling handler <botocore.retryhandler.RetryHandler object at 0x106175290>
+2024-11-27 19:55:01,695 DEBUG: No retry needed.
+2024-11-27 19:55:01,695 INFO: Credentials validated successfully
+2024-11-27 19:55:06,542 INFO: Received validate_credentials request with AWS credentials: AKIAT5QZODQXLFYPHXFB, us-west-2
+2024-11-27 19:55:06,542 INFO: Configuring AWS session
+2024-11-27 19:55:06,543 DEBUG: Changing event name from creating-client-class.iot-data to creating-client-class.iot-data-plane
+2024-11-27 19:55:06,547 DEBUG: Changing event name from before-call.apigateway to before-call.api-gateway
+2024-11-27 19:55:06,548 DEBUG: Changing event name from request-created.machinelearning.Predict to request-created.machine-learning.Predict
+2024-11-27 19:55:06,550 DEBUG: Changing event name from before-parameter-build.autoscaling.CreateLaunchConfiguration to before-parameter-build.auto-scaling.CreateLaunchConfiguration
+2024-11-27 19:55:06,550 DEBUG: Changing event name from before-parameter-build.route53 to before-parameter-build.route-53
+2024-11-27 19:55:06,551 DEBUG: Changing event name from request-created.cloudsearchdomain.Search to request-created.cloudsearch-domain.Search
+2024-11-27 19:55:06,552 DEBUG: Changing event name from docs.*.autoscaling.CreateLaunchConfiguration.complete-section to docs.*.auto-scaling.CreateLaunchConfiguration.complete-section
+2024-11-27 19:55:06,555 DEBUG: Changing event name from before-parameter-build.logs.CreateExportTask to before-parameter-build.cloudwatch-logs.CreateExportTask
+2024-11-27 19:55:06,555 DEBUG: Changing event name from docs.*.logs.CreateExportTask.complete-section to docs.*.cloudwatch-logs.CreateExportTask.complete-section
+2024-11-27 19:55:06,555 DEBUG: Changing event name from before-parameter-build.cloudsearchdomain.Search to before-parameter-build.cloudsearch-domain.Search
+2024-11-27 19:55:06,555 DEBUG: Changing event name from docs.*.cloudsearchdomain.Search.complete-section to docs.*.cloudsearch-domain.Search.complete-section
+2024-11-27 19:55:06,556 DEBUG: Setting config variable for region to 'us-west-2'
+2024-11-27 19:55:06,558 INFO: Validating AWS credentials
+2024-11-27 19:55:06,559 DEBUG: Loading JSON file: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/botocore/data/endpoints.json
+2024-11-27 19:55:06,603 DEBUG: Loading JSON file: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/botocore/data/sdk-default-configuration.json
+2024-11-27 19:55:06,603 DEBUG: Event choose-service-name: calling handler <function handle_service_name_alias at 0x1050685e0>
+2024-11-27 19:55:06,637 DEBUG: Loading JSON file: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/botocore/data/sts/2011-06-15/service-2.json.gz
+2024-11-27 19:55:06,657 DEBUG: Loading JSON file: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/botocore/data/sts/2011-06-15/endpoint-rule-set-1.json.gz
+2024-11-27 19:55:06,658 DEBUG: Loading JSON file: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/botocore/data/partitions.json
+2024-11-27 19:55:06,658 DEBUG: Event creating-client-class.sts: calling handler <function add_generate_presigned_url at 0x104d95b20>
+2024-11-27 19:55:06,658 DEBUG: Looking for endpoint for sts via: environment_service
+2024-11-27 19:55:06,658 DEBUG: Looking for endpoint for sts via: environment_global
+2024-11-27 19:55:06,658 DEBUG: Looking for endpoint for sts via: config_service
+2024-11-27 19:55:06,658 DEBUG: Looking for endpoint for sts via: config_global
+2024-11-27 19:55:06,658 DEBUG: No configured endpoint found.
+2024-11-27 19:55:06,659 DEBUG: Setting sts timeout as (60, 60)
+2024-11-27 19:55:06,660 DEBUG: Loading JSON file: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/botocore/data/_retry.json
+2024-11-27 19:55:06,660 DEBUG: Registering retry handlers for service: sts
+2024-11-27 19:55:06,660 DEBUG: Event before-parameter-build.sts.GetCallerIdentity: calling handler <function generate_idempotent_uuid at 0x10508b060>
+2024-11-27 19:55:06,660 DEBUG: Calling endpoint provider with parameters: {'Region': 'us-west-2', 'UseDualStack': False, 'UseFIPS': False, 'UseGlobalEndpoint': True}
+2024-11-27 19:55:06,660 DEBUG: Endpoint provider result: https://sts.amazonaws.com
+2024-11-27 19:55:06,660 DEBUG: Selecting from endpoint provider's list of auth schemes: "sigv4". User selected auth scheme is: "None"
+2024-11-27 19:55:06,660 DEBUG: Selected auth type "v4" as "v4" with signing context params: {'region': 'us-east-1', 'signing_name': 'sts'}
+2024-11-27 19:55:06,660 DEBUG: Event before-call.sts.GetCallerIdentity: calling handler <function add_recursion_detection_header at 0x105089940>
+2024-11-27 19:55:06,660 DEBUG: Event before-call.sts.GetCallerIdentity: calling handler <function add_query_compatibility_header at 0x1050b1b20>
+2024-11-27 19:55:06,660 DEBUG: Event before-call.sts.GetCallerIdentity: calling handler <function inject_api_version_header_if_needed at 0x1050b0b80>
+2024-11-27 19:55:06,660 DEBUG: Making request for OperationModel(name=GetCallerIdentity) with params: {'url_path': '/', 'query_string': '', 'method': 'POST', 'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8', 'User-Agent': 'Boto3/1.35.69 md/Botocore#1.35.69 md/awscrt#0.16.26 ua/2.0 os/macos#23.5.0 md/arch#arm64 lang/python#3.11.0 md/pyimpl#CPython cfg/retry-mode#legacy Botocore/1.35.69'}, 'body': {'Action': 'GetCallerIdentity', 'Version': '2011-06-15'}, 'url': 'https://sts.amazonaws.com/', 'context': {'client_region': 'us-west-2', 'client_config': <botocore.config.Config object at 0x105833c10>, 'has_streaming_input': False, 'auth_type': 'v4', 'unsigned_payload': None, 'signing': {'region': 'us-east-1', 'signing_name': 'sts'}, 'endpoint_properties': {'authSchemes': [{'name': 'sigv4', 'signingName': 'sts', 'signingRegion': 'us-east-1'}]}}}
+2024-11-27 19:55:06,661 DEBUG: Event request-created.sts.GetCallerIdentity: calling handler <bound method RequestSigner.handler of <botocore.signers.RequestSigner object at 0x105833ad0>>
+2024-11-27 19:55:06,661 DEBUG: Event choose-signer.sts.GetCallerIdentity: calling handler <function set_operation_specific_signer at 0x10508ae80>
+2024-11-27 19:55:06,661 DEBUG: Event request-created.sts.GetCallerIdentity: calling handler <function add_retry_headers at 0x1050b13a0>
+2024-11-27 19:55:06,661 DEBUG: Sending http request: <AWSPreparedRequest stream_output=False, method=POST, url=https://sts.amazonaws.com/, headers={'Content-Type': b'application/x-www-form-urlencoded; charset=utf-8', 'User-Agent': b'Boto3/1.35.69 md/Botocore#1.35.69 md/awscrt#0.16.26 ua/2.0 os/macos#23.5.0 md/arch#arm64 lang/python#3.11.0 md/pyimpl#CPython cfg/retry-mode#legacy Botocore/1.35.69', 'host': b'sts.amazonaws.com', 'X-Amz-Date': b'20241127T115506Z', 'Authorization': b'AWS4-HMAC-SHA256 Credential=AKIAT5QZODQXLFYPHXFB/20241127/us-east-1/sts/aws4_request, SignedHeaders=content-type;host;x-amz-date, Signature=6a15c33ab249ec7189afa2efe5e25f1d3702bc0e53c206ea3ba9f82e4b3cd27f', 'amz-sdk-invocation-id': b'2dc5a811-8d3e-4532-8c2b-7d8566f8f031', 'amz-sdk-request': b'attempt=1', 'Content-Length': '43'}>
+2024-11-27 19:55:06,661 DEBUG: Certificate path: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/certifi/cacert.pem
+2024-11-27 19:55:06,661 DEBUG: Starting new HTTPS connection (1): sts.amazonaws.com:443
+2024-11-27 19:55:08,754 DEBUG: https://sts.amazonaws.com:443 "POST / HTTP/11" 200 406
+2024-11-27 19:55:08,755 DEBUG: Response headers: {'x-amzn-RequestId': 'e7226382-77ae-4925-b47a-52a564a21f2f', 'Content-Type': 'text/xml', 'Content-Length': '406', 'Date': 'Wed, 27 Nov 2024 11:55:08 GMT'}
+2024-11-27 19:55:08,755 DEBUG: Response body:
+b'<GetCallerIdentityResponse xmlns="https://sts.amazonaws.com/doc/2011-06-15/">\n  <GetCallerIdentityResult>\n    <Arn>arn:aws:iam::269562551342:user/zhenyu_op</Arn>\n    <UserId>AIDAJJGL22BTF2DN5WG5M</UserId>\n    <Account>269562551342</Account>\n  </GetCallerIdentityResult>\n  <ResponseMetadata>\n    <RequestId>e7226382-77ae-4925-b47a-52a564a21f2f</RequestId>\n  </ResponseMetadata>\n</GetCallerIdentityResponse>\n'
+2024-11-27 19:55:08,756 DEBUG: Event needs-retry.sts.GetCallerIdentity: calling handler <botocore.retryhandler.RetryHandler object at 0x10581a510>
+2024-11-27 19:55:08,756 DEBUG: No retry needed.
+2024-11-27 19:55:08,756 INFO: Credentials validated successfully
+2024-11-27 19:55:22,553 INFO: Received transcribe request for S3 audio file: s3://voice-matching-zytest/AMC_English_US_Kimberly.mp3
+2024-11-27 19:55:22,555 DEBUG: Changing event name from creating-client-class.iot-data to creating-client-class.iot-data-plane
+2024-11-27 19:55:22,559 DEBUG: Changing event name from before-call.apigateway to before-call.api-gateway
+2024-11-27 19:55:22,560 DEBUG: Changing event name from request-created.machinelearning.Predict to request-created.machine-learning.Predict
+2024-11-27 19:55:22,563 DEBUG: Changing event name from before-parameter-build.autoscaling.CreateLaunchConfiguration to before-parameter-build.auto-scaling.CreateLaunchConfiguration
+2024-11-27 19:55:22,563 DEBUG: Changing event name from before-parameter-build.route53 to before-parameter-build.route-53
+2024-11-27 19:55:22,564 DEBUG: Changing event name from request-created.cloudsearchdomain.Search to request-created.cloudsearch-domain.Search
+2024-11-27 19:55:22,565 DEBUG: Changing event name from docs.*.autoscaling.CreateLaunchConfiguration.complete-section to docs.*.auto-scaling.CreateLaunchConfiguration.complete-section
+2024-11-27 19:55:22,567 DEBUG: Changing event name from before-parameter-build.logs.CreateExportTask to before-parameter-build.cloudwatch-logs.CreateExportTask
+2024-11-27 19:55:22,568 DEBUG: Changing event name from docs.*.logs.CreateExportTask.complete-section to docs.*.cloudwatch-logs.CreateExportTask.complete-section
+2024-11-27 19:55:22,568 DEBUG: Changing event name from before-parameter-build.cloudsearchdomain.Search to before-parameter-build.cloudsearch-domain.Search
+2024-11-27 19:55:22,568 DEBUG: Changing event name from docs.*.cloudsearchdomain.Search.complete-section to docs.*.cloudsearch-domain.Search.complete-section
+2024-11-27 19:55:22,569 DEBUG: Setting config variable for region to 'us-west-2'
+2024-11-27 19:55:22,572 DEBUG: Loading JSON file: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/botocore/data/endpoints.json
+2024-11-27 19:55:22,587 DEBUG: Loading JSON file: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/botocore/data/sdk-default-configuration.json
+2024-11-27 19:55:22,587 DEBUG: Event choose-service-name: calling handler <function handle_service_name_alias at 0x1050685e0>
+2024-11-27 19:55:22,627 DEBUG: Loading JSON file: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/botocore/data/transcribe/2017-10-26/service-2.json.gz
+2024-11-27 19:55:22,648 DEBUG: Loading JSON file: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/botocore/data/transcribe/2017-10-26/endpoint-rule-set-1.json.gz
+2024-11-27 19:55:22,648 DEBUG: Loading JSON file: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/botocore/data/partitions.json
+2024-11-27 19:55:22,649 DEBUG: Event creating-client-class.transcribe: calling handler <function add_generate_presigned_url at 0x104d95b20>
+2024-11-27 19:55:22,649 DEBUG: Looking for endpoint for transcribe via: environment_service
+2024-11-27 19:55:22,649 DEBUG: Looking for endpoint for transcribe via: environment_global
+2024-11-27 19:55:22,649 DEBUG: Looking for endpoint for transcribe via: config_service
+2024-11-27 19:55:22,649 DEBUG: Looking for endpoint for transcribe via: config_global
+2024-11-27 19:55:22,649 DEBUG: No configured endpoint found.
+2024-11-27 19:55:22,650 DEBUG: Setting transcribe timeout as (60, 60)
+2024-11-27 19:55:22,650 DEBUG: Loading JSON file: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/botocore/data/_retry.json
+2024-11-27 19:55:22,650 DEBUG: Registering retry handlers for service: transcribe
+2024-11-27 19:55:22,651 DEBUG: Event choose-service-name: calling handler <function handle_service_name_alias at 0x1050685e0>
+2024-11-27 19:55:22,651 DEBUG: Loading JSON file: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/botocore/data/bedrock-runtime/2023-09-30/service-2.json.gz
+2024-11-27 19:55:22,652 DEBUG: Loading JSON file: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/botocore/data/bedrock-runtime/2023-09-30/endpoint-rule-set-1.json.gz
+2024-11-27 19:55:22,652 DEBUG: Event creating-client-class.bedrock-runtime: calling handler <function add_generate_presigned_url at 0x104d95b20>
+2024-11-27 19:55:22,652 DEBUG: Looking for endpoint for bedrock-runtime via: environment_service
+2024-11-27 19:55:22,652 DEBUG: Looking for endpoint for bedrock-runtime via: environment_global
+2024-11-27 19:55:22,652 DEBUG: Looking for endpoint for bedrock-runtime via: config_service
+2024-11-27 19:55:22,652 DEBUG: Looking for endpoint for bedrock-runtime via: config_global
+2024-11-27 19:55:22,652 DEBUG: No configured endpoint found.
+2024-11-27 19:55:22,652 DEBUG: Creating a regex based endpoint for bedrock-runtime, us-west-2
+2024-11-27 19:55:22,653 DEBUG: Setting bedrock-runtime timeout as (60, 60)
+2024-11-27 19:55:22,653 DEBUG: Registering retry handlers for service: bedrock-runtime
+2024-11-27 19:55:22,654 DEBUG: Event before-parameter-build.transcribe.StartTranscriptionJob: calling handler <function generate_idempotent_uuid at 0x10508b060>
+2024-11-27 19:55:22,654 DEBUG: Calling endpoint provider with parameters: {'Region': 'us-west-2', 'UseDualStack': False, 'UseFIPS': False}
+2024-11-27 19:55:22,654 DEBUG: Endpoint provider result: https://transcribe.us-west-2.amazonaws.com
+2024-11-27 19:55:22,654 DEBUG: Event before-call.transcribe.StartTranscriptionJob: calling handler <function add_recursion_detection_header at 0x105089940>
+2024-11-27 19:55:22,654 DEBUG: Event before-call.transcribe.StartTranscriptionJob: calling handler <function add_query_compatibility_header at 0x1050b1b20>
+2024-11-27 19:55:22,654 DEBUG: Event before-call.transcribe.StartTranscriptionJob: calling handler <function inject_api_version_header_if_needed at 0x1050b0b80>
+2024-11-27 19:55:22,654 DEBUG: Making request for OperationModel(name=StartTranscriptionJob) with params: {'url_path': '/', 'query_string': '', 'method': 'POST', 'headers': {'X-Amz-Target': 'Transcribe.StartTranscriptionJob', 'Content-Type': 'application/x-amz-json-1.1', 'User-Agent': 'Boto3/1.35.69 md/Botocore#1.35.69 md/awscrt#0.16.26 ua/2.0 os/macos#23.5.0 md/arch#arm64 lang/python#3.11.0 md/pyimpl#CPython cfg/retry-mode#legacy Botocore/1.35.69'}, 'body': b'{"TranscriptionJobName": "transcribe-job-d89a8200-a07c-4e3e-b165-b2fa6ae072de", "Media": {"MediaFileUri": "s3://voice-matching-zytest/AMC_English_US_Kimberly.mp3"}, "MediaFormat": "mp3", "LanguageCode": "en-US"}', 'url': 'https://transcribe.us-west-2.amazonaws.com/', 'context': {'client_region': 'us-west-2', 'client_config': <botocore.config.Config object at 0x105a29790>, 'has_streaming_input': False, 'auth_type': None, 'unsigned_payload': None}}
+2024-11-27 19:55:22,654 DEBUG: Event request-created.transcribe.StartTranscriptionJob: calling handler <bound method RequestSigner.handler of <botocore.signers.RequestSigner object at 0x105a29750>>
+2024-11-27 19:55:22,654 DEBUG: Event choose-signer.transcribe.StartTranscriptionJob: calling handler <function set_operation_specific_signer at 0x10508ae80>
+2024-11-27 19:55:22,654 DEBUG: Event request-created.transcribe.StartTranscriptionJob: calling handler <function add_retry_headers at 0x1050b13a0>
+2024-11-27 19:55:22,654 DEBUG: Sending http request: <AWSPreparedRequest stream_output=False, method=POST, url=https://transcribe.us-west-2.amazonaws.com/, headers={'X-Amz-Target': b'Transcribe.StartTranscriptionJob', 'Content-Type': b'application/x-amz-json-1.1', 'User-Agent': b'Boto3/1.35.69 md/Botocore#1.35.69 md/awscrt#0.16.26 ua/2.0 os/macos#23.5.0 md/arch#arm64 lang/python#3.11.0 md/pyimpl#CPython cfg/retry-mode#legacy Botocore/1.35.69', 'host': b'transcribe.us-west-2.amazonaws.com', 'X-Amz-Date': b'20241127T115522Z', 'Authorization': b'AWS4-HMAC-SHA256 Credential=AKIAT5QZODQXLFYPHXFB/20241127/us-west-2/transcribe/aws4_request, SignedHeaders=content-type;host;x-amz-date;x-amz-target, Signature=ed76e97a1c8c31353c4e35e034854e306211799db00bdfad546931af99591ce5', 'amz-sdk-invocation-id': b'920a1d7b-ea06-44dc-b949-83d6a0095af0', 'amz-sdk-request': b'attempt=1', 'Content-Length': '211'}>
+2024-11-27 19:55:22,654 DEBUG: Certificate path: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/certifi/cacert.pem
+2024-11-27 19:55:22,655 DEBUG: Starting new HTTPS connection (1): transcribe.us-west-2.amazonaws.com:443
+2024-11-27 19:55:26,932 DEBUG: https://transcribe.us-west-2.amazonaws.com:443 "POST / HTTP/11" 200 324
+2024-11-27 19:55:26,933 DEBUG: Response headers: {'x-amzn-RequestId': 'c07d36e4-2cd0-443d-a945-c37ab2fa6202', 'Content-Type': 'application/x-amz-json-1.1', 'Content-Length': '324', 'Date': 'Wed, 27 Nov 2024 11:55:24 GMT'}
+2024-11-27 19:55:26,933 DEBUG: Response body:
+b'{"TranscriptionJob":{"CreationTime":1.732708525073E9,"LanguageCode":"en-US","Media":{"MediaFileUri":"s3://voice-matching-zytest/AMC_English_US_Kimberly.mp3"},"MediaFormat":"mp3","StartTime":1.732708525094E9,"TranscriptionJobName":"transcribe-job-d89a8200-a07c-4e3e-b165-b2fa6ae072de","TranscriptionJobStatus":"IN_PROGRESS"}}'
+2024-11-27 19:55:26,934 DEBUG: Event needs-retry.transcribe.StartTranscriptionJob: calling handler <botocore.retryhandler.RetryHandler object at 0x105a1e450>
+2024-11-27 19:55:26,934 DEBUG: No retry needed.
+2024-11-27 19:55:26,935 INFO: Started transcription job: transcribe-job-d89a8200-a07c-4e3e-b165-b2fa6ae072de
+2024-11-27 19:55:26,935 DEBUG: Event before-parameter-build.transcribe.GetTranscriptionJob: calling handler <function generate_idempotent_uuid at 0x10508b060>
+2024-11-27 19:55:26,935 DEBUG: Calling endpoint provider with parameters: {'Region': 'us-west-2', 'UseDualStack': False, 'UseFIPS': False}
+2024-11-27 19:55:26,935 DEBUG: Endpoint provider result: https://transcribe.us-west-2.amazonaws.com
+2024-11-27 19:55:26,936 DEBUG: Event before-call.transcribe.GetTranscriptionJob: calling handler <function add_recursion_detection_header at 0x105089940>
+2024-11-27 19:55:26,936 DEBUG: Event before-call.transcribe.GetTranscriptionJob: calling handler <function add_query_compatibility_header at 0x1050b1b20>
+2024-11-27 19:55:26,936 DEBUG: Event before-call.transcribe.GetTranscriptionJob: calling handler <function inject_api_version_header_if_needed at 0x1050b0b80>
+2024-11-27 19:55:26,936 DEBUG: Making request for OperationModel(name=GetTranscriptionJob) with params: {'url_path': '/', 'query_string': '', 'method': 'POST', 'headers': {'X-Amz-Target': 'Transcribe.GetTranscriptionJob', 'Content-Type': 'application/x-amz-json-1.1', 'User-Agent': 'Boto3/1.35.69 md/Botocore#1.35.69 md/awscrt#0.16.26 ua/2.0 os/macos#23.5.0 md/arch#arm64 lang/python#3.11.0 md/pyimpl#CPython cfg/retry-mode#legacy Botocore/1.35.69'}, 'body': b'{"TranscriptionJobName": "transcribe-job-d89a8200-a07c-4e3e-b165-b2fa6ae072de"}', 'url': 'https://transcribe.us-west-2.amazonaws.com/', 'context': {'client_region': 'us-west-2', 'client_config': <botocore.config.Config object at 0x105a29790>, 'has_streaming_input': False, 'auth_type': None, 'unsigned_payload': None}}
+2024-11-27 19:55:26,936 DEBUG: Event request-created.transcribe.GetTranscriptionJob: calling handler <bound method RequestSigner.handler of <botocore.signers.RequestSigner object at 0x105a29750>>
+2024-11-27 19:55:26,936 DEBUG: Event choose-signer.transcribe.GetTranscriptionJob: calling handler <function set_operation_specific_signer at 0x10508ae80>
+2024-11-27 19:55:26,937 DEBUG: Event request-created.transcribe.GetTranscriptionJob: calling handler <function add_retry_headers at 0x1050b13a0>
+2024-11-27 19:55:26,937 DEBUG: Sending http request: <AWSPreparedRequest stream_output=False, method=POST, url=https://transcribe.us-west-2.amazonaws.com/, headers={'X-Amz-Target': b'Transcribe.GetTranscriptionJob', 'Content-Type': b'application/x-amz-json-1.1', 'User-Agent': b'Boto3/1.35.69 md/Botocore#1.35.69 md/awscrt#0.16.26 ua/2.0 os/macos#23.5.0 md/arch#arm64 lang/python#3.11.0 md/pyimpl#CPython cfg/retry-mode#legacy Botocore/1.35.69', 'host': b'transcribe.us-west-2.amazonaws.com', 'X-Amz-Date': b'20241127T115526Z', 'Authorization': b'AWS4-HMAC-SHA256 Credential=AKIAT5QZODQXLFYPHXFB/20241127/us-west-2/transcribe/aws4_request, SignedHeaders=content-type;host;x-amz-date;x-amz-target, Signature=6a0f8f97ef6aed501877651d2374f9b4dfbdaee7bdd0e9aefa0dc32d68f8f7e4', 'amz-sdk-invocation-id': b'025f6987-4cfe-457f-acf1-6b8a561c5c9d', 'amz-sdk-request': b'attempt=1', 'Content-Length': '79'}>
+2024-11-27 19:55:26,937 DEBUG: Certificate path: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/certifi/cacert.pem
+2024-11-27 19:55:28,226 DEBUG: https://transcribe.us-west-2.amazonaws.com:443 "POST / HTTP/11" 200 437
+2024-11-27 19:55:28,228 DEBUG: Response headers: {'x-amzn-RequestId': '63aa19f8-2ce3-4de5-ac74-b5d8f8fa014c', 'Content-Type': 'application/x-amz-json-1.1', 'Content-Length': '437', 'Date': 'Wed, 27 Nov 2024 11:55:26 GMT'}
+2024-11-27 19:55:28,228 DEBUG: Response body:
+b'{"TranscriptionJob":{"CreationTime":1.732708525073E9,"LanguageCode":"en-US","Media":{"MediaFileUri":"s3://voice-matching-zytest/AMC_English_US_Kimberly.mp3"},"MediaFormat":"mp3","MediaSampleRateHertz":22050,"Settings":{"ChannelIdentification":false,"ShowAlternatives":false},"StartTime":1.732708525094E9,"Transcript":{},"TranscriptionJobName":"transcribe-job-d89a8200-a07c-4e3e-b165-b2fa6ae072de","TranscriptionJobStatus":"IN_PROGRESS"}}'
+2024-11-27 19:55:28,229 DEBUG: Event needs-retry.transcribe.GetTranscriptionJob: calling handler <botocore.retryhandler.RetryHandler object at 0x105a1e450>
+2024-11-27 19:55:28,229 DEBUG: No retry needed.
+2024-11-27 19:55:29,231 DEBUG: Event before-parameter-build.transcribe.GetTranscriptionJob: calling handler <function generate_idempotent_uuid at 0x10508b060>
+2024-11-27 19:55:29,232 DEBUG: Calling endpoint provider with parameters: {'Region': 'us-west-2', 'UseDualStack': False, 'UseFIPS': False}
+2024-11-27 19:55:29,232 DEBUG: Endpoint provider result: https://transcribe.us-west-2.amazonaws.com
+2024-11-27 19:55:29,233 DEBUG: Event before-call.transcribe.GetTranscriptionJob: calling handler <function add_recursion_detection_header at 0x105089940>
+2024-11-27 19:55:29,233 DEBUG: Event before-call.transcribe.GetTranscriptionJob: calling handler <function add_query_compatibility_header at 0x1050b1b20>
+2024-11-27 19:55:29,233 DEBUG: Event before-call.transcribe.GetTranscriptionJob: calling handler <function inject_api_version_header_if_needed at 0x1050b0b80>
+2024-11-27 19:55:29,233 DEBUG: Making request for OperationModel(name=GetTranscriptionJob) with params: {'url_path': '/', 'query_string': '', 'method': 'POST', 'headers': {'X-Amz-Target': 'Transcribe.GetTranscriptionJob', 'Content-Type': 'application/x-amz-json-1.1', 'User-Agent': 'Boto3/1.35.69 md/Botocore#1.35.69 md/awscrt#0.16.26 ua/2.0 os/macos#23.5.0 md/arch#arm64 lang/python#3.11.0 md/pyimpl#CPython cfg/retry-mode#legacy Botocore/1.35.69'}, 'body': b'{"TranscriptionJobName": "transcribe-job-d89a8200-a07c-4e3e-b165-b2fa6ae072de"}', 'url': 'https://transcribe.us-west-2.amazonaws.com/', 'context': {'client_region': 'us-west-2', 'client_config': <botocore.config.Config object at 0x105a29790>, 'has_streaming_input': False, 'auth_type': None, 'unsigned_payload': None}}
+2024-11-27 19:55:29,234 DEBUG: Event request-created.transcribe.GetTranscriptionJob: calling handler <bound method RequestSigner.handler of <botocore.signers.RequestSigner object at 0x105a29750>>
+2024-11-27 19:55:29,234 DEBUG: Event choose-signer.transcribe.GetTranscriptionJob: calling handler <function set_operation_specific_signer at 0x10508ae80>
+2024-11-27 19:55:29,235 DEBUG: Event request-created.transcribe.GetTranscriptionJob: calling handler <function add_retry_headers at 0x1050b13a0>
+2024-11-27 19:55:29,235 DEBUG: Sending http request: <AWSPreparedRequest stream_output=False, method=POST, url=https://transcribe.us-west-2.amazonaws.com/, headers={'X-Amz-Target': b'Transcribe.GetTranscriptionJob', 'Content-Type': b'application/x-amz-json-1.1', 'User-Agent': b'Boto3/1.35.69 md/Botocore#1.35.69 md/awscrt#0.16.26 ua/2.0 os/macos#23.5.0 md/arch#arm64 lang/python#3.11.0 md/pyimpl#CPython cfg/retry-mode#legacy Botocore/1.35.69', 'host': b'transcribe.us-west-2.amazonaws.com', 'X-Amz-Date': b'20241127T115529Z', 'Authorization': b'AWS4-HMAC-SHA256 Credential=AKIAT5QZODQXLFYPHXFB/20241127/us-west-2/transcribe/aws4_request, SignedHeaders=content-type;host;x-amz-date;x-amz-target, Signature=742c7624fa7f9c7f74e6e20e51331a8c29d66e45dcc711ccaf76b5fc37a2cff3', 'amz-sdk-invocation-id': b'657483f5-b0cf-4352-b4c7-210f09c9359c', 'amz-sdk-request': b'attempt=1', 'Content-Length': '79'}>
+2024-11-27 19:55:29,235 DEBUG: Certificate path: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/certifi/cacert.pem
+2024-11-27 19:55:33,282 DEBUG: https://transcribe.us-west-2.amazonaws.com:443 "POST / HTTP/11" 200 437
+2024-11-27 19:55:33,283 DEBUG: Response headers: {'x-amzn-RequestId': '219b52d8-8898-433c-afe7-3582d0180b1e', 'Content-Type': 'application/x-amz-json-1.1', 'Content-Length': '437', 'Date': 'Wed, 27 Nov 2024 11:55:28 GMT'}
+2024-11-27 19:55:33,283 DEBUG: Response body:
+b'{"TranscriptionJob":{"CreationTime":1.732708525073E9,"LanguageCode":"en-US","Media":{"MediaFileUri":"s3://voice-matching-zytest/AMC_English_US_Kimberly.mp3"},"MediaFormat":"mp3","MediaSampleRateHertz":22050,"Settings":{"ChannelIdentification":false,"ShowAlternatives":false},"StartTime":1.732708525094E9,"Transcript":{},"TranscriptionJobName":"transcribe-job-d89a8200-a07c-4e3e-b165-b2fa6ae072de","TranscriptionJobStatus":"IN_PROGRESS"}}'
+2024-11-27 19:55:33,284 DEBUG: Event needs-retry.transcribe.GetTranscriptionJob: calling handler <botocore.retryhandler.RetryHandler object at 0x105a1e450>
+2024-11-27 19:55:33,284 DEBUG: No retry needed.
+2024-11-27 19:55:34,286 DEBUG: Event before-parameter-build.transcribe.GetTranscriptionJob: calling handler <function generate_idempotent_uuid at 0x10508b060>
+2024-11-27 19:55:34,287 DEBUG: Calling endpoint provider with parameters: {'Region': 'us-west-2', 'UseDualStack': False, 'UseFIPS': False}
+2024-11-27 19:55:34,287 DEBUG: Endpoint provider result: https://transcribe.us-west-2.amazonaws.com
+2024-11-27 19:55:34,288 DEBUG: Event before-call.transcribe.GetTranscriptionJob: calling handler <function add_recursion_detection_header at 0x105089940>
+2024-11-27 19:55:34,288 DEBUG: Event before-call.transcribe.GetTranscriptionJob: calling handler <function add_query_compatibility_header at 0x1050b1b20>
+2024-11-27 19:55:34,288 DEBUG: Event before-call.transcribe.GetTranscriptionJob: calling handler <function inject_api_version_header_if_needed at 0x1050b0b80>
+2024-11-27 19:55:34,288 DEBUG: Making request for OperationModel(name=GetTranscriptionJob) with params: {'url_path': '/', 'query_string': '', 'method': 'POST', 'headers': {'X-Amz-Target': 'Transcribe.GetTranscriptionJob', 'Content-Type': 'application/x-amz-json-1.1', 'User-Agent': 'Boto3/1.35.69 md/Botocore#1.35.69 md/awscrt#0.16.26 ua/2.0 os/macos#23.5.0 md/arch#arm64 lang/python#3.11.0 md/pyimpl#CPython cfg/retry-mode#legacy Botocore/1.35.69'}, 'body': b'{"TranscriptionJobName": "transcribe-job-d89a8200-a07c-4e3e-b165-b2fa6ae072de"}', 'url': 'https://transcribe.us-west-2.amazonaws.com/', 'context': {'client_region': 'us-west-2', 'client_config': <botocore.config.Config object at 0x105a29790>, 'has_streaming_input': False, 'auth_type': None, 'unsigned_payload': None}}
+2024-11-27 19:55:34,289 DEBUG: Event request-created.transcribe.GetTranscriptionJob: calling handler <bound method RequestSigner.handler of <botocore.signers.RequestSigner object at 0x105a29750>>
+2024-11-27 19:55:34,289 DEBUG: Event choose-signer.transcribe.GetTranscriptionJob: calling handler <function set_operation_specific_signer at 0x10508ae80>
+2024-11-27 19:55:34,290 DEBUG: Event request-created.transcribe.GetTranscriptionJob: calling handler <function add_retry_headers at 0x1050b13a0>
+2024-11-27 19:55:34,290 DEBUG: Sending http request: <AWSPreparedRequest stream_output=False, method=POST, url=https://transcribe.us-west-2.amazonaws.com/, headers={'X-Amz-Target': b'Transcribe.GetTranscriptionJob', 'Content-Type': b'application/x-amz-json-1.1', 'User-Agent': b'Boto3/1.35.69 md/Botocore#1.35.69 md/awscrt#0.16.26 ua/2.0 os/macos#23.5.0 md/arch#arm64 lang/python#3.11.0 md/pyimpl#CPython cfg/retry-mode#legacy Botocore/1.35.69', 'host': b'transcribe.us-west-2.amazonaws.com', 'X-Amz-Date': b'20241127T115534Z', 'Authorization': b'AWS4-HMAC-SHA256 Credential=AKIAT5QZODQXLFYPHXFB/20241127/us-west-2/transcribe/aws4_request, SignedHeaders=content-type;host;x-amz-date;x-amz-target, Signature=86760d8c297d1e215f3e3f0526d8da68c8828c11b7a488fc5c336cd9b0de4559', 'amz-sdk-invocation-id': b'bd60c0b9-17c9-42c1-b410-2b2df6021516', 'amz-sdk-request': b'attempt=1', 'Content-Length': '79'}>
+2024-11-27 19:55:34,290 DEBUG: Certificate path: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/certifi/cacert.pem
+2024-11-27 19:55:34,926 DEBUG: https://transcribe.us-west-2.amazonaws.com:443 "POST / HTTP/11" 200 2386
+2024-11-27 19:55:34,926 DEBUG: Response headers: {'x-amzn-RequestId': 'a0fe98c7-4b2d-463d-b8eb-4ee395eeaa0b', 'Content-Type': 'application/x-amz-json-1.1', 'Content-Length': '2386', 'Date': 'Wed, 27 Nov 2024 11:55:34 GMT'}
+2024-11-27 19:55:34,926 DEBUG: Response body:
+b'{"TranscriptionJob":{"CompletionTime":1.732708532119E9,"CreationTime":1.732708525073E9,"LanguageCode":"en-US","Media":{"MediaFileUri":"s3://voice-matching-zytest/AMC_English_US_Kimberly.mp3"},"MediaFormat":"mp3","MediaSampleRateHertz":22050,"Settings":{"ChannelIdentification":false,"ShowAlternatives":false},"StartTime":1.732708525094E9,"Transcript":{"TranscriptFileUri":"https://s3.us-west-2.amazonaws.com/aws-transcribe-us-west-2-prod/269562551342/transcribe-job-d89a8200-a07c-4e3e-b165-b2fa6ae072de/1206bb2f-54d3-41c8-9451-448ab9a0b703/asrOutput.json?X-Amz-Security-Token=IQoJb3JpZ2luX2VjEJv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQDw0e4yIF%2FAnZrcsBUQ7LEPC3G1kNfkADfi3ntc%2FIsBJAIgXXXZ%2B25PHHR3XK2r7dsXMZIEXpsIKH%2Brxa9nI%2FYaye8qsQUIRBAEGgwwODAyNDgzMjIyMDYiDDU%2Fi%2BZxhb6Sjpul9SqOBVZV44e749uta9fhY7nWDkvQM2LExmqt39YiDSfs5DsiLJ4qFyNaXIgI9ODeZ%2BAB%2FasHBTdWNY00Cz0tvc0nRq6AdweH%2BI6avvVw%2FvKZw9QpceX3cZK1ecAC1X19HbHVRSwPoWFv1jojTSqkzjoiiNIl0LdkQa%2BeT3p9IuAx1GvCxpqGbABLq5uxeYQC7wsjazBKqouRbU1ug39%2Bu6b8JwE0ptjjOHvSgOZABvOtwQrwzBK%2FwGfk3xPoBt7PAt5dnnPtQ2ARP%2F6qyaO%2FxEmQlE87x1%2Beo93QWQjLFe4tXw4snOEf76ddN60belJxTcVRlIexpbJlkqu%2BsRfVtymzrKC1D6qbaTR2oh6mzPl3yk0SrVHGEIwlP1rnCzR4w%2FfmGgZRwHMp7zUJ3SzPrqa74pEg%2FodAQa3%2BScvV2rjIhj3FwngrVbGENqwXofce66sL%2FXybxeaonSUseczrnANRubmk77sqbPTjyUxk0pyXhM2AxG14vEbahEiiB14bFZmDw6Xpj2Xoe2Ah%2BtoG10OBYDikfobE6%2F4BgDgmzPNvBmp6Qt9ilrOhuag%2FdVL6rAvOdxfa6U7G1EwNv%2F7ToUBBqTMmiMDBavGPcoJ%2FgamW5YIUZFrwBlE1HTObsZW%2F2A3YNdc%2BnZ%2BqvtqR51VsNfHi1OhJ9VJ61M%2FVra%2BS4mMpuW7taVnS9sOWq5pBEqwUg3cGuqDYqKn3vjINSs1QABk%2Fk9Gw3ERcaqV8H0mpMV4SEsKgXXx9l04SPC%2BhIqvG2THTRY%2FjeuDxHRH3IFgc8fYgYJXLjKwra6Pggt0upQz098Dn8LV5F83KZV3NrTKuSDCgESo%2B98WST23cY1un20FPjDIRPRjBXCipYJqQvKVoQzDK%2BZu6BjqxAdaZjKTYX1lKIYtN6T737IFq4RrjtZMwU4gtC3LSAiuZwxY4aI4a7moj6CmMWsmF4lzCYZz0s%2F3sed%2FbqfcnkYx2cyegrMPORsq%2BPVS2HvRF7ShMdIbf4L1bHbON3zoEiCLygreKsMMAThcvAYlO4PAUGFQGjkFahmWAKI2YxoSnwp4c3nyWGF9zz141J9%2FiCxjKXlg9sCfXYx%2BtcEdgsqQenXHzI0tLAnhLt%2BIJxvzhNQ%3D%3D&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20241127T115534Z&X-Amz-SignedHeaders=host&X-Amz-Expires=899&X-Amz-Credential=ASIARFLZMHCPJJVTBLJY%2F20241127%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Signature=d448d4ffda951248e639254240ff35bb56f380e43e953fa33ab0f4b92c2b8d81"},"TranscriptionJobName":"transcribe-job-d89a8200-a07c-4e3e-b165-b2fa6ae072de","TranscriptionJobStatus":"COMPLETED"}}'
+2024-11-27 19:55:34,927 DEBUG: Event needs-retry.transcribe.GetTranscriptionJob: calling handler <botocore.retryhandler.RetryHandler object at 0x105a1e450>
+2024-11-27 19:55:34,927 DEBUG: No retry needed.
+2024-11-27 19:55:34,935 DEBUG: Starting new HTTPS connection (1): s3.us-west-2.amazonaws.com:443
+2024-11-27 19:55:40,137 DEBUG: https://s3.us-west-2.amazonaws.com:443 "GET /aws-transcribe-us-west-2-prod/269562551342/transcribe-job-d89a8200-a07c-4e3e-b165-b2fa6ae072de/1206bb2f-54d3-41c8-9451-448ab9a0b703/asrOutput.json?X-Amz-Security-Token=IQoJb3JpZ2luX2VjEJv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQDw0e4yIF%2FAnZrcsBUQ7LEPC3G1kNfkADfi3ntc%2FIsBJAIgXXXZ%2B25PHHR3XK2r7dsXMZIEXpsIKH%2Brxa9nI%2FYaye8qsQUIRBAEGgwwODAyNDgzMjIyMDYiDDU%2Fi%2BZxhb6Sjpul9SqOBVZV44e749uta9fhY7nWDkvQM2LExmqt39YiDSfs5DsiLJ4qFyNaXIgI9ODeZ%2BAB%2FasHBTdWNY00Cz0tvc0nRq6AdweH%2BI6avvVw%2FvKZw9QpceX3cZK1ecAC1X19HbHVRSwPoWFv1jojTSqkzjoiiNIl0LdkQa%2BeT3p9IuAx1GvCxpqGbABLq5uxeYQC7wsjazBKqouRbU1ug39%2Bu6b8JwE0ptjjOHvSgOZABvOtwQrwzBK%2FwGfk3xPoBt7PAt5dnnPtQ2ARP%2F6qyaO%2FxEmQlE87x1%2Beo93QWQjLFe4tXw4snOEf76ddN60belJxTcVRlIexpbJlkqu%2BsRfVtymzrKC1D6qbaTR2oh6mzPl3yk0SrVHGEIwlP1rnCzR4w%2FfmGgZRwHMp7zUJ3SzPrqa74pEg%2FodAQa3%2BScvV2rjIhj3FwngrVbGENqwXofce66sL%2FXybxeaonSUseczrnANRubmk77sqbPTjyUxk0pyXhM2AxG14vEbahEiiB14bFZmDw6Xpj2Xoe2Ah%2BtoG10OBYDikfobE6%2F4BgDgmzPNvBmp6Qt9ilrOhuag%2FdVL6rAvOdxfa6U7G1EwNv%2F7ToUBBqTMmiMDBavGPcoJ%2FgamW5YIUZFrwBlE1HTObsZW%2F2A3YNdc%2BnZ%2BqvtqR51VsNfHi1OhJ9VJ61M%2FVra%2BS4mMpuW7taVnS9sOWq5pBEqwUg3cGuqDYqKn3vjINSs1QABk%2Fk9Gw3ERcaqV8H0mpMV4SEsKgXXx9l04SPC%2BhIqvG2THTRY%2FjeuDxHRH3IFgc8fYgYJXLjKwra6Pggt0upQz098Dn8LV5F83KZV3NrTKuSDCgESo%2B98WST23cY1un20FPjDIRPRjBXCipYJqQvKVoQzDK%2BZu6BjqxAdaZjKTYX1lKIYtN6T737IFq4RrjtZMwU4gtC3LSAiuZwxY4aI4a7moj6CmMWsmF4lzCYZz0s%2F3sed%2FbqfcnkYx2cyegrMPORsq%2BPVS2HvRF7ShMdIbf4L1bHbON3zoEiCLygreKsMMAThcvAYlO4PAUGFQGjkFahmWAKI2YxoSnwp4c3nyWGF9zz141J9%2FiCxjKXlg9sCfXYx%2BtcEdgsqQenXHzI0tLAnhLt%2BIJxvzhNQ%3D%3D&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20241127T115534Z&X-Amz-SignedHeaders=host&X-Amz-Expires=899&X-Amz-Credential=ASIARFLZMHCPJJVTBLJY%2F20241127%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Signature=d448d4ffda951248e639254240ff35bb56f380e43e953fa33ab0f4b92c2b8d81 HTTP/11" 200 610
+2024-11-27 19:55:40,138 INFO: Transcription result: A MC.
+2024-11-27 19:55:40,139 DEBUG: Event before-parameter-build.bedrock-runtime.InvokeModel: calling handler <function generate_idempotent_uuid at 0x10508b060>
+2024-11-27 19:55:40,139 DEBUG: Calling endpoint provider with parameters: {'Region': 'us-west-2', 'UseDualStack': False, 'UseFIPS': False}
+2024-11-27 19:55:40,140 DEBUG: Endpoint provider result: https://bedrock-runtime.us-west-2.amazonaws.com
+2024-11-27 19:55:40,140 DEBUG: Event before-call.bedrock-runtime.InvokeModel: calling handler <function add_recursion_detection_header at 0x105089940>
+2024-11-27 19:55:40,140 DEBUG: Event before-call.bedrock-runtime.InvokeModel: calling handler <function add_query_compatibility_header at 0x1050b1b20>
+2024-11-27 19:55:40,140 DEBUG: Event before-call.bedrock-runtime.InvokeModel: calling handler <function inject_api_version_header_if_needed at 0x1050b0b80>
+2024-11-27 19:55:40,140 DEBUG: Making request for OperationModel(name=InvokeModel) with params: {'url_path': '/model/anthropic.claude-v2/invoke', 'query_string': {}, 'method': 'POST', 'headers': {'User-Agent': 'Boto3/1.35.69 md/Botocore#1.35.69 md/awscrt#0.16.26 ua/2.0 os/macos#23.5.0 md/arch#arm64 lang/python#3.11.0 md/pyimpl#CPython cfg/retry-mode#legacy Botocore/1.35.69'}, 'body': b'{"prompt": "You are an AI assistant for efficient text matching. Your task is to quickly match given text with words from a predefined dictionary. Follow these guidelines:\\n\\nInput:\\nText: A word or short phrase from speech transcription.\\nDictionary: A list of keywords with possible variations.\\n\\nMatching Strategy:\\n1. Exact Match\\n2. High-confidence Partial Match (>80% similarity)\\n3. Phonetic Similarity (using Soundex or similar algorithm)\\n\\nOutput Format:\\nMatched Word: [Dictionary keyword]\\nMatch Type: [Exact/Partial/Phonetic]\\nConfidence: [High/Medium/Low]\\n\\nInstructions:\\n- Use efficient string matching algorithms.\\n- Implement caching for frequent queries.\\n- Utilize parallel processing for large dictionaries.\\n- Apply heuristic rules to quickly filter candidates.\\n- Provide only the best match.\\n- If no good match, state \\"No match found\\".\\n- Do not explain the match.\\n- Consider common speech recognition errors.\\n\\nText: {text}\\nDictionary:{\\n  \\"ALO\\": [\\"a\\", \\"al\\", \\"allow\\", \\"alo\\", \\"alone\\", \\"hello\\", \\"oh no\\"],\\n  \\"AMC\\": [\\"a mc\\", \\"a nc\\", \\"ac\\", \\"amc\\", \\"anc\\", \\"mc\\"],\\n  \\"AMICI\\": [\\"a mi\\", \\"a mikai\\", \\"a mike high\\", \\"a my\\", \\"am my kai\\", \\"amici\\", \\"ams\\", \\"anici\\", \\"i like guy\\", \\"i like thai\\", \\"i my kai\\", \\"on my eye\\", \\"the mikai\\", \\"the mike guy\\", \\"um my guy\\"],\\n  \\"AND OTHER STORES\\": [\\"and odher stores\\", \\"and other\\", \\"and other sdores\\", \\"and other stores\\", \\"and otr strs\\", \\"and-other-stores\\", \\"and_other_stores\\", \\"andotherstores\\", \\"ant\\", \\"ant other stores\\", \\"odher\\", \\"other\\", \\"other stores\\", \\"sdores\\", \\"stores\\"],\\n  \\"ANTHRO\\": [\\"and drown\\", \\"and through\\", \\"and throw\\", \\"andhro\\", \\"andre\\", \\"anthro\\", \\"antr\\"],\\n  \\"APPLE STORE\\": [\\"abble\\", \\"abble store\\", \\"apl str\\", \\"apple\\", \\"apple sdore\\", \\"apple store\\", \\"apple-store\\", \\"apple_store\\", \\"applestore\\", \\"sdore\\", \\"store\\"],\\n  \\"ARITZIA\\": [\\"aridzia\\", \\"aritsia\\", \\"aritzia\\", \\"artz\\", \\"aysia\\", \\"i the\\", \\"or its yeah\\", \\"oria\\", \\"oriza\\", \\"oryza\\", \\"sia\\"],\\n  \\"ASRV\\": [\\"a srv\\", \\"as rv\\", \\"asrb\\", \\"asrv\\"],\\n  \\"BACARI\\": [\\"bacari\\", \\"bakari\\", \\"bcr\\", \\"bhari\\", \\"bihari\\", \\"rica\\", \\"the car\\", \\"the con\\", \\"the kari\\", \\"vacari\\"],\\n  \\"BARNES AND NOBLE\\": [\\"and noble\\", \\"ant\\", \\"barnes\\", \\"barnes and\\", \\"barnes and noble\\", \\"barnes and novle\\", \\"barnes ant noble\\", \\"barnes-and-noble\\", \\"barnes_and_noble\\", \\"barnesandnoble\\", \\"brns and nbl\\", \\"noble\\", \\"novle\\", \\"varnes\\", \\"varnes and noble\\"],\\n  \\"BAR VERDE\\": [\\"bar\\", \\"bar berde\\", \\"bar verde\\", \\"bar verte\\", \\"bar-verde\\", \\"bar_verde\\", \\"barverde\\", \\"berde\\", \\"br vrd\\", \\"var\\", \\"var verde\\", \\"verde\\", \\"verte\\"],\\n  \\"BOTTEGA\\": [\\"boddega\\", \\"botega\\", \\"bottega\\", \\"botteka\\", \\"bt\\", \\"btg\\", \\"but\\", \\"vottega\\"],\\n  \\"BOURBON STEAK\\": [\\"bourbon\\", \\"bourbon sdeak\\", \\"bourbon steak\\", \\"bourbon-steak\\", \\"bourbon_steak\\", \\"bourbonsteak\\", \\"brbn stk\\", \\"sdeak\\", \\"steak\\", \\"vourvon\\", \\"vourvon steak\\"],\\n  \\"BRANDY\\": [\\"brandy\\", \\"branty\\", \\"brndy\\", \\"vrandy\\"],\\n  \\"BYREDO\\": [\\"bare though\\", \\"birao\\", \\"by radio\\", \\"by rado\\", \\"by rao\\", \\"by rato\\", \\"by reno\\", \\"byrd\\", \\"byredo\\", \\"byreto\\", \\"vaai\\", \\"valero\\", \\"vyredo\\"],\\n  \\"CAPITAL ONE\\": [\\"cabital\\", \\"cabital one\\", \\"capidal\\", \\"capidal one\\", \\"capital\\", \\"capital one\\", \\"capital-one\\", \\"capital_one\\", \\"capitalone\\", \\"cptl on\\", \\"one\\"],\\n  \\"CHANEL\\": [\\"chanel\\", \\"janel\\", \\"knl\\", \\"she know\\", \\"she now\\", \\"tel\\"],\\n  \\"CHEESECAKE\\": [\\"cheese cake\\", \\"cheesecake\\", \\"jeesecake\\", \\"ksck\\"],\\n  \\"THE CHEESECAKE FACTORY\\": [\\"cheesecake\\", \\"cheesecake factory\\", \\"dhe\\", \\"dhe cheesecake factory\\", \\"facdory\\", \\"factory\\", \\"jeesecake\\", \\"t ksck fctry\\", \\"the cheesecake\\", \\"the cheesecake facdory\\", \\"the cheesecake factory\\", \\"the cheesecake vactory\\", \\"the jeesecake factory\\", \\"the-cheesecake-factory\\", \\"the_cheesecake_factory\\", \\"thecheesecakefactory\\", \\"vactory\\"],\\n  \\"CHICKFILA\\": [\\"chick fil a\\", \\"chickfila\\", \\"chickvila\\", \\"jickfila\\", \\"kkfl\\", \\"philly\\", \\"sick filet\\"],\\n  \\"CINEMA\\": [\\"cinema\\", \\"cinena\\", \\"sema\\", \\"snm\\"],\\n  \\"CINNABON\\": [\\"cinnabon\\", \\"cinnavon\\", \\"creon\\", \\"saban\\", \\"sen\\", \\"snbn\\"],\\n  \\"CONVERSE\\": [\\"cnvrs\\", \\"conberse\\", \\"converse\\"],\\n  \\"CRUMBLE COOKIES\\": [\\"cookies\\", \\"crml cks\\", \\"crumble\\", \\"crumble cookies\\", \\"crumble-cookies\\", \\"crumble_cookies\\", \\"crumblecookies\\", \\"crumvle\\", \\"crumvle cookies\\", \\"crunble\\", \\"crunble cookies\\"],\\n  \\"DAVID YURMAN\\": [\\"dabid\\", \\"dabid yurman\\", \\"david\\", \\"david yurman\\", \\"david yurnan\\", \\"david-yurman\\", \\"david_yurman\\", \\"davidyurman\\", \\"dvd yrmn\\", \\"tavit\\", \\"tavit yurman\\", \\"yurman\\", \\"yurnan\\"],\\n  \\"DELUCA\\": [\\"de luca\\", \\"deluca\\", \\"democrat\\", \\"dlc\\", \\"teluca\\", \\"the luca\\", \\"z lua\\"],\\n  \\"DRYBAR\\": [\\"driver\\", \\"dry bar\\", \\"drybar\\", \\"drybr\\", \\"dryvar\\", \\"try bar\\", \\"trybar\\"],\\n  \\"EBAR\\": [\\"a bar\\", \\"ear\\", \\"ebar\\", \\"ebr\\", \\"evar\\", \\"i a\\", \\"i bar\\", \\"ibar\\"],\\n  \\"EGGSLUT\\": [\\"egg right\\", \\"egg sl\\", \\"egg slut\\", \\"eggs light\\", \\"eggs like\\", \\"eggs lot\\", \\"eggs lut\\", \\"eggslud\\", \\"eggslut\\", \\"egslt\\", \\"ekkslut\\", \\"ex light\\", \\"ex lot\\", \\"excellent\\"],\\n  \\"FORWARD MEDICAL\\": [\\"forward\\", \\"forward medical\\", \\"forward metical\\", \\"forward nedical\\", \\"forward-medical\\", \\"forward_medical\\", \\"forwardmedical\\", \\"forwart\\", \\"forwart medical\\", \\"frwrd mdcl\\", \\"medical\\", \\"metical\\", \\"nedical\\", \\"vorward\\", \\"vorward medical\\"],\\n  \\"FRIDA MEXICAN\\": [\\"frd mkscn\\", \\"frida\\", \\"frida mexican\\", \\"frida nexican\\", \\"frida-mexican\\", \\"frida_mexican\\", \\"fridamexican\\", \\"frita\\", \\"frita mexican\\", \\"mexican\\", \\"nexican\\", \\"vrida\\", \\"vrida mexican\\"],\\n  \\"GOLDEN GOOSE\\": [\\"gldn gs\\", \\"golden\\", \\"golden goose\\", \\"golden koose\\", \\"golden-goose\\", \\"golden_goose\\", \\"goldengoose\\", \\"golten\\", \\"golten goose\\", \\"goose\\", \\"kolden\\", \\"kolden goose\\", \\"koose\\"],\\n  \\"GOREANA\\": [\\"giana\\", \\"gloriana\\", \\"go alla\\", \\"goana\\", \\"goanna\\", \\"goreana\\", \\"grn\\", \\"guiana\\", \\"kiana\\", \\"koreana\\"],\\n  \\"GUCCI\\": [\\"gcs\\", \\"goodie\\", \\"gucci\\", \\"kitty\\", \\"kucci\\"],\\n  \\"HAAGEN-DAZS\\": [\\"ha and dass\\", \\"haagen dazs\\", \\"haagendass\\", \\"haagendazs\\", \\"haagentazs\\", \\"haakendazs\\", \\"hagen dass\\", \\"hagen doss\\", \\"hjn-dzs\\", \\"hogan doss\\", \\"hogen doss\\", \\"pagodas\\"],\\n  \\"H AND M\\": [\\"and m\\", \\"ant\\", \\"h and\\", \\"h and m\\", \\"h and n\\", \\"h ant m\\", \\"h-and-m\\", \\"h_and_m\\", \\"handm\\", \\"n\\"],\\n  \\"INDOCHINO\\": [\\"in the china\\", \\"indkn\\", \\"indo china\\", \\"indochino\\", \\"indojino\\", \\"intochino\\"],\\n  \\"ITALIAN DELI\\": [\\"deli\\", \\"idalian\\", \\"idalian deli\\", \\"italian\\", \\"italian deli\\", \\"italian teli\\", \\"italian-deli\\", \\"italian_deli\\", \\"italiandeli\\", \\"itln dl\\", \\"teli\\"],\\n  \\"JERSEY MIKE\\": [\\"gersey\\", \\"gersey mike\\", \\"jersey\\", \\"jersey mike\\", \\"jersey nike\\", \\"jersey-mike\\", \\"jersey_mike\\", \\"jerseymike\\", \\"jrsy mk\\", \\"mike\\", \\"nike\\"],\\n  \\"JOE AND JUICE\\": [\\"and juice\\", \\"ant\\", \\"goe\\", \\"goe and juice\\", \\"guice\\", \\"j and js\\", \\"joe\\", \\"joe and\\", \\"joe and guice\\", \\"joe and juice\\", \\"joe ant juice\\", \\"joe-and-juice\\", \\"joe_and_juice\\", \\"joeandjuice\\", \\"juice\\"],\\n  \\"KIEHL\\": [\\"keel\\", \\"keo\\", \\"khl\\", \\"kiehl\\", \\"kill\\", \\"ko\\"],\\n  \\"LADUREE\\": [\\"la\\", \\"la dure\\", \\"laduree\\", \\"lady\\", \\"laia re\\", \\"larger\\", \\"largey\\", \\"lari\\", \\"laturee\\", \\"lauder\\", \\"laurie\\", \\"ldr\\", \\"moderate\\"],\\n  \\"LALA COFFEE\\": [\\"coffee\\", \\"covvee\\", \\"lala\\", \\"lala coffee\\", \\"lala covvee\\", \\"lala-coffee\\", \\"lala_coffee\\", \\"lalacoffee\\", \\"ll cf\\"],\\n  \\"LE PAIN\\": [\\"bain\\", \\"l pyn\\", \\"le bain\\", \\"le pain\\", \\"le-pain\\", \\"le_pain\\", \\"lepain\\", \\"pain\\"],\\n  \\"LULULEMON\\": [\\"little little lemon\\", \\"lllmn\\", \\"lolo lemon\\", \\"lou lou emmon\\", \\"ludy lemon\\", \\"lulu lemon\\", \\"lulu lennon\\", \\"lululemon\\", \\"lululenon\\", \\"luther lemon\\", \\"will win it\\"],\\n  \\"MEJURI\\": [\\"maji\\", \\"major\\", \\"majuri\\", \\"mari\\", \\"mauri\\", \\"meguri\\", \\"mejuri\\", \\"mjr\\", \\"naji\\", \\"nejuri\\", \\"nigeria\\", \\"the jury\\"],\\n  \\"MELVILLE\\": [\\"mabel\\", \\"melbille\\", \\"melville\\", \\"mlvl\\", \\"nelville\\", \\"no no\\"],\\n  \\"MENDOCINO FARMS\\": [\\"farms\\", \\"farns\\", \\"mendocino\\", \\"mendocino farms\\", \\"mendocino farns\\", \\"mendocino varms\\", \\"mendocino-farms\\", \\"mendocino_farms\\", \\"mendocinofarms\\", \\"mentocino\\", \\"mentocino farms\\", \\"mndsn frms\\", \\"nendocino\\", \\"nendocino farms\\", \\"varms\\"],\\n  \\"MENDO\\": [\\"men out\\", \\"mendel\\", \\"mendo\\", \\"menino\\", \\"mento\\", \\"mindo\\", \\"mnd\\", \\"nendo\\"],\\n  \\"MIKES SUBS\\": [\\"mikes\\", \\"mikes subs\\", \\"mikes suvs\\", \\"mikes-subs\\", \\"mikes_subs\\", \\"mikessubs\\", \\"mks sbs\\", \\"nikes\\", \\"nikes subs\\", \\"subs\\", \\"suvs\\"],\\n  \\"MOVIES\\": [\\"mobies\\", \\"movies\\", \\"mvs\\", \\"novies\\"],\\n  \\"NAILED IT\\": [\\"id\\", \\"nailed\\", \\"nailed id\\", \\"nailed it\\", \\"nailed-it\\", \\"nailed_it\\", \\"nailedit\\", \\"nailet\\", \\"nailet it\\", \\"nyld it\\"],\\n  \\"NESPRESSO\\": [\\"an espresso\\", \\"espresso\\", \\"nesbresso\\", \\"nespresso\\", \\"ni preso\\", \\"nsprs\\"],\\n  \\"NIKE COLLECTIVE\\": [\\"collecdive\\", \\"collectibe\\", \\"collective\\", \\"nike\\", \\"nike collecdive\\", \\"nike collectibe\\", \\"nike collective\\", \\"nike-collective\\", \\"nike_collective\\", \\"nikecollective\\", \\"nk clctv\\"],\\n  \\"NONNA\\": [\\"lana\\", \\"nana\\", \\"nn\\", \\"no\\", \\"no no\\", \\"nona\\", \\"nonna\\"],\\n  \\"NORDIES\\": [\\"no\\", \\"no is\\", \\"noddy\\", \\"nor\\", \\"nor are these\\", \\"nor is\\", \\"nord\\", \\"nordies\\", \\"north east\\", \\"norties\\", \\"nrds\\"],\\n  \\"NORDSTROM\\": [\\"nord\\", \\"nordsdrom\\", \\"nordstrom\\", \\"nordstron\\", \\"norstan\\", \\"nortstrom\\", \\"nrdstrm\\"],\\n  \\"OMBRA\\": [\\"bra\\", \\"hombre\\", \\"ombra\\", \\"omr\\", \\"omvra\\", \\"on barre\\", \\"on bra\\", \\"onbra\\", \\"row\\", \\"um back\\", \\"umbra\\", \\"umbria\\"],\\n  \\"OMBRA WINE BAR\\": [\\"bar\\", \\"ombra\\", \\"ombra wine\\", \\"ombra wine bar\\", \\"ombra wine var\\", \\"ombra-wine-bar\\", \\"ombra_wine_bar\\", \\"ombrawinebar\\", \\"omr wn br\\", \\"omvra\\", \\"omvra wine bar\\", \\"onbra\\", \\"onbra wine bar\\", \\"var\\", \\"wine\\", \\"wine bar\\"],\\n  \\"PHILS COFFEE\\": [\\"bhils\\", \\"bhils coffee\\", \\"coffee\\", \\"covvee\\", \\"fls cf\\", \\"phils\\", \\"phils coffee\\", \\"phils covvee\\", \\"phils-coffee\\", \\"phils_coffee\\", \\"philscoffee\\"],\\n  \\"POTATO CORNER\\": [\\"botato\\", \\"botato corner\\", \\"corner\\", \\"podado\\", \\"podado corner\\", \\"potato\\", \\"potato corner\\", \\"potato-corner\\", \\"potato_corner\\", \\"potatocorner\\", \\"ptt crnr\\"],\\n  \\"PRESSED JUICE\\": [\\"bressed\\", \\"bressed juice\\", \\"guice\\", \\"juice\\", \\"pressed\\", \\"pressed guice\\", \\"pressed juice\\", \\"pressed-juice\\", \\"pressed_juice\\", \\"pressedjuice\\", \\"presset\\", \\"presset juice\\", \\"prsd js\\"],\\n  \\"RAY BAN\\": [\\"ban\\", \\"ray\\", \\"ray ban\\", \\"ray van\\", \\"ray-ban\\", \\"ray_ban\\", \\"rayban\\", \\"ry bn\\", \\"van\\"],\\n  \\"SAINT LAURENT\\": [\\"laurend\\", \\"laurent\\", \\"saind\\", \\"saind laurent\\", \\"saint\\", \\"saint laurend\\", \\"saint laurent\\", \\"saint-laurent\\", \\"saint_laurent\\", \\"saintlaurent\\", \\"synt lrnt\\"],\\n  \\"SAMSUNG STORE\\": [\\"samsung\\", \\"samsung sdore\\", \\"samsung store\\", \\"samsung-store\\", \\"samsung_store\\", \\"samsungstore\\", \\"samsunk\\", \\"samsunk store\\", \\"sansung\\", \\"sansung store\\", \\"sdore\\", \\"smsng str\\", \\"store\\"],\\n  \\"SEABUTTER\\": [\\"c butter\\", \\"sata\\", \\"sbtr\\", \\"seabudder\\", \\"seabutter\\", \\"seavutter\\", \\"see but\\", \\"see butter\\"],\\n  \\"SEE\'S CANDY\\": [\\"candy\\", \\"canty\\", \\"s\'s cndy\\", \\"sees\\", \\"sees candy\\", \\"sees canty\\", \\"sees-candy\\", \\"sees_candy\\", \\"seescandy\\"],\\n  \\"SEPHORA\\": [\\"safaa\\", \\"sebhora\\", \\"sephora\\", \\"sfr\\"],\\n  \\"SHADE STORE\\": [\\"sade\\", \\"sade store\\", \\"sd str\\", \\"sdore\\", \\"shade\\", \\"shade sdore\\", \\"shade store\\", \\"shade-store\\", \\"shade_store\\", \\"shadestore\\", \\"shate\\", \\"shate store\\", \\"store\\"],\\n  \\"SHAKE SHACK\\": [\\"sack\\", \\"sake\\", \\"sake shack\\", \\"shack\\", \\"shake\\", \\"shake sack\\", \\"shake shack\\", \\"shake-shack\\", \\"shake_shack\\", \\"shakeshack\\", \\"sk sk\\"],\\n  \\"SPRINKLE CUPCAKE\\": [\\"cubcake\\", \\"cupcake\\", \\"sbrinkle\\", \\"sbrinkle cupcake\\", \\"sprinkle\\", \\"sprinkle cubcake\\", \\"sprinkle cupcake\\", \\"sprinkle-cupcake\\", \\"sprinkle_cupcake\\", \\"sprinklecupcake\\", \\"sprnkl cpck\\"],\\n  \\"SUR LA TAB\\": [\\"dab\\", \\"la tab\\", \\"sr l tb\\", \\"sur\\", \\"sur la\\", \\"sur la dab\\", \\"sur la tab\\", \\"sur la tav\\", \\"sur-la-tab\\", \\"sur_la_tab\\", \\"surlatab\\", \\"tab\\", \\"tav\\"],\\n  \\"T AND CO\\": [\\"and co\\", \\"ant\\", \\"d\\", \\"d and co\\", \\"t and\\", \\"t and c\\", \\"t and co\\", \\"t ant co\\", \\"t-and-co\\", \\"t_and_co\\", \\"tandco\\"],\\n  \\"TESLA\\": [\\"de la\\", \\"desla\\", \\"desley\\", \\"tesla\\", \\"tsl\\"],\\n  \\"THE SALON\\": [\\"dhe\\", \\"dhe salon\\", \\"salon\\", \\"t sln\\", \\"the salon\\", \\"the-salon\\", \\"the_salon\\", \\"thesalon\\"],\\n  \\"TIFFANY\\": [\\"diffany\\", \\"tfny\\", \\"tiffany\\", \\"tivvany\\", \\"to vinny\\"],\\n  \\"TRATTORIA AMICI\\": [\\"amici\\", \\"anici\\", \\"draddoria\\", \\"draddoria amici\\", \\"trattoria\\", \\"trattoria amici\\", \\"trattoria anici\\", \\"trattoria-amici\\", \\"trattoria_amici\\", \\"trattoriaamici\\", \\"trtr ams\\"],\\n  \\"TUFT AND NEEDLE\\": [\\"and needle\\", \\"ant\\", \\"dufd\\", \\"dufd and needle\\", \\"needle\\", \\"neetle\\", \\"tft and ndl\\", \\"tuft\\", \\"tuft and\\", \\"tuft and needle\\", \\"tuft and neetle\\", \\"tuft ant needle\\", \\"tuft-and-needle\\", \\"tuft_and_needle\\", \\"tuftandneedle\\", \\"tuvt\\", \\"tuvt and needle\\"],\\n  \\"TUMI\\": [\\"dumi\\", \\"tm\\", \\"to me\\", \\"tumi\\", \\"tuni\\"],\\n  \\"URBAN OUTFITTER\\": [\\"oudfidder\\", \\"outfitter\\", \\"outvitter\\", \\"urban\\", \\"urban oudfidder\\", \\"urban outfitter\\", \\"urban outvitter\\", \\"urban-outfitter\\", \\"urban_outfitter\\", \\"urbanoutfitter\\", \\"urbn utftr\\", \\"urvan\\", \\"urvan outfitter\\"],\\n  \\"VENETA\\": [\\"aa\\", \\"be\\", \\"beneta\\", \\"they\\", \\"v\\", \\"veneda\\", \\"veneta\\", \\"venuta\\", \\"vidar\\", \\"vitter\\", \\"vnt\\", \\"we know that\\"],\\n  \\"WARBY PARKER\\": [\\"barker\\", \\"parker\\", \\"warby\\", \\"warby barker\\", \\"warby parker\\", \\"warby-parker\\", \\"warby_parker\\", \\"warbyparker\\", \\"warvy\\", \\"warvy parker\\", \\"wrby prkr\\"],\\n  \\"WETZEL\'S PRETZELS\\": [\\"bretzels\\", \\"predzels\\", \\"pretsels\\", \\"pretzels\\", \\"wedzels\\", \\"wedzels pretzels\\", \\"wetsels\\", \\"wetsels pretzels\\", \\"wetzels\\", \\"wetzels bretzels\\", \\"wetzels predzels\\", \\"wetzels pretsels\\", \\"wetzels pretzels\\", \\"wetzels-pretzels\\", \\"wetzels_pretzels\\", \\"wetzelspretzels\\", \\"wtzl\'s prtzls\\"],\\n  \\"WINE BAR\\": [\\"bar\\", \\"var\\", \\"wine\\", \\"wine bar\\", \\"wine var\\", \\"wine-bar\\", \\"wine_bar\\", \\"winebar\\", \\"wn br\\"],\\n  \\"YSL\\": [\\"wire cell\\", \\"y la l\\", \\"yl\\", \\"ysl\\"],\\n  \\"YURMAN\\": [\\"erman\\", \\"german\\", \\"uriman\\", \\"y\\", \\"yeah i mean\\", \\"yeah man\\", \\"yemen\\", \\"yeoman\\", \\"yorman\\", \\"you are a man\\", \\"youman\\", \\"your men\\", \\"yrmn\\", \\"yurman\\", \\"yurnan\\"]\\n}\\n\\n\\nHuman: A MC.\\n\\nAssistant:", "max_tokens_to_sample": 2000, "temperature": 0.7}', 'url': 'https://bedrock-runtime.us-west-2.amazonaws.com/model/anthropic.claude-v2/invoke', 'context': {'client_region': 'us-west-2', 'client_config': <botocore.config.Config object at 0x106540c50>, 'has_streaming_input': True, 'auth_type': None, 'unsigned_payload': None}}
+2024-11-27 19:55:40,142 DEBUG: Event request-created.bedrock-runtime.InvokeModel: calling handler <bound method RequestSigner.handler of <botocore.signers.RequestSigner object at 0x106540c10>>
+2024-11-27 19:55:40,142 DEBUG: Event choose-signer.bedrock-runtime.InvokeModel: calling handler <function set_operation_specific_signer at 0x10508ae80>
+2024-11-27 19:55:40,143 DEBUG: Event request-created.bedrock-runtime.InvokeModel: calling handler <function add_retry_headers at 0x1050b13a0>
+2024-11-27 19:55:40,143 DEBUG: Sending http request: <AWSPreparedRequest stream_output=True, method=POST, url=https://bedrock-runtime.us-west-2.amazonaws.com/model/anthropic.claude-v2/invoke, headers={'User-Agent': b'Boto3/1.35.69 md/Botocore#1.35.69 md/awscrt#0.16.26 ua/2.0 os/macos#23.5.0 md/arch#arm64 lang/python#3.11.0 md/pyimpl#CPython cfg/retry-mode#legacy Botocore/1.35.69', 'host': b'bedrock-runtime.us-west-2.amazonaws.com', 'X-Amz-Date': b'20241127T115540Z', 'Authorization': b'AWS4-HMAC-SHA256 Credential=AKIAT5QZODQXLFYPHXFB/20241127/us-west-2/bedrock/aws4_request, SignedHeaders=host;x-amz-date, Signature=2bd6984afed1c464f3c4a1591844e0507df1812f18349b1c53e1b234323d81c8', 'amz-sdk-invocation-id': b'21a95390-25ce-4391-ab47-3849526f8b90', 'amz-sdk-request': b'attempt=1', 'Content-Length': '14852'}>
+2024-11-27 19:55:40,144 DEBUG: Certificate path: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/certifi/cacert.pem
+2024-11-27 19:55:40,144 DEBUG: Starting new HTTPS connection (1): bedrock-runtime.us-west-2.amazonaws.com:443
+2024-11-27 19:55:46,348 DEBUG: https://bedrock-runtime.us-west-2.amazonaws.com:443 "POST /model/anthropic.claude-v2/invoke HTTP/11" 200 148
+2024-11-27 19:55:46,349 DEBUG: Response headers: {'Date': 'Wed, 27 Nov 2024 11:55:46 GMT', 'Content-Type': 'application/json', 'Content-Length': '148', 'Connection': 'keep-alive', 'x-amzn-RequestId': '4a6ff216-b621-4602-8b41-04d4024ec240', 'X-Amzn-Bedrock-Invocation-Latency': '4635', 'X-Amzn-Bedrock-Output-Token-Count': '26', 'X-Amzn-Bedrock-Input-Token-Count': '5010'}
+2024-11-27 19:55:46,349 DEBUG: Response body:
+<botocore.response.StreamingBody object at 0x1052f7310>
+2024-11-27 19:55:46,349 DEBUG: Event needs-retry.bedrock-runtime.InvokeModel: calling handler <botocore.retryhandler.RetryHandler object at 0x1065434d0>
+2024-11-27 19:55:46,349 DEBUG: No retry needed.
+2024-11-27 19:55:46,350 INFO: Bedrock Claude result:  Matched Word: [AMC]
+Match Type: [Exact]
+Confidence: [High]
+2024-11-27 19:55:46,350 DEBUG: Event before-parameter-build.transcribe.DeleteTranscriptionJob: calling handler <function generate_idempotent_uuid at 0x10508b060>
+2024-11-27 19:55:46,350 DEBUG: Calling endpoint provider with parameters: {'Region': 'us-west-2', 'UseDualStack': False, 'UseFIPS': False}
+2024-11-27 19:55:46,350 DEBUG: Endpoint provider result: https://transcribe.us-west-2.amazonaws.com
+2024-11-27 19:55:46,350 DEBUG: Event before-call.transcribe.DeleteTranscriptionJob: calling handler <function add_recursion_detection_header at 0x105089940>
+2024-11-27 19:55:46,350 DEBUG: Event before-call.transcribe.DeleteTranscriptionJob: calling handler <function add_query_compatibility_header at 0x1050b1b20>
+2024-11-27 19:55:46,350 DEBUG: Event before-call.transcribe.DeleteTranscriptionJob: calling handler <function inject_api_version_header_if_needed at 0x1050b0b80>
+2024-11-27 19:55:46,350 DEBUG: Making request for OperationModel(name=DeleteTranscriptionJob) with params: {'url_path': '/', 'query_string': '', 'method': 'POST', 'headers': {'X-Amz-Target': 'Transcribe.DeleteTranscriptionJob', 'Content-Type': 'application/x-amz-json-1.1', 'User-Agent': 'Boto3/1.35.69 md/Botocore#1.35.69 md/awscrt#0.16.26 ua/2.0 os/macos#23.5.0 md/arch#arm64 lang/python#3.11.0 md/pyimpl#CPython cfg/retry-mode#legacy Botocore/1.35.69'}, 'body': b'{"TranscriptionJobName": "transcribe-job-d89a8200-a07c-4e3e-b165-b2fa6ae072de"}', 'url': 'https://transcribe.us-west-2.amazonaws.com/', 'context': {'client_region': 'us-west-2', 'client_config': <botocore.config.Config object at 0x105a29790>, 'has_streaming_input': False, 'auth_type': None, 'unsigned_payload': None}}
+2024-11-27 19:55:46,350 DEBUG: Event request-created.transcribe.DeleteTranscriptionJob: calling handler <bound method RequestSigner.handler of <botocore.signers.RequestSigner object at 0x105a29750>>
+2024-11-27 19:55:46,350 DEBUG: Event choose-signer.transcribe.DeleteTranscriptionJob: calling handler <function set_operation_specific_signer at 0x10508ae80>
+2024-11-27 19:55:46,351 DEBUG: Event request-created.transcribe.DeleteTranscriptionJob: calling handler <function add_retry_headers at 0x1050b13a0>
+2024-11-27 19:55:46,351 DEBUG: Sending http request: <AWSPreparedRequest stream_output=False, method=POST, url=https://transcribe.us-west-2.amazonaws.com/, headers={'X-Amz-Target': b'Transcribe.DeleteTranscriptionJob', 'Content-Type': b'application/x-amz-json-1.1', 'User-Agent': b'Boto3/1.35.69 md/Botocore#1.35.69 md/awscrt#0.16.26 ua/2.0 os/macos#23.5.0 md/arch#arm64 lang/python#3.11.0 md/pyimpl#CPython cfg/retry-mode#legacy Botocore/1.35.69', 'host': b'transcribe.us-west-2.amazonaws.com', 'X-Amz-Date': b'20241127T115546Z', 'Authorization': b'AWS4-HMAC-SHA256 Credential=AKIAT5QZODQXLFYPHXFB/20241127/us-west-2/transcribe/aws4_request, SignedHeaders=content-type;host;x-amz-date;x-amz-target, Signature=a96de118469458d4f2f8187b9a53678a16d142bd349fdab22dc4a0ecb3497b54', 'amz-sdk-invocation-id': b'6d1fc8f4-686e-4fe6-8691-5297f171510e', 'amz-sdk-request': b'attempt=1', 'Content-Length': '79'}>
+2024-11-27 19:55:46,351 DEBUG: Certificate path: /Users/zhenyin/.pyenv/versions/3.11.0/lib/python3.11/site-packages/certifi/cacert.pem
+2024-11-27 19:55:46,766 DEBUG: https://transcribe.us-west-2.amazonaws.com:443 "POST / HTTP/11" 200 0
+2024-11-27 19:55:46,767 DEBUG: Response headers: {'x-amzn-RequestId': '5fd27b13-7ce8-4bf7-81f3-cf92575aad15', 'Content-Type': 'application/x-amz-json-1.1', 'Content-Length': '0', 'Date': 'Wed, 27 Nov 2024 11:55:46 GMT'}
+2024-11-27 19:55:46,767 DEBUG: Response body:
+b''
+2024-11-27 19:55:46,767 DEBUG: Event needs-retry.transcribe.DeleteTranscriptionJob: calling handler <botocore.retryhandler.RetryHandler object at 0x105a1e450>
+2024-11-27 19:55:46,767 DEBUG: No retry needed.
