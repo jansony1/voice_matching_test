@@ -1,42 +1,27 @@
 <template>
   <div id="app">
-    <InputForm>
-      <SpeechTranscription
-        :transcriptionMode="transcriptionMode"
-        :transcriptionResult="transcriptionResult"
-        :result="result"
-      />
-    </InputForm>
+    <InputForm />
   </div>
 </template>
 
 <script>
 import InputForm from './components/InputForm.vue'
-import SpeechTranscription from './components/SpeechTranscription.vue'
 
 export default {
   name: 'App',
   components: {
     InputForm,
-    SpeechTranscription,
-  },
-  data() {
-    return {
-      transcriptionMode: 'realtime',
-      transcriptionResult: '',
-      result: null,
-    }
-  },
-  mounted() {
-    window.addEventListener('message', (event) => {
-      if (event.data.type === 'transcriptionMode') {
-        this.transcriptionMode = event.data.value
-      } else if (event.data.type === 'transcriptionResult') {
-        this.transcriptionResult = event.data.value
-      } else if (event.data.type === 'result') {
-        this.result = event.data.value
-      }
-    })
   },
 }
 </script>
+
+<style>
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+  margin-top: 60px;
+}
+</style>

@@ -1,7 +1,23 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
-// https://vite.dev/config/
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [
+    vue(),
+    nodePolyfills({
+      protocolImports: true,
+    }),
+  ],
+  resolve: {
+    alias: {
+      'buffer': 'buffer',
+    }
+  },
+  define: {
+    'process.env': {},
+  },
+  optimizeDeps: {
+    include: ['buffer'],
+  },
 })

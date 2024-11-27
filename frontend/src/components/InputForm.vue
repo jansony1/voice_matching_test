@@ -16,6 +16,11 @@
     </p>
 
     <div v-if="credentialsValid" class="transcription-mode-container">
+      <div class="form-group">
+        <label for="systemPrompt">System Prompt</label>
+        <textarea id="systemPrompt" v-model="systemPrompt" placeholder="Enter system prompt" class="form-control"></textarea>
+      </div>
+
       <ul class="nav nav-tabs">
         <li class="nav-item">
           <a class="nav-link" :class="{ active: transcriptionMode === 'realtime' }" href="#" @click.prevent="transcriptionMode = 'realtime'">Real-time Speech Transcription</a>
@@ -28,13 +33,27 @@
       <div class="tab-content">
         <div class="tab-pane" :class="{ 'active': transcriptionMode === 'realtime' }">
           <div class="realtime-transcription">
-            <AudioRecorder ref="audioRecorder" @audioChunk="handleAudioChunk" @recordingStopped="handleRecordingStopped" />
-            <div v-if="isMatching" class="status-text">
-              {{ matchStatus }}
+            <AudioRecorder 
+              ref="audioRecorder" 
+              :awsCredentials="awsCredentials"
+              :systemPrompt="systemPrompt"
+              @transcriptionUpdate="handleTranscriptionUpdate"
+              @recordingStopped="handleRecordingStopped"
+              @recordingStarted="handleRecordingStarted"
+            />
+            <div v-if="status === 'matching'" class="status-text">
+              Matching...
+            </div>
+            <div v-if="status === 'matched'" class="status-text">
+              Match Result
             </div>
             <div v-if="transcriptionResult" class="transcription-result">
-              <h3>Match Result</h3>
+              <h3>Transcription Result</h3>
               <pre>{{ transcriptionResult }}</pre>
+            </div>
+            <div v-if="bedrockResult" class="bedrock-result">
+              <h3>Bedrock Inference Result</h3>
+              <pre>{{ bedrockResult }}</pre>
             </div>
           </div>
         </div>
@@ -45,28 +64,14 @@
               <label for="s3AudioFileUrl">S3 Audio File URL</label>
               <input type="text" id="s3AudioFileUrl" v-model="s3AudioFileUrl" placeholder="Enter S3 Audio File URL" class="form-control" />
             </div>
-            <div class="form-group">
-              <label for="systemPrompt">System Prompt</label>
-              <textarea id="systemPrompt" v-model="systemPrompt" placeholder="Enter system prompt" class="form-control"></textarea>
-            </div>
-            <button @click="submitInputs" class="btn btn-primary">Submit</button>
+            <button @click="submitS3Transcription" class="btn btn-primary">Submit</button>
           </div>
         </div>
       </div>
     </div>
 
-    <div v-if="result">
-      <h2>Result</h2>
-      <div class="result-container">
-        <div class="transcript-container">
-          <h3>Transcript</h3>
-          <pre>{{ result.transcript }}</pre>
-        </div>
-        <div class="bedrock-result-container">
-          <h3>Bedrock Claude Result</h3>
-          <pre>{{ result.bedrock_claude_result }}</pre>
-        </div>
-      </div>
+    <div v-if="error" class="error-message">
+      {{ error }}
     </div>
   </div>
 </template>
@@ -76,7 +81,6 @@ import './InputForm.css'
 import AudioRecorder from './AudioRecorder.vue'
 
 const BACKEND_URL = 'http://localhost:8000'
-const BACKEND_WS_URL = 'ws://localhost:8000'
 
 export default {
   name: 'InputForm',
@@ -90,16 +94,22 @@ export default {
       awsRegion: 'us-west-2',
       s3AudioFileUrl: '',
       systemPrompt: '',
-      result: null,
       credentialsValid: false,
       credentialsValidated: false,
-      isMatching: false,
-      matchStatus: 'Matching...',
       transcriptionResult: '',
-      webSocket: null,
-      webSocketConnected: false,
-      transcriptionMode: 'realtime', // or 's3file'
-      pendingAudioChunks: [],
+      bedrockResult: '',
+      transcriptionMode: 'realtime',
+      status: 'idle',
+      error: null,
+    }
+  },
+  computed: {
+    awsCredentials() {
+      return {
+        accessKeyId: this.awsAccessKeyId,
+        secretAccessKey: this.awsSecretAccessKey,
+        region: this.awsRegion
+      }
     }
   },
   methods: {
@@ -128,102 +138,81 @@ export default {
         this.credentialsValidated = true
       }
     },
-    async submitInputs() {
-      const response = await fetch(`${BACKEND_URL}/transcribe`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
+    async submitS3Transcription() {
+      try {
+        const requestData = {
           s3_audio_url: this.s3AudioFileUrl,
           system_prompt: this.systemPrompt,
           aws_access_key_id: this.awsAccessKeyId,
           aws_secret_access_key: this.awsSecretAccessKey,
           aws_region: this.awsRegion
-        })
-      })
-      if (response.ok) {
-        this.result = await response.json()
-      } else {
-        alert(`Error: ${response.status} - ${response.statusText}`)
+        };
+        
+        console.log('Sending transcription request with data:', requestData);
+
+        const response = await fetch(`${BACKEND_URL}/transcribe`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(requestData)
+        });
+
+        console.log('Transcription response status:', response.status);
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log('Transcription result:', result);
+          this.transcriptionResult = result.transcript;
+          this.bedrockResult = result.bedrock_claude_result;
+        } else {
+          const errorText = await response.text();
+          console.error('Transcription error:', errorText);
+          throw new Error(`Error: ${response.status} - ${response.statusText}\n${errorText}`);
+        }
+      } catch (error) {
+        console.error('Error submitting S3 transcription:', error);
+        this.error = `Error submitting S3 transcription: ${error.message}`;
       }
     },
-    handleAudioChunk(audioChunk) {
-      if (!this.isMatching) {
-        this.startMatching()
-        // Store the chunk until WebSocket is connected
-        this.pendingAudioChunks.push(audioChunk)
-      } else {
-        console.log('Received audio chunk of size', audioChunk.byteLength)
-        this.sendAudioChunk(audioChunk)
-      }
+    handleTranscriptionUpdate(transcription) {
+      this.transcriptionResult = transcription
+      this.status = 'matching'
     },
-    handleRecordingStopped() {
-      this.stopMatching()
+    async handleRecordingStopped(finalTranscription) {
+      this.transcriptionResult = finalTranscription
+      this.status = 'matched'
+      await this.callBedrock(finalTranscription)
     },
-    startMatching() {
-      this.isMatching = true
+    handleRecordingStarted() {
+      this.status = 'matching'
       this.transcriptionResult = ''
-      this.webSocketConnected = false
-      this.pendingAudioChunks = []
-
-      const webSocketUrl = `${BACKEND_WS_URL}/ws/client-id`
-      console.log('Connecting to WebSocket:', webSocketUrl)
-
-      this.webSocket = new WebSocket(webSocketUrl)
-      
-      this.webSocket.onopen = () => {
-        console.log('WebSocket connection opened')
-        // First send AWS credentials
-        const credentials = {
-          aws_access_key_id: this.awsAccessKeyId,
-          aws_secret_access_key: this.awsSecretAccessKey,
-          aws_region: this.awsRegion
-        }
-        this.webSocket.send(JSON.stringify(credentials))
-        this.webSocketConnected = true
-
-        // Send any pending audio chunks
-        while (this.pendingAudioChunks.length > 0) {
-          const chunk = this.pendingAudioChunks.shift()
-          this.sendAudioChunk(chunk)
-        }
-      }
-
-      this.webSocket.onmessage = (event) => {
-        this.transcriptionResult += event.data
-      }
-
-      this.webSocket.onclose = () => {
-        this.isMatching = false
-        this.webSocketConnected = false
-        console.log('WebSocket connection closed')
-      }
-
-      this.webSocket.onerror = (error) => {
-        console.error('WebSocket error:', error)
-        this.isMatching = false
-        this.webSocketConnected = false
-        this.matchStatus = 'Error occurred during matching'
-      }
+      this.bedrockResult = ''
     },
-    sendAudioChunk(audioChunk) {
-      if (this.webSocketConnected) {
-        console.log('Sending audio chunk of size', audioChunk.byteLength)
-        this.webSocket.send(audioChunk)
-      } else {
-        console.error('WebSocket is not open, cannot send audio chunk')
-        // Store the chunk until WebSocket is connected
-        this.pendingAudioChunks.push(audioChunk)
-      }
-    },
-    stopMatching() {
-      if (this.webSocket) {
-        this.webSocket.close()
-        this.webSocket = null
-        this.webSocketConnected = false
-        this.pendingAudioChunks = []
-        console.log('WebSocket connection closed')
+    async callBedrock(transcription) {
+      try {
+        const response = await fetch(`${BACKEND_URL}/bedrock`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            transcript: transcription,
+            system_prompt: this.systemPrompt,
+            aws_access_key_id: this.awsAccessKeyId,
+            aws_secret_access_key: this.awsSecretAccessKey,
+            aws_region: this.awsRegion
+          })
+        })
+        if (response.ok) {
+          const result = await response.json()
+          this.bedrockResult = result.bedrock_result
+        } else {
+          throw new Error(`Error: ${response.status} - ${response.statusText}`)
+        }
+      } catch (error) {
+        console.error('Error calling Bedrock:', error)
+        this.error = `Error calling Bedrock: ${error.message}`
       }
     }
   },
@@ -313,23 +302,8 @@ export default {
   color: #007bff;
 }
 
-.transcription-result {
+.transcription-result, .bedrock-result {
   margin-top: 20px;
-  border: 1px solid #ccc;
-  padding: 10px;
-  border-radius: 5px;
-}
-
-.result-container {
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
-  margin-top: 20px;
-}
-
-.transcript-container,
-.bedrock-result-container {
-  flex: 1;
   border: 1px solid #ccc;
   padding: 10px;
   border-radius: 5px;
@@ -346,5 +320,10 @@ pre {
 
 .text-danger {
   color: red;
+}
+
+.error-message {
+  color: red;
+  margin-top: 10px;
 }
 </style>
