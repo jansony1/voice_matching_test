@@ -167,41 +167,71 @@ docker image prune
 - 使用卷挂载进行开发调试
 - 配置适当的网络模式
 
-### 常见问题排查 (Troubleshooting)
+### Kubernetes (EKS) 部署 (Kubernetes Deployment)
 
-#### 镜像构建问题 (Image Build Issues)
-- 检查依赖版本兼容性
-- 验证构建上下文
-- 查看详细构建日志
+#### 先决条件 (Prerequisites)
+1. AWS账户 (AWS Account)
+2. EKS集群 (EKS Cluster)
+3. 安装工具 (Required Tools):
+   - AWS CLI (v2+)
+   - eksctl
+   - kubectl
+   - Docker
 
-#### 容器运行问题 (Container Runtime Issues)
-- 检查端口映射
-- 验证环境变量
-- 查看容器日志 `docker logs <container_id>`
+#### 安全配置 (Security Configuration)
 
-## 持续集成 (Continuous Integration)
+##### 1. 创建IAM策略 (Create IAM Policy)
+```bash
+# 创建后端服务IAM策略 (Create Backend Service IAM Policy)
+aws iam create-policy \
+    --policy-name VoiceMatchingBackendPolicy \
+    --policy-document file://k8s/iam-policy.json
+```
 
-### GitHub Actions示例 (GitHub Actions Example)
-```yaml
-name: Docker CI
+##### 2. 配置OIDC提供者 (Configure OIDC Provider)
+```bash
+# 为EKS集群启用OIDC提供者 (Enable OIDC Provider for EKS Cluster)
+eksctl utils associate-iam-oidc-provider \
+    --cluster=your-cluster-name \
+    --approve
+```
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+##### 3. 创建IAM服务账户 (Create IAM Service Account)
+```bash
+# 替换${ACCOUNT_ID}为您的AWS账户ID (Replace ${ACCOUNT_ID} with your AWS Account ID)
+eksctl create iamserviceaccount \
+    --cluster=your-cluster-name \
+    --namespace=default \
+    --name=voice-matching-backend-sa \
+    --attach-policy-arn=arn:aws:iam::${ACCOUNT_ID}:policy/VoiceMatchingBackendPolicy \
+    --approve
+```
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    
-    - name: Build Frontend
-      run: docker build ./frontend
-    
-    - name: Build Backend
-      run: docker build ./backend
+#### 部署步骤 (Deployment Steps)
+
+##### 1. 构建容器镜像 (Build Container Images)
+```bash
+# 后端镜像 (Backend Image)
+aws ecr create-repository --repository-name voice-matching-backend
+docker build -t ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/voice-matching-backend:latest backend
+aws ecr get-login-password | docker login --username AWS --password-stdin ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com
+docker push ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/voice-matching-backend:latest
+
+# 前端镜像 (Frontend Image)
+aws ecr create-repository --repository-name voice-matching-frontend
+docker build -t ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/voice-matching-frontend:latest frontend
+docker push ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/voice-matching-frontend:latest
+```
+
+##### 2. 部署到EKS (Deploy to EKS)
+```bash
+# 部署AWS负载均衡控制器 (Deploy AWS Load Balancer Controller)
+kubectl apply -f k8s/alb-controller.yaml
+
+# 部署后端和前端服务 (Deploy Backend and Frontend Services)
+kubectl apply -f k8s/backend-deployment.yaml
+kubectl apply -f k8s/frontend-deployment.yaml
+kubectl apply -f k8s/ingress.yaml
 ```
 
 ## 贡献指南 (Contributing)
