@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: voice-matching-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: voice-matching-frontend
+  template:
+    metadata:
+      labels:
+        app: voice-matching-frontend
+    spec:
+      containers:
+      - name: frontend
+        image: voice-matching-frontend:latest
+        ports:
+        - containerPort: 5173
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 250m
+            memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+spec:
+  selector:
+    app: voice-matching-frontend
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 5173
+  type: LoadBalancer

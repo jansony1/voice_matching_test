@@ -2,10 +2,40 @@
   <div class="input-form">
     <h2>AWS Credentials</h2>
     <div class="form-group">
-      <input v-model="awsAccessKeyId" placeholder="Access Key ID" class="form-control" />
+      <div class="input-group">
+        <input 
+          :type="showAccessKeyId ? 'text' : 'password'" 
+          v-model="awsAccessKeyId" 
+          placeholder="Access Key ID" 
+          class="form-control" 
+        />
+        <div class="input-group-append">
+          <button 
+            @click="toggleAccessKeyVisibility" 
+            class="btn btn-outline-secondary"
+          >
+            {{ showAccessKeyId ? 'Hide' : 'Show' }}
+          </button>
+        </div>
+      </div>
     </div>
     <div class="form-group">
-      <input v-model="awsSecretAccessKey" placeholder="Secret Access Key" class="form-control" />
+      <div class="input-group">
+        <input 
+          :type="showSecretAccessKey ? 'text' : 'password'" 
+          v-model="awsSecretAccessKey" 
+          placeholder="Secret Access Key" 
+          class="form-control" 
+        />
+        <div class="input-group-append">
+          <button 
+            @click="toggleSecretKeyVisibility" 
+            class="btn btn-outline-secondary"
+          >
+            {{ showSecretAccessKey ? 'Hide' : 'Show' }}
+          </button>
+        </div>
+      </div>
     </div>
     <div class="form-group">
       <input v-model="awsRegion" placeholder="Region (e.g. us-west-2)" class="form-control" />
@@ -115,6 +145,8 @@ export default {
       status: 'idle',
       s3Status: 'idle',
       error: null,
+      showAccessKeyId: false,
+      showSecretAccessKey: false
     }
   },
   computed: {
@@ -127,6 +159,12 @@ export default {
     }
   },
   methods: {
+    toggleAccessKeyVisibility() {
+      this.showAccessKeyId = !this.showAccessKeyId
+    },
+    toggleSecretKeyVisibility() {
+      this.showSecretAccessKey = !this.showSecretAccessKey
+    },
     async validateCredentials() {
       try {
         const response = await fetch(`${BACKEND_URL}/validate_credentials`, {
@@ -251,6 +289,14 @@ export default {
   border-radius: 3px;
 }
 
+.input-group {
+  display: flex;
+}
+
+.input-group-append {
+  margin-left: 10px;
+}
+
 .btn {
   padding: 10px 20px;
   border: none;
@@ -262,6 +308,12 @@ export default {
 .btn-primary {
   background-color: #007bff;
   color: #fff;
+}
+
+.btn-outline-secondary {
+  background-color: #f8f9fa;
+  border: 1px solid #ccc;
+  color: #333;
 }
 
 .transcription-mode-container {
