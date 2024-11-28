@@ -64,7 +64,20 @@
               <label for="s3AudioFileUrl">S3 Audio File URL</label>
               <input type="text" id="s3AudioFileUrl" v-model="s3AudioFileUrl" placeholder="Enter S3 Audio File URL" class="form-control" />
             </div>
-            <button @click="submitS3Transcription" class="btn btn-primary">Submit</button>
+            <button @click="submitS3Transcription" :disabled="s3Status === 'matching'" class="btn btn-primary">
+              {{ s3Status === 'matching' ? 'Matching...' : 'Submit' }}
+            </button>
+            <div v-if="s3Status === 'matched'" class="status-text">
+              Match Result
+            </div>
+            <div v-if="transcriptionResult" class="transcription-result">
+              <h3>S3 Transcription Result</h3>
+              <pre>{{ transcriptionResult }}</pre>
+            </div>
+            <div v-if="bedrockResult" class="bedrock-result">
+              <h3>S3 Bedrock Inference Result</h3>
+              <pre>{{ bedrockResult }}</pre>
+            </div>
           </div>
         </div>
       </div>
@@ -100,6 +113,7 @@ export default {
       bedrockResult: '',
       transcriptionMode: 'realtime',
       status: 'idle',
+      s3Status: 'idle',
       error: null,
     }
   },
@@ -139,40 +153,38 @@ export default {
       }
     },
     async submitS3Transcription() {
-      try {
-        const requestData = {
-          s3_audio_url: this.s3AudioFileUrl,
-          system_prompt: this.systemPrompt,
-          aws_access_key_id: this.awsAccessKeyId,
-          aws_secret_access_key: this.awsSecretAccessKey,
-          aws_region: this.awsRegion
-        };
-        
-        console.log('Sending transcription request with data:', requestData);
+      this.s3Status = 'matching'
+      this.transcriptionResult = ''
+      this.bedrockResult = ''
+      this.error = null
 
+      try {
         const response = await fetch(`${BACKEND_URL}/transcribe`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(requestData)
-        });
-
-        console.log('Transcription response status:', response.status);
+          body: JSON.stringify({
+            s3_audio_url: this.s3AudioFileUrl,
+            system_prompt: this.systemPrompt,
+            aws_access_key_id: this.awsAccessKeyId,
+            aws_secret_access_key: this.awsSecretAccessKey,
+            aws_region: this.awsRegion
+          })
+        })
 
         if (response.ok) {
-          const result = await response.json();
-          console.log('Transcription result:', result);
-          this.transcriptionResult = result.transcript;
-          this.bedrockResult = result.bedrock_claude_result;
+          const result = await response.json()
+          this.transcriptionResult = result.transcript
+          this.bedrockResult = result.bedrock_claude_result
+          this.s3Status = 'matched'
         } else {
-          const errorText = await response.text();
-          console.error('Transcription error:', errorText);
-          throw new Error(`Error: ${response.status} - ${response.statusText}\n${errorText}`);
+          throw new Error(`Error: ${response.status} - ${response.statusText}`)
         }
       } catch (error) {
-        console.error('Error submitting S3 transcription:', error);
-        this.error = `Error submitting S3 transcription: ${error.message}`;
+        console.error('Error submitting S3 transcription:', error)
+        this.error = `Error submitting S3 transcription: ${error.message}`
+        this.s3Status = 'idle'
       }
     },
     handleTranscriptionUpdate(transcription) {
