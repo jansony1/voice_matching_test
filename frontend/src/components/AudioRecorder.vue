@@ -33,13 +33,41 @@ export default {
       mediaStream: null,
       audioInput: null,
       processor: null,
+      finalTranscription: '',
+      transcriptionBuffer: [],
+      lastProcessedIndex: 0
     }
   },
   methods: {
+    cleanTranscription(transcript) {
+      // Remove punctuation, convert to uppercase, and trim
+      const cleanedTranscript = transcript
+        .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
+        .toUpperCase()
+        .trim();
+
+      // Split into words and remove duplicates while preserving order
+      const words = cleanedTranscript.split(/\s+/);
+      const uniqueWords = [];
+      const seenWords = new Set();
+
+      for (const word of words) {
+        if (!seenWords.has(word)) {
+          uniqueWords.push(word);
+          seenWords.add(word);
+        }
+      }
+
+      return uniqueWords.join(' ');
+    },
+
     async startRecording() {
       try {
         this.error = null;
         this.transcription = '';
+        this.finalTranscription = '';
+        this.transcriptionBuffer = [];
+        this.lastProcessedIndex = 0;
         
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
           throw new Error("Your browser doesn't support audio recording");
@@ -80,9 +108,24 @@ export default {
           if (event.TranscriptEvent && event.TranscriptEvent.Transcript) {
             const results = event.TranscriptEvent.Transcript.Results;
             if (results && results.length > 0 && results[0].Alternatives && results[0].Alternatives.length > 0) {
-              const transcript = results[0].Alternatives[0].Transcript;
-              this.transcription += transcript + ' ';
-              this.$emit('transcriptionUpdate', this.transcription);
+              const transcript = results[0].Alternatives[0].Transcript.trim();
+              
+              // Only process if the transcript is new
+              if (transcript && !this.transcriptionBuffer.includes(transcript)) {
+                this.transcriptionBuffer.push(transcript);
+                
+                // Keep only the last few transcripts to prevent memory bloat
+                if (this.transcriptionBuffer.length > 5) {
+                  this.transcriptionBuffer.shift();
+                }
+
+                // Update transcription with unique words
+                this.transcription = this.cleanTranscription(
+                  this.transcriptionBuffer.join(' ')
+                );
+
+                this.$emit('transcriptionUpdate', this.transcription);
+              }
             }
           }
         }
@@ -117,7 +160,9 @@ export default {
           this.transcribeClient = null;
         }
         
-        this.$emit('recordingStopped', this.transcription);
+        // Clean and store the final transcription
+        this.finalTranscription = this.cleanTranscription(this.transcription);
+        this.$emit('recordingStopped', this.finalTranscription);
       } catch (error) {
         console.error('Error stopping recording:', error);
         this.error = `Error stopping recording: ${error.message}`;
