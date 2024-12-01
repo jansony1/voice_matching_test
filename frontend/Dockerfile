@@ -2,23 +2,24 @@ FROM node:18-alpine as builder
 
 WORKDIR /app
 
-# 安装依赖
+# Install dependencies
 COPY package*.json ./
 RUN npm install
 
-# 复制源代码
+# Copy source code
 COPY . .
 
-# 构建生产版本 - 这会生成静态文件到 dist 目录
+# Build production version
 RUN npm run build
 
-# 生产环境 - 使用nginx服务静态文件
+# Production environment - using nginx to serve static files
 FROM nginx:alpine
 
-# 从构建阶段复制编译好的静态文件
+# Copy built static files
 COPY --from=builder /app/dist /usr/share/nginx/html
+COPY --from=builder /app/public/config.js /usr/share/nginx/html/config.js
 
-# nginx配置
+# Nginx configuration with API proxy
 RUN echo 'server { \
     listen 80; \
     location / { \
@@ -26,8 +27,24 @@ RUN echo 'server { \
         index index.html; \
         try_files $uri $uri/ /index.html; \
     } \
+    location /api/ { \
+        proxy_pass http://backend:8000/; \
+        proxy_http_version 1.1; \
+        proxy_set_header Upgrade $http_upgrade; \
+        proxy_set_header Connection "upgrade"; \
+        proxy_set_header Host $host; \
+        proxy_cache_bypass $http_upgrade; \
+        proxy_set_header X-Real-IP $remote_addr; \
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; \
+        proxy_set_header X-Forwarded-Proto $scheme; \
+    } \
 }' > /etc/nginx/conf.d/default.conf
+
+# Copy the config.js template
+COPY docker-entrypoint.sh /
+RUN chmod +x /docker-entrypoint.sh
 
 EXPOSE 80
 
+ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]

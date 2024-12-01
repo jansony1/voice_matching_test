@@ -6,9 +6,9 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "80:80"
+      - "8080:80"
     environment:
-      - VITE_BACKEND_URL=http://backend:8000
+      - BACKEND_URL=http://backend:8000
     depends_on:
       - backend
     networks:
@@ -25,7 +25,7 @@ services:
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-west-2}
     volumes:
-      - ./backend:/app  # 开发模式下的代码热重载
+      - ./backend:/app  # Development mode hot-reload
     networks:
       - voice-matching-network
 

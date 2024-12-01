@@ -123,13 +123,16 @@
 import './InputForm.css'
 import AudioRecorder from './AudioRecorder.vue'
 
-const BACKEND_URL = 'http://localhost:8000'
+// Use the config.js configuration with fallback
+const BACKEND_URL = (window.configs && window.configs.BACKEND_URL) || 'http://localhost:8000'
+console.log('Using backend URL:', BACKEND_URL) // Debug log
 
 export default {
   name: 'InputForm',
   components: {
     AudioRecorder,
   },
+  // Keep existing component logic
   data() {
     return {
       awsAccessKeyId: '',
@@ -159,6 +162,7 @@ export default {
     }
   },
   methods: {
+    // Keep existing methods
     toggleAccessKeyVisibility() {
       this.showAccessKeyId = !this.showAccessKeyId
     },
@@ -265,7 +269,7 @@ export default {
         this.error = `Error calling Bedrock: ${error.message}`
       }
     }
-  },
+  }
 }
 </script>
 
