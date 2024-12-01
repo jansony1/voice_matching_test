@@ -38,7 +38,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="/Users/zhenyin/heihei/voice_matching_test/backend/venv"
+VIRTUAL_ENV="/Users/zhenyin/1201_new/voice_matching_test-3/backend/venv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
