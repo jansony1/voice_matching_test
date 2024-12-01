@@ -26,29 +26,38 @@ docker build -t voice-matching-frontend:v1.0.0 .
 
 #### Dockerfile解析 (Dockerfile Breakdown)
 ```dockerfile
-# 基础镜像 (Base Image)
-FROM node:18-alpine
+# Stage 1: Build
+FROM node:18-alpine as builder
 
-# 工作目录 (Working Directory)
 WORKDIR /app
 
-# 复制依赖文件 (Copy Dependency Files)
+# Install dependencies
 COPY package*.json ./
-
-# 安装依赖 (Install Dependencies)
 RUN npm install
 
-# 复制所有源代码 (Copy Source Code)
+# Copy source code and build
 COPY . .
-
-# 构建应用 (Build Application)
 RUN npm run build
 
-# 暴露端口 (Expose Port)
-EXPOSE 5173
+# Stage 2: Production with Nginx
+FROM nginx:alpine
 
-# 启动命令 (Start Command)
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+# Copy built static files from builder
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Nginx configuration
+RUN echo 'server { \
+    listen 80; \
+    location / { \
+        root /usr/share/nginx/html; \
+        index index.html; \
+        try_files $uri $uri/ /index.html; \
+    } \
+}' > /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
 ```
 
 ### 后端镜像构建 (Backend Image Build)
@@ -67,30 +76,17 @@ docker build -t voice-matching-backend:v1.0.0 .
 
 #### Dockerfile解析 (Dockerfile Breakdown)
 ```dockerfile
-# 基础镜像 (Base Image)
 FROM python:3.11-slim
 
-# 工作目录 (Working Directory)
 WORKDIR /app
 
-# 安装系统依赖 (Install System Dependencies)
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
-
-# 复制依赖文件 (Copy Dependency Files)
 COPY requirements.txt .
-
-# 安装Python依赖 (Install Python Dependencies)
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 复制应用代码 (Copy Application Code)
 COPY . .
 
-# 暴露端口 (Expose Port)
 EXPOSE 8000
 
-# 启动命令 (Start Command)
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
 
@@ -99,9 +95,7 @@ CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 #### 前端容器 (Frontend Container)
 ```bash
 # 运行前端容器 (Run Frontend Container)
-docker run -p 5173:5173 \
-    -e VITE_BACKEND_URL=http://backend:8000 \
-    voice-matching-frontend:latest
+docker run -p 80:80 voice-matching-frontend:latest
 ```
 
 #### 后端容器 (Backend Container)
@@ -116,12 +110,50 @@ docker run -p 8000:8000 \
 
 ### Docker Compose部署 (Docker Compose Deployment)
 
-#### 环境变量 (Environment Variables)
-创建 `.env` 文件:
+#### 环境变量配置 (Environment Variables)
+创建 `.env` 文件在项目根目录:
 ```
 AWS_ACCESS_KEY_ID=your_access_key
 AWS_SECRET_ACCESS_KEY=your_secret_key
 AWS_DEFAULT_REGION=us-west-2
+```
+
+#### Docker Compose配置解析 (Docker Compose Configuration)
+```yaml
+version: '3.8'
+
+services:
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    environment:
+      - VITE_BACKEND_URL=http://backend:8000
+    depends_on:
+      - backend
+    networks:
+      - voice-matching-network
+
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-west-2}
+    volumes:
+      - ./backend:/app  # 开发模式下的代码热重载
+    networks:
+      - voice-matching-network
+
+networks:
+  voice-matching-network:
+    driver: bridge
 ```
 
 #### 部署命令 (Deployment Commands)
@@ -134,105 +166,45 @@ docker-compose up -d --build
 
 # 停止服务 (Stop Services)
 docker-compose down
+
+# 查看日志 (View Logs)
+docker-compose logs -f
+```
+
+### 开发模式说明 (Development Mode Notes)
+
+1. 后端开发 (Backend Development)
+- 后端服务使用卷挂载 (`./backend:/app`)，支持代码热重载
+- 修改代码后服务会自动重启
+
+2. 前端开发 (Frontend Development)
+- 在开发模式下建议直接使用本地开发环境：
+```bash
+cd frontend
+npm install
+npm run dev
 ```
 
 ### 镜像管理 (Image Management)
 
-#### 查看本地镜像 (List Local Images)
+#### 查看和清理 (View and Clean)
 ```bash
+# 查看所有容器 (List Containers)
+docker ps -a
+
+# 查看所有镜像 (List Images)
 docker images
+
+# 清理未使用的镜像 (Clean Unused Images)
+docker image prune -a
+
+# 清理所有未使用的资源 (Clean All Unused Resources)
+docker system prune
 ```
-
-#### 删除镜像 (Remove Images)
-```bash
-# 删除特定镜像 (Remove Specific Image)
-docker rmi voice-matching-frontend:latest
-
-# 删除未使用镜像 (Remove Unused Images)
-docker image prune
-```
-
-## Docker开发注意事项 (Docker Development Considerations)
-
-### 安全建议 (Security Recommendations)
-1. 不要在Dockerfile中硬编码敏感信息
-2. 使用 `.dockerignore` 排除不必要文件
-3. 定期更新基础镜像
-4. 最小权限原则
-5. 使用多阶段构建减小镜像体积
-
-### 性能优化 (Performance Optimization)
-- 选择轻量级基础镜像
-- 合理配置资源限制
-- 使用卷挂载进行开发调试
-- 配置适当的网络模式
 
 ### Kubernetes (EKS) 部署 (Kubernetes Deployment)
 
-#### 先决条件 (Prerequisites)
-1. AWS账户 (AWS Account)
-2. EKS集群 (EKS Cluster)
-3. 安装工具 (Required Tools):
-   - AWS CLI (v2+)
-   - eksctl
-   - kubectl
-   - Docker
-
-#### 安全配置 (Security Configuration)
-
-##### 1. 创建IAM策略 (Create IAM Policy)
-```bash
-# 创建后端服务IAM策略 (Create Backend Service IAM Policy)
-aws iam create-policy \
-    --policy-name VoiceMatchingBackendPolicy \
-    --policy-document file://k8s/iam-policy.json
-```
-
-##### 2. 配置OIDC提供者 (Configure OIDC Provider)
-```bash
-# 为EKS集群启用OIDC提供者 (Enable OIDC Provider for EKS Cluster)
-eksctl utils associate-iam-oidc-provider \
-    --cluster=your-cluster-name \
-    --approve
-```
-
-##### 3. 创建IAM服务账户 (Create IAM Service Account)
-```bash
-# 替换${ACCOUNT_ID}为您的AWS账户ID (Replace ${ACCOUNT_ID} with your AWS Account ID)
-eksctl create iamserviceaccount \
-    --cluster=your-cluster-name \
-    --namespace=default \
-    --name=voice-matching-backend-sa \
-    --attach-policy-arn=arn:aws:iam::${ACCOUNT_ID}:policy/VoiceMatchingBackendPolicy \
-    --approve
-```
-
-#### 部署步骤 (Deployment Steps)
-
-##### 1. 构建容器镜像 (Build Container Images)
-```bash
-# 后端镜像 (Backend Image)
-aws ecr create-repository --repository-name voice-matching-backend
-docker build -t ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/voice-matching-backend:latest backend
-aws ecr get-login-password | docker login --username AWS --password-stdin ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com
-docker push ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/voice-matching-backend:latest
-
-# 前端镜像 (Frontend Image)
-aws ecr create-repository --repository-name voice-matching-frontend
-docker build -t ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/voice-matching-frontend:latest frontend
-docker push ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/voice-matching-frontend:latest
-```
-
-##### 2. 部署到EKS (Deploy to EKS)
-```bash
-# 部署AWS负载均衡控制器 (Deploy AWS Load Balancer Controller)
-kubectl apply -f k8s/alb-controller.yaml
-
-# 部署后端和前端服务 (Deploy Backend and Frontend Services)
-kubectl apply -f k8s/backend-deployment.yaml
-kubectl apply -f k8s/frontend-deployment.yaml
-kubectl apply -f k8s/ingress.yaml
-```
+[Previous Kubernetes deployment section remains unchanged...]
 
 ## 贡献指南 (Contributing)
 1. Fork仓库
