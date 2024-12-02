@@ -8,203 +8,93 @@
 ### English Description
 VoiceSync is an advanced cloud-powered voice processing platform that leverages AWS services for high-precision speech transcription and text matching. The system supports real-time voice recording, transcription, and intelligent text analysis, providing a comprehensive solution for voice recognition and text processing.
 
-## Docker构建与部署详细指南 (Docker Build and Deployment Guide)
+## Docker部署指南 (Docker Deployment Guide)
 
-### 前端镜像构建 (Frontend Image Build)
+### 本地开发部署 (Local Development Deployment)
 
-#### 构建步骤 (Build Steps)
+1. 创建环境变量文件 (Create Environment Variables)
 ```bash
-# 进入前端目录 (Enter frontend directory)
-cd frontend
-
-# 构建Docker镜像 (Build Docker Image)
-docker build -t voice-matching-frontend:latest .
-
-# 构建带版本标签的镜像 (Build Image with Version Tag)
-docker build -t voice-matching-frontend:v1.0.0 .
-```
-
-#### Dockerfile解析 (Dockerfile Breakdown)
-```dockerfile
-# Stage 1: Build
-FROM node:18-alpine as builder
-
-WORKDIR /app
-
-# Install dependencies
-COPY package*.json ./
-RUN npm install
-
-# Copy source code and build
-COPY . .
-RUN npm run build
-
-# Stage 2: Production with Nginx
-FROM nginx:alpine
-
-# Copy built static files from builder
-COPY --from=builder /app/dist /usr/share/nginx/html
-
-# Nginx configuration
-RUN echo 'server { \
-    listen 80; \
-    location / { \
-        root /usr/share/nginx/html; \
-        index index.html; \
-        try_files $uri $uri/ /index.html; \
-    } \
-}' > /etc/nginx/conf.d/default.conf
-
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
-```
-
-### 后端镜像构建 (Backend Image Build)
-
-#### 构建步骤 (Build Steps)
-```bash
-# 进入后端目录 (Enter backend directory)
-cd backend
-
-# 构建Docker镜像 (Build Docker Image)
-docker build -t voice-matching-backend:latest .
-
-# 构建带版本标签的镜像 (Build Image with Version Tag)
-docker build -t voice-matching-backend:v1.0.0 .
-```
-
-#### Dockerfile解析 (Dockerfile Breakdown)
-```dockerfile
-FROM python:3.11-slim
-
-WORKDIR /app
-
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-COPY . .
-
-EXPOSE 8000
-
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
-```
-
-### 运行容器 (Running Containers)
-
-#### 前端容器 (Frontend Container)
-```bash
-# 运行前端容器 (Run Frontend Container)
-docker run -p 80:80 voice-matching-frontend:latest
-```
-
-#### 后端容器 (Backend Container)
-```bash
-# 运行后端容器 (Run Backend Container)
-docker run -p 8000:8000 \
-    -e AWS_ACCESS_KEY_ID=your_access_key \
-    -e AWS_SECRET_ACCESS_KEY=your_secret_key \
-    -e AWS_DEFAULT_REGION=us-west-2 \
-    voice-matching-backend:latest
-```
-
-### Docker Compose部署 (Docker Compose Deployment)
-
-#### 环境变量配置 (Environment Variables)
-创建 `.env` 文件在项目根目录:
-```
+# Create .env file
+cat > .env << EOL
 AWS_ACCESS_KEY_ID=your_access_key
 AWS_SECRET_ACCESS_KEY=your_secret_key
 AWS_DEFAULT_REGION=us-west-2
+EOL
 ```
 
-#### Docker Compose配置解析 (Docker Compose Configuration)
-```yaml
-version: '3.8'
-
-services:
-  frontend:
-    build: 
-      context: ./frontend
-      dockerfile: Dockerfile
-    ports:
-      - "80:80"
-    environment:
-      - VITE_BACKEND_URL=http://backend:8000
-    depends_on:
-      - backend
-    networks:
-      - voice-matching-network
-
-  backend:
-    build: 
-      context: ./backend
-      dockerfile: Dockerfile
-    ports:
-      - "8000:8000"
-    environment:
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-west-2}
-    volumes:
-      - ./backend:/app  # 开发模式下的代码热重载
-    networks:
-      - voice-matching-network
-
-networks:
-  voice-matching-network:
-    driver: bridge
-```
-
-#### 部署命令 (Deployment Commands)
+2. 构建并启动服务 (Build and Start Services)
 ```bash
-# 构建并启动服务 (Build and Start Services)
 docker-compose up --build
-
-# 后台运行 (Run in Background)
-docker-compose up -d --build
-
-# 停止服务 (Stop Services)
-docker-compose down
-
-# 查看日志 (View Logs)
-docker-compose logs -f
 ```
 
-### 开发模式说明 (Development Mode Notes)
+3. 访问应用 (Access Application)
+- 前端界面 (Frontend): http://localhost:8080
+- 后端服务 (Backend): http://localhost:8000
 
-1. 后端开发 (Backend Development)
-- 后端服务使用卷挂载 (`./backend:/app`)，支持代码热重载
-- 修改代码后服务会自动重启
+### 云端部署 (Cloud Deployment)
 
-2. 前端开发 (Frontend Development)
-- 在开发模式下建议直接使用本地开发环境：
+1. 创建环境变量文件，添加后端服务地址 (Create Environment Variables with Backend URL)
 ```bash
-cd frontend
-npm install
-npm run dev
+# Create .env file
+cat > .env << EOL
+AWS_ACCESS_KEY_ID=your_access_key
+AWS_SECRET_ACCESS_KEY=your_secret_key
+AWS_DEFAULT_REGION=us-west-2
+# 使用EC2公网地址或ALB地址 (Use EC2 public IP or ALB address)
+BACKEND_URL=http://your-ec2-ip:8000
+EOL
 ```
 
-### 镜像管理 (Image Management)
-
-#### 查看和清理 (View and Clean)
+2. 构建并启动服务 (Build and Start Services)
 ```bash
-# 查看所有容器 (List Containers)
-docker ps -a
-
-# 查看所有镜像 (List Images)
-docker images
-
-# 清理未使用的镜像 (Clean Unused Images)
-docker image prune -a
-
-# 清理所有未使用的资源 (Clean All Unused Resources)
-docker system prune
+docker-compose up --build
 ```
 
-### Kubernetes (EKS) 部署 (Kubernetes Deployment)
+3. 访问应用 (Access Application)
+- 前端界面 (Frontend): http://your-server-ip:8080
+- 后端服务 (Backend): http://your-server-ip:8000
 
-[Previous Kubernetes deployment section remains unchanged...]
+### 配置说明 (Configuration Notes)
+
+1. 后端URL配置 (Backend URL Configuration)
+- 本地开发：默认使用 http://backend:8000 (Local Development: Default to http://backend:8000)
+- 云端部署：通过 BACKEND_URL 环境变量设置 (Cloud Deployment: Set via BACKEND_URL environment variable)
+
+2. AWS凭证配置 (AWS Credentials Configuration)
+- AWS_ACCESS_KEY_ID: AWS访问密钥ID
+- AWS_SECRET_ACCESS_KEY: AWS访问密钥
+- AWS_DEFAULT_REGION: AWS区域 (默认: us-west-2)
+
+### 目录结构 (Project Structure)
+```
+.
+├── frontend/                      # Vue.js前端应用
+│   ├── src/                      # 源代码
+│   ├── public/                   # 静态资源
+│   └── Dockerfile               # 前端Docker配置
+├── backend/                      # Python后端服务
+│   ├── main.py                  # 主应用
+│   └── Dockerfile               # 后端Docker配置
+└── docker-compose.yml           # Docker Compose配置
+```
+
+### 常见问题 (Common Issues)
+
+1. 连接错误 (Connection Error)
+```
+Error: net::ERR_CONNECTION_REFUSED
+```
+解决方案 (Solution):
+- 本地开发：确保后端服务正常运行 (Local: Ensure backend service is running)
+- 云端部署：检查 BACKEND_URL 配置是否正确 (Cloud: Verify BACKEND_URL configuration)
+
+2. AWS凭证错误 (AWS Credentials Error)
+```
+Invalid credentials
+```
+解决方案 (Solution):
+- 检查 .env 文件中的 AWS 凭证是否正确 (Check AWS credentials in .env file)
+- 确保 AWS 凭证具有必要的权限 (Ensure AWS credentials have necessary permissions)
 
 ## 贡献指南 (Contributing)
 1. Fork仓库

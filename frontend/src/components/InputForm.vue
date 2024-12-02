@@ -123,16 +123,19 @@
 import './InputForm.css'
 import AudioRecorder from './AudioRecorder.vue'
 
-// Use the config.js configuration with fallback
 const BACKEND_URL = (window.configs && window.configs.BACKEND_URL) || 'http://localhost:8000'
 console.log('Using backend URL:', BACKEND_URL) // Debug log
+
+// Helper function to build API URL
+function buildApiUrl(path) {
+  return `${BACKEND_URL}${path.startsWith('/') ? path : '/' + path}`
+}
 
 export default {
   name: 'InputForm',
   components: {
     AudioRecorder,
   },
-  // Keep existing component logic
   data() {
     return {
       awsAccessKeyId: '',
@@ -162,7 +165,6 @@ export default {
     }
   },
   methods: {
-    // Keep existing methods
     toggleAccessKeyVisibility() {
       this.showAccessKeyId = !this.showAccessKeyId
     },
@@ -171,7 +173,7 @@ export default {
     },
     async validateCredentials() {
       try {
-        const response = await fetch(`${BACKEND_URL}/validate_credentials`, {
+        const response = await fetch(buildApiUrl('/validate_credentials'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -201,7 +203,7 @@ export default {
       this.error = null
 
       try {
-        const response = await fetch(`${BACKEND_URL}/transcribe`, {
+        const response = await fetch(buildApiUrl('/transcribe'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -245,7 +247,7 @@ export default {
     },
     async callBedrock(transcription) {
       try {
-        const response = await fetch(`${BACKEND_URL}/bedrock`, {
+        const response = await fetch(buildApiUrl('/bedrock'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
