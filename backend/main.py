@@ -19,7 +19,7 @@ logging.basicConfig(
     ]
 )
 
-app = FastAPI()
+app = FastAPI(root_path="/api")
 
 # Configure CORS
 app.add_middleware(
