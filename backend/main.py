@@ -10,7 +10,6 @@ import asyncio
 from botocore.exceptions import ClientError
 from fastapi.security import OAuth2PasswordBearer
 from datetime import datetime, timezone
-from dateutil import parser
 
 # Configure logging
 log_file = os.path.join(os.path.dirname(__file__), 'app.log')
@@ -41,6 +40,27 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 ec2_role = None
 session = None
 credentials = None
+aws_region = None
+
+def get_aws_region():
+    global aws_region
+    if aws_region is None:
+        try:
+            logging.info("Attempting to fetch AWS region from instance metadata")
+            token = get_imdsv2_token()
+            response = requests.get(
+                "http://169.254.169.254/latest/meta-data/placement/region",
+                headers={"X-aws-ec2-metadata-token": token},
+                timeout=2
+            )
+            response.raise_for_status()
+            aws_region = response.text
+            logging.info(f"Successfully fetched AWS region: {aws_region}")
+        except Exception as e:
+            logging.error(f"Error fetching AWS region: {e}")
+            aws_region = "us-west-2"  # Default fallback
+            logging.info(f"Using default region: {aws_region}")
+    return aws_region
 
 def get_imdsv2_token():
     try:
@@ -96,18 +116,7 @@ def get_ec2_role():
 
 def get_temporary_credentials():
     global session, credentials
-    current_time = datetime.now(timezone.utc)
-    
-    if session is None or credentials is None:
-        needs_refresh = True
-    else:
-        try:
-            expiration = parser.parse(credentials['Expiration'])
-            needs_refresh = expiration <= current_time
-        except (KeyError, ValueError, TypeError):
-            needs_refresh = True
-
-    if needs_refresh:
+    if session is None or credentials is None or credentials.get('Expiration', 0) <= datetime.now(timezone.utc):
         role = get_ec2_role()
         try:
             logging.info(f"Attempting to fetch temporary credentials for role: {role}")
@@ -133,8 +142,13 @@ async def fetch_ec2_role():
         logging.info("Received request to fetch EC2 role")
         role = get_ec2_role()
         _, credentials = get_temporary_credentials()
+        region = get_aws_region()
         logging.info(f"Successfully fetched EC2 role and credentials for role: {role}")
-        return {"role": role, "token": credentials['Token']}
+        return {
+            "role": role, 
+            "token": credentials['Token'],
+            "region": region  # Add region to the response
+        }
     except HTTPException as he:
         raise he
     except Exception as e:

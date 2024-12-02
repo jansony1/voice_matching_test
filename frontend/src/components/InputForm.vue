@@ -30,7 +30,11 @@
             <AudioRecorder 
               ref="audioRecorder" 
               :systemPrompt="systemPrompt"
-              :temporaryToken="temporaryToken"
+              :awsCredentials="{
+                region: awsRegion,
+                accessKeyId: '',
+                secretAccessKey: ''
+              }"
               @transcriptionUpdate="handleTranscriptionUpdate"
               @recordingStopped="handleRecordingStopped"
               @recordingStarted="handleRecordingStarted"
@@ -116,7 +120,8 @@ export default {
       error: null,
       ec2Role: null,
       temporaryToken: null,
-      isFetchingRole: false
+      isFetchingRole: false,
+      awsRegion: null
     }
   },
   methods: {
@@ -131,8 +136,10 @@ export default {
           const result = await response.json()
           this.ec2Role = result.role
           this.temporaryToken = result.token
+          this.awsRegion = result.region
           console.log('EC2 Role:', this.ec2Role)
           console.log('Temporary Token:', this.temporaryToken)
+          console.log('AWS Region:', this.awsRegion)
         } else {
           const errorData = await response.json()
           throw new Error(errorData.detail || `Error: ${response.status} - ${response.statusText}`)
