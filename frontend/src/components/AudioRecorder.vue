@@ -85,12 +85,13 @@ export default {
         this.isRecording = true;
         this.$emit('recordingStarted');
 
-        // Initialize AWS Transcribe client
+        // Initialize AWS Transcribe client with all credentials
         this.transcribeClient = new TranscribeStreamingClient({
           region: this.awsCredentials.region,
           credentials: {
             accessKeyId: this.awsCredentials.accessKeyId,
             secretAccessKey: this.awsCredentials.secretAccessKey,
+            sessionToken: this.awsCredentials.sessionToken // Add session token
           },
         });
 
