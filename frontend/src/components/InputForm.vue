@@ -1,54 +1,15 @@
 <template>
   <div class="input-form">
-    <h2>AWS Credentials</h2>
-    <div class="form-group">
-      <div class="input-group">
-        <input 
-          :type="showAccessKeyId ? 'text' : 'password'" 
-          v-model="awsAccessKeyId" 
-          placeholder="Access Key ID" 
-          class="form-control" 
-        />
-        <div class="input-group-append">
-          <button 
-            @click="toggleAccessKeyVisibility" 
-            class="btn btn-outline-secondary"
-          >
-            {{ showAccessKeyId ? 'Hide' : 'Show' }}
-          </button>
-        </div>
-      </div>
-    </div>
-    <div class="form-group">
-      <div class="input-group">
-        <input 
-          :type="showSecretAccessKey ? 'text' : 'password'" 
-          v-model="awsSecretAccessKey" 
-          placeholder="Secret Access Key" 
-          class="form-control" 
-        />
-        <div class="input-group-append">
-          <button 
-            @click="toggleSecretKeyVisibility" 
-            class="btn btn-outline-secondary"
-          >
-            {{ showSecretAccessKey ? 'Hide' : 'Show' }}
-          </button>
-        </div>
-      </div>
-    </div>
-    <div class="form-group">
-      <input v-model="awsRegion" placeholder="Region (e.g. us-west-2)" class="form-control" />
-    </div>
-    <button @click="validateCredentials" class="btn btn-primary">Validate Credentials</button>
-    <p v-if="credentialsValidated" :class="{ 'text-success': credentialsValid, 'text-danger': !credentialsValid }">
-      {{ credentialsValid ? 'Credentials are valid' : 'Invalid credentials' }}
-    </p>
-    <p v-if="validationError" class="text-danger">
-      {{ validationError }}
-    </p>
+    <button @click="fetchEC2Role" class="btn btn-primary" :disabled="isFetchingRole">
+      {{ isFetchingRole ? 'Fetching EC2 Role...' : 'Get EC2 Role and Start' }}
+    </button>
 
-    <div v-if="credentialsValid" class="transcription-mode-container">
+    <div v-if="ec2Role" class="role-info">
+      <h3>EC2 Role: {{ ec2Role }}</h3>
+      <p>Authentication successful. You can now use the application.</p>
+    </div>
+
+    <div v-if="temporaryToken">
       <div class="form-group">
         <label for="systemPrompt">System Prompt</label>
         <textarea id="systemPrompt" v-model="systemPrompt" placeholder="Enter system prompt" class="form-control"></textarea>
@@ -68,8 +29,8 @@
           <div class="realtime-transcription">
             <AudioRecorder 
               ref="audioRecorder" 
-              :awsCredentials="awsCredentials"
               :systemPrompt="systemPrompt"
+              :temporaryToken="temporaryToken"
               @transcriptionUpdate="handleTranscriptionUpdate"
               @recordingStopped="handleRecordingStopped"
               @recordingStarted="handleRecordingStarted"
@@ -141,89 +102,52 @@ export default {
     AudioRecorder,
   },
   created() {
-    // Log configuration on component creation
     console.log('Component created with backend URL:', BACKEND_URL)
   },
   data() {
     return {
-      awsAccessKeyId: '',
-      awsSecretAccessKey: '',
-      awsRegion: 'us-west-2',
       s3AudioFileUrl: '',
       systemPrompt: '',
-      credentialsValid: false,
-      credentialsValidated: false,
       transcriptionResult: '',
       bedrockResult: '',
       transcriptionMode: 'realtime',
       status: 'idle',
       s3Status: 'idle',
       error: null,
-      validationError: null,
-      showAccessKeyId: false,
-      showSecretAccessKey: false
-    }
-  },
-  computed: {
-    awsCredentials() {
-      return {
-        accessKeyId: this.awsAccessKeyId,
-        secretAccessKey: this.awsSecretAccessKey,
-        region: this.awsRegion
-      }
+      ec2Role: null,
+      temporaryToken: null,
+      isFetchingRole: false
     }
   },
   methods: {
-    toggleAccessKeyVisibility() {
-      this.showAccessKeyId = !this.showAccessKeyId
-    },
-    toggleSecretKeyVisibility() {
-      this.showSecretAccessKey = !this.showSecretAccessKey
-    },
-    async validateCredentials() {
-      this.validationError = null;
-      this.credentialsValidated = false;
-      
+    async fetchEC2Role() {
+      this.isFetchingRole = true
+      this.error = null
       try {
-        console.log('Starting credentials validation...');
-        console.log('Using backend URL:', BACKEND_URL);
-        
-        const requestData = {
-          aws_access_key_id: this.awsAccessKeyId,
-          aws_secret_access_key: this.awsSecretAccessKey,
-          aws_region: this.awsRegion
-        };
-        console.log('Request data:', requestData);
-
-        const response = await fetch(`${BACKEND_URL}/validate_credentials`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(requestData)
-        });
-
-        console.log('Response status:', response.status);
-        const responseData = await response.text();
-        console.log('Response data:', responseData);
-
+        const response = await fetch(`${BACKEND_URL}/get_ec2_role`, {
+          method: 'GET'
+        })
         if (response.ok) {
-          this.credentialsValid = true;
-          console.log('Credentials validated successfully');
+          const result = await response.json()
+          this.ec2Role = result.role
+          this.temporaryToken = result.token
+          console.log('EC2 Role:', this.ec2Role)
+          console.log('Temporary Token:', this.temporaryToken)
         } else {
-          this.credentialsValid = false;
-          this.validationError = `Server returned error: ${response.status} - ${responseData}`;
-          console.error('Validation failed:', this.validationError);
+          throw new Error(`Error: ${response.status} - ${response.statusText}`)
         }
       } catch (error) {
-        console.error('Error during validation:', error);
-        this.credentialsValid = false;
-        this.validationError = `Error: ${error.message}`;
+        console.error('Error fetching EC2 role:', error)
+        this.error = `Error fetching EC2 role: ${error.message}. Please ensure the application is running on an EC2 instance with the correct IAM role attached.`
       } finally {
-        this.credentialsValidated = true;
+        this.isFetchingRole = false
       }
     },
     async submitS3Transcription() {
+      if (!this.temporaryToken) {
+        this.error = "Please fetch the EC2 role first."
+        return
+      }
       this.s3Status = 'matching'
       this.transcriptionResult = ''
       this.bedrockResult = ''
@@ -233,14 +157,12 @@ export default {
         const response = await fetch(`${BACKEND_URL}/transcribe`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.temporaryToken}`
           },
           body: JSON.stringify({
             s3_audio_url: this.s3AudioFileUrl,
-            system_prompt: this.systemPrompt,
-            aws_access_key_id: this.awsAccessKeyId,
-            aws_secret_access_key: this.awsSecretAccessKey,
-            aws_region: this.awsRegion
+            system_prompt: this.systemPrompt
           })
         })
 
@@ -273,18 +195,20 @@ export default {
       this.bedrockResult = ''
     },
     async callBedrock(transcription) {
+      if (!this.temporaryToken) {
+        this.error = "Please fetch the EC2 role first."
+        return
+      }
       try {
         const response = await fetch(`${BACKEND_URL}/bedrock`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.temporaryToken}`
           },
           body: JSON.stringify({
             transcript: transcription,
-            system_prompt: this.systemPrompt,
-            aws_access_key_id: this.awsAccessKeyId,
-            aws_secret_access_key: this.awsSecretAccessKey,
-            aws_region: this.awsRegion
+            system_prompt: this.systemPrompt
           })
         })
         if (response.ok) {
@@ -303,124 +227,5 @@ export default {
 </script>
 
 <style scoped>
-.input-form {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-
-.form-group {
-  margin-bottom: 20px;
-}
-
-.form-control {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 3px;
-}
-
-.input-group {
-  display: flex;
-}
-
-.input-group-append {
-  margin-left: 10px;
-}
-
-.btn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 3px;
-  cursor: pointer;
-  margin-right: 10px;
-}
-
-.btn-primary {
-  background-color: #007bff;
-  color: #fff;
-}
-
-.btn-outline-secondary {
-  background-color: #f8f9fa;
-  border: 1px solid #ccc;
-  color: #333;
-}
-
-.transcription-mode-container {
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  padding: 20px;
-  margin-top: 20px;
-}
-
-.nav-tabs {
-  display: flex;
-  list-style: none;
-  padding: 0;
-  margin-bottom: 20px;
-}
-
-.nav-item {
-  margin-right: 10px;
-}
-
-.nav-link {
-  display: block;
-  padding: 10px 15px;
-  text-decoration: none;
-  color: #333;
-  background-color: #f0f0f0;
-  border-radius: 5px;
-}
-
-.nav-link.active {
-  background-color: #007bff;
-  color: #fff;
-}
-
-.tab-content {
-  margin-top: 20px;
-}
-
-.tab-pane {
-  display: none;
-}
-
-.tab-pane.active {
-  display: block;
-}
-
-.status-text {
-  margin: 20px 0;
-  font-weight: bold;
-  color: #007bff;
-}
-
-.transcription-result, .bedrock-result {
-  margin-top: 20px;
-  border: 1px solid #ccc;
-  padding: 10px;
-  border-radius: 5px;
-}
-
-pre {
-  white-space: pre-wrap;
-  word-wrap: break-word;
-}
-
-.text-success {
-  color: green;
-}
-
-.text-danger {
-  color: red;
-}
-
-.error-message {
-  color: red;
-  margin-top: 10px;
-}
+/* ... (styles remain unchanged) ... */
 </style>

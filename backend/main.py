@@ -1,12 +1,15 @@
 import logging
 import os
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 import boto3
 import json
 import uuid
 import requests
 import asyncio
+from botocore.exceptions import ClientError
+from fastapi.security import OAuth2PasswordBearer
+from datetime import datetime, timezone
 
 # Configure logging
 log_file = os.path.join(os.path.dirname(__file__), 'app.log')
@@ -30,101 +33,68 @@ app.add_middleware(
     allow_credentials=True
 )
 
-@app.options("/validate_credentials")
-def validate_credentials_options():
-    return {"message": "OPTIONS request handled"}
+# OAuth2 scheme for token
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-@app.post('/validate_credentials')
-def validate_credentials(request_data: dict):
+# Global variables for EC2 role and credentials
+ec2_role = None
+session = None
+credentials = None
+
+def get_instance_metadata(metadata_path):
     try:
-        aws_access_key_id = request_data.get('aws_access_key_id')
-        aws_secret_access_key = request_data.get('aws_secret_access_key')
-        aws_region = request_data.get('aws_region', 'us-west-2')
+        response = requests.get(f"http://169.254.169.254/latest/meta-data/{metadata_path}", timeout=2)
+        response.raise_for_status()
+        return response.text
+    except requests.RequestException as e:
+        logging.error(f"Error fetching instance metadata: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to fetch instance metadata: {metadata_path}")
 
-        logging.info(f"Received validate_credentials request with AWS credentials: {aws_access_key_id}, {aws_region}")
+def get_ec2_role():
+    global ec2_role
+    if ec2_role is None:
+        ec2_role = get_instance_metadata("iam/security-credentials/")
+    return ec2_role
 
-        if not all([aws_access_key_id, aws_secret_access_key]):
-            logging.error("Missing required fields")
-            raise HTTPException(status_code=400, detail="Missing required fields")
-
-        # Configure AWS session
-        logging.info("Configuring AWS session")
-        session = boto3.Session(
-            aws_access_key_id=aws_access_key_id,
-            aws_secret_access_key=aws_secret_access_key,
-            region_name=aws_region
-        )
-
-        # Try to validate credentials using STS
-        logging.info("Validating AWS credentials")
-        sts = session.client('sts')
+def get_temporary_credentials():
+    global session, credentials
+    if session is None or credentials is None or credentials.get('Expiration', 0) <= datetime.now(timezone.utc):
+        role = get_ec2_role()
         try:
-            sts.get_caller_identity()
-            logging.info("Credentials validated successfully")
-            return {"message": "Credentials are valid"}
+            creds_json = get_instance_metadata(f"iam/security-credentials/{role}")
+            credentials = json.loads(creds_json)
+            session = boto3.Session(
+                aws_access_key_id=credentials['AccessKeyId'],
+                aws_secret_access_key=credentials['SecretAccessKey'],
+                aws_session_token=credentials['Token']
+            )
         except Exception as e:
-            logging.error(f"Error validating credentials: {e}")
-            raise HTTPException(status_code=400, detail=str(e))
+            logging.error(f"Error fetching temporary credentials: {e}")
+            raise HTTPException(status_code=500, detail="Failed to fetch temporary credentials")
+    return session, credentials
 
-    except Exception as e:
-        logging.error(f"Error validating credentials: {e}")
-        raise HTTPException(status_code=400, detail=str(e))
+@app.get('/get_ec2_role')
+async def fetch_ec2_role():
+    role = get_ec2_role()
+    _, credentials = get_temporary_credentials()
+    return {"role": role, "token": credentials['Token']}
 
-async def call_bedrock(transcript: str, system_prompt: str, aws_credentials: dict):
-    try:
-        # Configure AWS session
-        session = boto3.Session(
-            aws_access_key_id=aws_credentials['aws_access_key_id'],
-            aws_secret_access_key=aws_credentials['aws_secret_access_key'],
-            region_name=aws_credentials['aws_region']
-        )
-
-        # Initialize Bedrock client
-        bedrock_runtime = session.client('bedrock-runtime')
-
-        # Prepare prompt for Bedrock Claude
-        claude_prompt = f"{system_prompt}\n\nHuman: {transcript}\n\nAssistant:"
-
-        # Call Bedrock Claude
-        bedrock_response = bedrock_runtime.invoke_model(
-            modelId="anthropic.claude-v2",
-            body=json.dumps({
-                "prompt": claude_prompt,
-                "max_tokens_to_sample": 2000,
-                "temperature": 0.7,
-            })
-        )
-        bedrock_response_body = json.loads(bedrock_response['body'].read())
-        bedrock_result = bedrock_response_body.get('completion', '')
-        logging.info(f"Bedrock Claude result: {bedrock_result}")
-
-        return bedrock_result
-
-    except Exception as e:
-        logging.error(f"Error calling Bedrock API: {e}")
-        raise HTTPException(status_code=500, detail=f"Bedrock API call failed: {str(e)}")
+async def get_session(token: str = Depends(oauth2_scheme)):
+    session, _ = get_temporary_credentials()
+    if token != credentials['Token']:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    return session
 
 @app.post('/transcribe')
-async def transcribe_audio(request_data: dict):
+async def transcribe_audio(request_data: dict, session: boto3.Session = Depends(get_session)):
     try:
-        # Extract data from request
         s3_audio_url = request_data.get('s3_audio_url')
         system_prompt = request_data.get('system_prompt')
-        aws_access_key_id = request_data.get('aws_access_key_id')
-        aws_secret_access_key = request_data.get('aws_secret_access_key')
-        aws_region = request_data.get('aws_region', 'us-west-2')
 
-        if not all([s3_audio_url, system_prompt, aws_access_key_id, aws_secret_access_key]):
+        if not all([s3_audio_url, system_prompt]):
             raise HTTPException(status_code=400, detail="Missing required fields")
 
         logging.info(f"Received transcribe request for S3 audio file: {s3_audio_url}")
-
-        # Configure AWS session
-        session = boto3.Session(
-            aws_access_key_id=aws_access_key_id,
-            aws_secret_access_key=aws_secret_access_key,
-            region_name=aws_region
-        )
 
         # Initialize Transcribe client
         transcribe = session.client('transcribe')
@@ -141,7 +111,7 @@ async def transcribe_audio(request_data: dict):
                 LanguageCode='en-US'
             )
             logging.info(f"Started transcription job: {job_name}")
-        except Exception as e:
+        except ClientError as e:
             logging.error(f"Error starting transcription job: {e}")
             raise HTTPException(status_code=500, detail=f"Transcription job failed: {str(e)}")
 
@@ -171,17 +141,12 @@ async def transcribe_audio(request_data: dict):
             raise HTTPException(status_code=500, detail=f"Invalid transcription result format: {str(e)}")
 
         # Call Bedrock Claude
-        aws_credentials = {
-            'aws_access_key_id': aws_access_key_id,
-            'aws_secret_access_key': aws_secret_access_key,
-            'aws_region': aws_region
-        }
-        bedrock_result = await call_bedrock(transcript_text, system_prompt, aws_credentials)
+        bedrock_result = await call_bedrock(transcript_text, system_prompt, session)
 
         # Clean up transcription job
         try:
             transcribe.delete_transcription_job(TranscriptionJobName=job_name)
-        except Exception as e:
+        except ClientError as e:
             logging.warning(f"Failed to delete transcription job: {str(e)}")
 
         return {
@@ -195,26 +160,45 @@ async def transcribe_audio(request_data: dict):
         logging.error(f"Unhandled exception: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+async def call_bedrock(transcript: str, system_prompt: str, session: boto3.Session):
+    try:
+        # Initialize Bedrock client
+        bedrock_runtime = session.client('bedrock-runtime')
+
+        # Prepare prompt for Bedrock Claude
+        claude_prompt = f"{system_prompt}\n\nHuman: {transcript}\n\nAssistant:"
+
+        # Call Bedrock Claude
+        bedrock_response = bedrock_runtime.invoke_model(
+            modelId="anthropic.claude-v2",
+            body=json.dumps({
+                "prompt": claude_prompt,
+                "max_tokens_to_sample": 2000,
+                "temperature": 0.7,
+            })
+        )
+        bedrock_response_body = json.loads(bedrock_response['body'].read())
+        bedrock_result = bedrock_response_body.get('completion', '')
+        logging.info(f"Bedrock Claude result: {bedrock_result}")
+
+        return bedrock_result
+
+    except ClientError as e:
+        logging.error(f"Error calling Bedrock API: {e}")
+        raise HTTPException(status_code=500, detail=f"Bedrock API call failed: {str(e)}")
+
 @app.post('/bedrock')
-async def bedrock_inference(request_data: dict):
+async def bedrock_inference(request_data: dict, session: boto3.Session = Depends(get_session)):
     try:
         transcript = request_data.get('transcript')
         system_prompt = request_data.get('system_prompt')
-        aws_access_key_id = request_data.get('aws_access_key_id')
-        aws_secret_access_key = request_data.get('aws_secret_access_key')
-        aws_region = request_data.get('aws_region', 'us-west-2')
 
-        if not all([transcript, system_prompt, aws_access_key_id, aws_secret_access_key]):
+        if not all([transcript, system_prompt]):
             raise HTTPException(status_code=400, detail="Missing required fields")
 
         logging.info(f"Received Bedrock inference request")
 
-        aws_credentials = {
-            'aws_access_key_id': aws_access_key_id,
-            'aws_secret_access_key': aws_secret_access_key,
-            'aws_region': aws_region
-        }
-        bedrock_result = await call_bedrock(transcript, system_prompt, aws_credentials)
+        bedrock_result = await call_bedrock(transcript, system_prompt, session)
 
         return {
             'bedrock_result': bedrock_result

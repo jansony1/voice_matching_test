@@ -7,10 +7,8 @@ VoiceSync is an advanced cloud-powered voice processing platform that leverages 
 ### System Workflow
 
 1. Start: The user initiates the system.
-2. Input AWS Credentials: The user enters their AWS credentials.
-3. Validate Credentials: The system checks if the provided credentials are valid.
-   - If invalid, the process returns to the input step.
-   - If valid, the process continues.
+2. Fetch EC2 Role: The system retrieves the IAM role associated with the EC2 instance.
+3. Get Temporary Token: The system obtains a temporary token for AWS service authentication.
 4. Input the System Prompt
 5. Choose Input Method: The user selects one of two input methods:
    - Real-time audio recording
@@ -22,75 +20,100 @@ VoiceSync is an advanced cloud-powered voice processing platform that leverages 
 8. Bedrock Inference: The transcribed text is processed using AWS Bedrock for inference.
 9. Display Results: The system displays the results of the transcription and inference.
 
-This workflow covers the main functionalities of the VoiceSync system, including user authentication, flexible audio input methods, audio transcription, AI-based inference, and result presentation.
+This workflow covers the main functionalities of the VoiceSync system, including IAM Role-based authentication, flexible audio input methods, audio transcription, AI-based inference, and result presentation.
+
+## IAM Role Setup
+
+Before deploying the application, you need to set up an IAM role with the necessary permissions:
+
+1. Go to the AWS IAM console.
+2. Create a new role for EC2.
+3. Attach the following policies to the role:
+   - AmazonTranscribeFullAccess
+   - AmazonS3FullAccess
+   - AWSBedrockFullAccess (or create a custom policy for Bedrock with the required permissions)
+4. Name the role (e.g., "VoiceSyncEC2Role") and create it.
 
 ## Docker Deployment Guide
 
-### Local Development Deployment
+### Cloud Deployment with IAM Role
 
-1. Create Environment Variables
-```bash
-# Create .env file
-cat > .env << EOL
-AWS_ACCESS_KEY_ID=your_access_key
-AWS_SECRET_ACCESS_KEY=your_secret_key
-AWS_DEFAULT_REGION=us-west-2
-BACKEND_URL=http://backend:8000/api
-EOL
-```
+1. Launch an EC2 instance:
+   - Choose an Amazon Linux 2 or Ubuntu AMI.
+   - In the "Configure Instance" step, select the IAM role you created (e.g., "VoiceSyncEC2Role").
+   - Configure other settings as needed (security group, key pair, etc.).
 
-2. Build and Start Services
-```bash
-docker-compose up --build
-```
+2. Connect to your EC2 instance via SSH.
 
-3. Access Application
-- Frontend: http://localhost:8080
-- Backend: http://localhost:8000/api
+3. Install Docker and Docker Compose on your EC2 instance:
+   ```bash
+   # For Amazon Linux 2
+   sudo yum update -y
+   sudo amazon-linux-extras install docker
+   sudo service docker start
+   sudo usermod -a -G docker ec2-user
+   sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+   sudo chmod +x /usr/local/bin/docker-compose
 
-### Cloud Deployment
+   # For Ubuntu
+   sudo apt update
+   sudo apt install docker.io
+   sudo systemctl start docker
+   sudo systemctl enable docker
+   sudo usermod -aG docker ubuntu
+   sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+   sudo chmod +x /usr/local/bin/docker-compose
+   ```
 
-1. Create Environment Variables with Backend URL
-```bash
-# Create .env file
-cat > .env << EOL
-AWS_ACCESS_KEY_ID=your_access_key
-AWS_SECRET_ACCESS_KEY=your_secret_key
-AWS_DEFAULT_REGION=us-west-2
-# Use ALB address
-BACKEND_URL=https://your-alb-address.com/api
-EOL
-```
+4. Clone your VoiceSync repository to the EC2 instance.
 
-2. Build and Start Services
-```bash
-docker-compose up --build
-```
 
-3. Configure ALB
+
+5. Configure ALB
    - Add a listener rule for HTTPS (port 443), with the default rule pointing to the EC2 deployment on port 80
    - Set a new rule to forward requests with the path pattern `/api/*` to the backend service (EC2 instance port 8000)
    - Ensure that the EC2 security group (80/8000) is open to the ALB security group
    - Ensure that the ALB security group has port 443 open
+   - Set up Cerficate with ACM
 
-4. Access Application
-   - Frontend: https://your-alb-address.com
-   - Backend: https://your-alb-address.com/api
+
+6. Create Environment Variables with Backend URL:
+   ```bash
+   # Create .env file
+   cat > .env << EOL
+   AWS_DEFAULT_REGION=us-west-2
+   # Use your ALB domain name
+   BACKEND_URL=https://your-alb-address.com/api
+   EOL
+   ```
+
+6. Build and Start Services:
+   ```bash
+   docker-compose up --build -d
+   ```
+
+7. Access Application:
+   https://your-alb-address.com
+
+
+### Using the Application
+
+1. Open the application in your web browser.
+2. Click the "Get EC2 Role and Start" button to fetch the IAM role and temporary token.
+3. Once authenticated, you can use the real-time speech transcription or S3 file upload features.
 
 ### Configuration Notes
 
 1. Backend URL Configuration
-   - Local development: Default is http://backend:8000/api
-   - Cloud deployment: Set via BACKEND_URL environment variable, should include the `/api` prefix
+   - Set via BACKEND_URL environment variable in the .env file
+   - Should include the `/api` prefix
 
-2. AWS Credentials Configuration
-   - AWS_ACCESS_KEY_ID: AWS access key ID
-   - AWS_SECRET_ACCESS_KEY: AWS secret access key
-   - AWS_DEFAULT_REGION: AWS region (default: us-west-2)
+2. AWS Region Configuration
+   - AWS_DEFAULT_REGION: AWS region where your services are deployed (default: us-west-2)
 
 3. Backend API Prefix
    - All backend API routes are prefixed with `/api`
-   - For example, the credential validation endpoint is `/api/validate_credentials`
+   - For example, the EC2 role fetching endpoint is `/api/get_ec2_role`
 
 ### Project Structure
 ```
@@ -112,37 +135,35 @@ docker-compose up --build
 Error: net::ERR_CONNECTION_REFUSED
 ```
 Solution:
-- Local development: Ensure backend service is running
-- Cloud deployment: Verify BACKEND_URL configuration, ensure it includes the `/api` prefix
+- Verify BACKEND_URL configuration, ensure it includes the `/api` prefix
+- Check if the backend service is running and accessible
 
-2. AWS Credentials Error
+2. IAM Role Error
 ```
-Invalid credentials
+Error fetching EC2 role
 ```
 Solution:
-- Check AWS credentials in the .env file
-- Ensure AWS credentials have necessary permissions
+- Ensure the EC2 instance has the correct IAM role attached with the necessary permissions
+- Check the EC2 instance metadata is accessible (http://169.254.169.254 should be reachable from the instance)
 
 3. Mixed Content Error
-If you see mixed content errors on an HTTPS site, ensure all requests (including backend API calls) use HTTPS.
+If you see mixed content errors, ensure all requests (including backend API calls) use the same protocol (HTTP or HTTPS).
 
 ## Development Considerations
 
 1. Backend API Routes
-   All backend API routes are prefixed with `/api`. When developing new API endpoints, there's no need to include `/api` in the route definition as it's already set globally in the FastAPI application.
+   All backend API routes are prefixed with `/api`. When developing new endpoints, there's no need to include `/api` in the route definition as it's already set globally in the FastAPI application.
 
 2. Frontend API Calls
    Ensure all API calls to the backend use the correct URL, including the `/api` prefix. This is typically configured through the `BACKEND_URL` environment variable.
 
-3. Local Development vs Production
-   - For local development, the backend URL is typically `http://backend:8000/api`
-   - In production, it should be a complete HTTPS URL, e.g., `https://your-domain.com/api`
+3. IAM Role and Temporary Token
+   - The frontend fetches the EC2 role and temporary token from the backend
+   - The backend refreshes the temporary token automatically when needed
+   - Ensure your IAM role has the minimum necessary permissions for your application's functionality
 
-## Contributing
-1. Fork the repository
-2. Create a feature branch
-3. Implement changes
-4. Submit a pull request with a detailed description
+4. Local Development
+   For local development without an EC2 instance, you may need to modify the authentication method or use AWS credentials directly. Ensure you don't commit any sensitive information to version control.
 
 ## License
 MIT License
