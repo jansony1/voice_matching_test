@@ -19,6 +19,7 @@ cat > .env << EOL
 AWS_ACCESS_KEY_ID=your_access_key
 AWS_SECRET_ACCESS_KEY=your_secret_key
 AWS_DEFAULT_REGION=us-west-2
+BACKEND_URL=http://backend:8000/api
 EOL
 ```
 
@@ -29,7 +30,7 @@ docker-compose up --build
 
 3. 访问应用 (Access Application)
 - 前端界面 (Frontend): http://localhost:8080
-- 后端服务 (Backend): http://localhost:8000
+- 后端服务 (Backend): http://localhost:8000/api
 
 ### 云端部署 (Cloud Deployment)
 
@@ -40,8 +41,8 @@ cat > .env << EOL
 AWS_ACCESS_KEY_ID=your_access_key
 AWS_SECRET_ACCESS_KEY=your_secret_key
 AWS_DEFAULT_REGION=us-west-2
-# 使用EC2公网地址或ALB地址 (Use EC2 public IP or ALB address)
-BACKEND_URL=http://your-ec2-ip:8000
+# 使用ALB地址 (Use ALB address)
+BACKEND_URL=https://your-alb-address.com/api
 EOL
 ```
 
@@ -50,20 +51,28 @@ EOL
 docker-compose up --build
 ```
 
-3. 访问应用 (Access Application)
-- 前端界面 (Frontend): http://your-server-ip:8080
-- 后端服务 (Backend): http://your-server-ip:8000
+3. 配置ALB (Configure ALB)
+   - 为HTTPS（443端口）添加一个监听器规则
+   - 将路径模式为 `/api/*` 的请求转发到后端服务（EC2实例的8000端口）
+
+4. 访问应用 (Access Application)
+   - 前端界面 (Frontend): https://your-alb-address.com
+   - 后端服务 (Backend): https://your-alb-address.com/api
 
 ### 配置说明 (Configuration Notes)
 
 1. 后端URL配置 (Backend URL Configuration)
-- 本地开发：默认使用 http://backend:8000 (Local Development: Default to http://backend:8000)
-- 云端部署：通过 BACKEND_URL 环境变量设置 (Cloud Deployment: Set via BACKEND_URL environment variable)
+   - 本地开发：默认使用 http://backend:8000/api
+   - 云端部署：通过 BACKEND_URL 环境变量设置，应包含 `/api` 前缀
 
 2. AWS凭证配置 (AWS Credentials Configuration)
-- AWS_ACCESS_KEY_ID: AWS访问密钥ID
-- AWS_SECRET_ACCESS_KEY: AWS访问密钥
-- AWS_DEFAULT_REGION: AWS区域 (默认: us-west-2)
+   - AWS_ACCESS_KEY_ID: AWS访问密钥ID
+   - AWS_SECRET_ACCESS_KEY: AWS访问密钥
+   - AWS_DEFAULT_REGION: AWS区域 (默认: us-west-2)
+
+3. 后端API前缀 (Backend API Prefix)
+   - 所有后端API路由都以 `/api` 为前缀
+   - 例如，验证凭证的端点为 `/api/validate_credentials`
 
 ### 目录结构 (Project Structure)
 ```
@@ -86,7 +95,7 @@ Error: net::ERR_CONNECTION_REFUSED
 ```
 解决方案 (Solution):
 - 本地开发：确保后端服务正常运行 (Local: Ensure backend service is running)
-- 云端部署：检查 BACKEND_URL 配置是否正确 (Cloud: Verify BACKEND_URL configuration)
+- 云端部署：检查 BACKEND_URL 配置是否正确，确保包含 `/api` 前缀 (Cloud: Verify BACKEND_URL configuration, ensure it includes the `/api` prefix)
 
 2. AWS凭证错误 (AWS Credentials Error)
 ```
@@ -95,6 +104,21 @@ Invalid credentials
 解决方案 (Solution):
 - 检查 .env 文件中的 AWS 凭证是否正确 (Check AWS credentials in .env file)
 - 确保 AWS 凭证具有必要的权限 (Ensure AWS credentials have necessary permissions)
+
+3. 混合内容错误 (Mixed Content Error)
+如果在HTTPS网站上看到混合内容错误，确保所有请求（包括后端API调用）都使用HTTPS。
+
+## 开发注意事项 (Development Considerations)
+
+1. 后端API路由 (Backend API Routes)
+   所有后端API路由都以 `/api` 为前缀。在开发新的API端点时，无需在路由定义中包含 `/api`，因为它已经在 FastAPI 应用程序中全局设置。
+
+2. 前端API调用 (Frontend API Calls)
+   确保所有对后端的API调用都使用正确的URL，包括 `/api` 前缀。这通常通过 `BACKEND_URL` 环境变量来配置。
+
+3. 本地开发与生产环境 (Local Development vs Production)
+   - 本地开发时，后端URL通常是 `http://backend:8000/api`
+   - 在生产环境中，它应该是完整的HTTPS URL，例如 `https://your-domain.com/api`
 
 ## 贡献指南 (Contributing)
 1. Fork仓库
