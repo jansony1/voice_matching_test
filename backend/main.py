@@ -157,9 +157,11 @@ async def fetch_ec2_role():
         region = get_aws_region()
         logging.info(f"Successfully fetched EC2 role and credentials for role: {role}")
         return {
-            "role": role, 
-            "token": credentials['Token'],
-            "region": region  # Add region to the response
+            "role": role,
+            "region": region,
+            "accessKeyId": credentials['AccessKeyId'],
+            "secretAccessKey": credentials['SecretAccessKey'],
+            "sessionToken": credentials['Token']
         }
     except HTTPException as he:
         raise he

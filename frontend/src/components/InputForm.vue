@@ -1,3 +1,4 @@
+<!-- Previous template section remains the same until AudioRecorder component -->
 <template>
   <div class="input-form">
     <button @click="fetchEC2Role" class="btn btn-primary" :disabled="isFetchingRole">
@@ -30,11 +31,7 @@
             <AudioRecorder 
               ref="audioRecorder" 
               :systemPrompt="systemPrompt"
-              :awsCredentials="{
-                region: awsRegion,
-                accessKeyId: '',
-                secretAccessKey: ''
-              }"
+              :awsCredentials="awsCredentials"
               @transcriptionUpdate="handleTranscriptionUpdate"
               @recordingStopped="handleRecordingStopped"
               @recordingStarted="handleRecordingStarted"
@@ -121,7 +118,12 @@ export default {
       ec2Role: null,
       temporaryToken: null,
       isFetchingRole: false,
-      awsRegion: null
+      awsCredentials: {
+        region: null,
+        accessKeyId: '',
+        secretAccessKey: '',
+        sessionToken: ''
+      }
     }
   },
   methods: {
@@ -135,11 +137,17 @@ export default {
         if (response.ok) {
           const result = await response.json()
           this.ec2Role = result.role
-          this.temporaryToken = result.token
-          this.awsRegion = result.region
+          
+          // Update AWS credentials from the single response
+          this.awsCredentials = {
+            region: result.region,
+            accessKeyId: result.accessKeyId,
+            secretAccessKey: result.secretAccessKey,
+            sessionToken: result.sessionToken
+          }
+
           console.log('EC2 Role:', this.ec2Role)
-          console.log('Temporary Token:', this.temporaryToken)
-          console.log('AWS Region:', this.awsRegion)
+          console.log('AWS Region:', this.awsCredentials.region)
         } else {
           const errorData = await response.json()
           throw new Error(errorData.detail || `Error: ${response.status} - ${response.statusText}`)
@@ -160,7 +168,7 @@ export default {
       }
     },
     async submitS3Transcription() {
-      if (!this.temporaryToken) {
+      if (!this.awsCredentials.sessionToken) {
         this.error = "Please fetch the EC2 role first."
         return
       }
@@ -174,7 +182,7 @@ export default {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${this.temporaryToken}`
+            'Authorization': `Bearer ${this.awsCredentials.sessionToken}`
           },
           body: JSON.stringify({
             s3_audio_url: this.s3AudioFileUrl,
@@ -212,7 +220,7 @@ export default {
       this.bedrockResult = ''
     },
     async callBedrock(transcription) {
-      if (!this.temporaryToken) {
+      if (!this.awsCredentials.sessionToken) {
         this.error = "Please fetch the EC2 role first."
         return
       }
@@ -221,7 +229,7 @@ export default {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${this.temporaryToken}`
+            'Authorization': `Bearer ${this.awsCredentials.sessionToken}`
           },
           body: JSON.stringify({
             transcript: transcription,
