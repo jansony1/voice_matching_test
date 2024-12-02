@@ -10,6 +10,7 @@ import asyncio
 from botocore.exceptions import ClientError
 from fastapi.security import OAuth2PasswordBearer
 from datetime import datetime, timezone
+from dateutil import parser
 
 # Configure logging
 log_file = os.path.join(os.path.dirname(__file__), 'app.log')
@@ -95,7 +96,18 @@ def get_ec2_role():
 
 def get_temporary_credentials():
     global session, credentials
-    if session is None or credentials is None or credentials.get('Expiration', 0) <= datetime.now(timezone.utc):
+    current_time = datetime.now(timezone.utc)
+    
+    if session is None or credentials is None:
+        needs_refresh = True
+    else:
+        try:
+            expiration = parser.parse(credentials['Expiration'])
+            needs_refresh = expiration <= current_time
+        except (KeyError, ValueError, TypeError):
+            needs_refresh = True
+
+    if needs_refresh:
         role = get_ec2_role()
         try:
             logging.info(f"Attempting to fetch temporary credentials for role: {role}")
