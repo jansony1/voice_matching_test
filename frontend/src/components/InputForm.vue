@@ -1,4 +1,3 @@
-<!-- Previous template section remains the same until AudioRecorder component -->
 <template>
   <div class="input-form">
     <button @click="fetchEC2Role" class="btn btn-primary" :disabled="isFetchingRole">
@@ -10,7 +9,7 @@
       <p>Authentication successful. You can now use the application.</p>
     </div>
 
-    <div v-if="temporaryToken">
+    <div v-if="awsCredentials.sessionToken">
       <div class="form-group">
         <label for="systemPrompt">System Prompt</label>
         <textarea id="systemPrompt" v-model="systemPrompt" placeholder="Enter system prompt" class="form-control"></textarea>
@@ -116,7 +115,6 @@ export default {
       s3Status: 'idle',
       error: null,
       ec2Role: null,
-      temporaryToken: null,
       isFetchingRole: false,
       awsCredentials: {
         region: null,
@@ -138,7 +136,7 @@ export default {
           const result = await response.json()
           this.ec2Role = result.role
           
-          // Update AWS credentials from the single response
+          // Update AWS credentials
           this.awsCredentials = {
             region: result.region,
             accessKeyId: result.accessKeyId,
