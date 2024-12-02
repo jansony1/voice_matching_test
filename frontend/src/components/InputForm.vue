@@ -181,7 +181,8 @@ export default {
           this.bedrockResult = result.bedrock_claude_result
           this.s3Status = 'matched'
         } else {
-          throw new Error(`Error: ${response.status} - ${response.statusText}`)
+          const errorData = await response.json()
+          throw new Error(errorData.detail || `Error: ${response.status} - ${response.statusText}`)
         }
       } catch (error) {
         console.error('Error submitting S3 transcription:', error)
@@ -224,7 +225,8 @@ export default {
           const result = await response.json()
           this.bedrockResult = result.bedrock_result
         } else {
-          throw new Error(`Error: ${response.status} - ${response.statusText}`)
+          const errorData = await response.json()
+          throw new Error(errorData.detail || `Error: ${response.status} - ${response.statusText}`)
         }
       } catch (error) {
         console.error('Error calling Bedrock:', error)

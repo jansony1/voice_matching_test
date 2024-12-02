@@ -47,7 +47,7 @@ def get_imdsv2_token():
         token_response = requests.put(
             "http://169.254.169.254/latest/api/token",
             headers={"X-aws-ec2-metadata-token-ttl-seconds": "21600"},
-            timeout=2  # Increased timeout to 5 seconds
+            timeout=2
         )
         token_response.raise_for_status()
         logging.info("Successfully fetched IMDSv2 token")
@@ -63,7 +63,7 @@ def get_instance_metadata(metadata_path):
         response = requests.get(
             f"http://169.254.169.254/latest/meta-data/{metadata_path}",
             headers={"X-aws-ec2-metadata-token": token},
-            timeout=5  # Increased timeout to 5 seconds
+            timeout=5
         )
         response.raise_for_status()
         logging.info(f"Successfully fetched instance metadata: {metadata_path}")
@@ -129,15 +129,8 @@ async def fetch_ec2_role():
         logging.error(f"Unexpected error in fetch_ec2_role: {e}")
         raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
-async def call_bedrock(transcript: str, system_prompt: str, aws_credentials: dict):
+async def call_bedrock(transcript: str, system_prompt: str, session: boto3.Session):
     try:
-        # Configure AWS session
-        session = boto3.Session(
-            aws_access_key_id=aws_credentials['aws_access_key_id'],
-            aws_secret_access_key=aws_credentials['aws_secret_access_key'],
-            region_name=aws_credentials['aws_region']
-        )
-
         # Initialize Bedrock client
         bedrock_runtime = session.client('bedrock-runtime')
 
@@ -242,35 +235,6 @@ async def transcribe_audio(request_data: dict):
         logging.error(f"Unhandled exception: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-# Update the call_bedrock function to use the session directly
-async def call_bedrock(transcript: str, system_prompt: str, session: boto3.Session):
-    try:
-        # Initialize Bedrock client
-        bedrock_runtime = session.client('bedrock-runtime')
-
-        # Prepare prompt for Bedrock Claude
-        claude_prompt = f"{system_prompt}\n\nHuman: {transcript}\n\nAssistant:"
-
-        # Call Bedrock Claude
-        bedrock_response = bedrock_runtime.invoke_model(
-            modelId="anthropic.claude-v2",
-            body=json.dumps({
-                "prompt": claude_prompt,
-                "max_tokens_to_sample": 2000,
-                "temperature": 0.7,
-            })
-        )
-        bedrock_response_body = json.loads(bedrock_response['body'].read())
-        bedrock_result = bedrock_response_body.get('completion', '')
-        logging.info(f"Bedrock Claude result: {bedrock_result}")
-
-        return bedrock_result
-
-    except Exception as e:
-        logging.error(f"Error calling Bedrock API: {e}")
-        raise HTTPException(status_code=500, detail=f"Bedrock API call failed: {str(e)}")
-
-# Update the bedrock_inference function as well
 @app.post('/bedrock')
 async def bedrock_inference(request_data: dict):
     try:

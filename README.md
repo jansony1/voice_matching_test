@@ -8,7 +8,7 @@ VoiceSync is an advanced cloud-powered voice processing platform that leverages 
 
 1. Start: The user initiates the system.
 2. Fetch EC2 Role: The system retrieves the IAM role associated with the EC2 instance using IMDSv2.
-3. Get Temporary Token: The system obtains a temporary token for AWS service authentication.
+3. Get Temporary Token: The system obtains temporary AWS credentials for service authentication.
 4. Input the System Prompt
 5. Choose Input Method: The user selects one of two input methods:
    - Real-time audio recording
@@ -68,12 +68,13 @@ Before deploying the application, you need to set up an IAM role with the necess
 
 4. Clone your VoiceSync repository to the EC2 instance.
 
-5. Configure ALB
-   - Add a listener rule for HTTPS (port 443), with the default rule pointing to the EC2 deployment on port 80
-   - Set a new rule to forward requests with the path pattern `/api/*` to the backend service (EC2 instance port 8000)
-   - Ensure that the EC2 security group (80/8000) is open to the ALB security group
-   - Ensure that the ALB security group has port 443 open
-   - Set up Certificate with ACM
+5. Configure ALB (Application Load Balancer):
+   - Create an ALB in the AWS Console if you haven't already.
+   - Add a listener rule for HTTPS (port 443), with the default rule pointing to the EC2 deployment on port 80.
+   - Set a new rule to forward requests with the path pattern `/api/*` to the backend service (EC2 instance port 8000).
+   - Ensure that the EC2 security group (80/8000) is open to the ALB security group.
+   - Ensure that the ALB security group has port 443 open.
+   - Set up an SSL/TLS certificate with AWS Certificate Manager (ACM) for your domain.
 
 6. Create Environment Variables with Backend URL:
    ```bash
@@ -91,7 +92,7 @@ Before deploying the application, you need to set up an IAM role with the necess
    ```
 
 8. Access Application:
-   https://your-alb-address.com
+   Open https://your-alb-address.com in your web browser.
 
 ### Using the Application
 
@@ -125,7 +126,7 @@ Before deploying the application, you need to set up an IAM role with the necess
 └── docker-compose.yml           # Docker Compose configuration
 ```
 
-### Common Issues
+### Common Issues and Troubleshooting
 
 1. Connection Error
 ```
@@ -134,6 +135,7 @@ Error: net::ERR_CONNECTION_REFUSED
 Solution:
 - Verify BACKEND_URL configuration, ensure it includes the `/api` prefix
 - Check if the backend service is running and accessible
+- Ensure the ALB and security groups are correctly configured
 
 2. IAM Role Error
 ```
@@ -145,7 +147,10 @@ Solution:
 - Verify that the instance has the necessary permissions to access the IMDS
 
 3. Mixed Content Error
-If you see mixed content errors, ensure all requests (including backend API calls) use the same protocol (HTTP or HTTPS).
+If you see mixed content errors, ensure all requests (including backend API calls) use HTTPS.
+
+4. CORS Issues
+If you encounter CORS-related errors, verify that the CORS settings in the backend (FastAPI CORS middleware) are correctly configured to allow requests from your frontend domain.
 
 ## Development Considerations
 
@@ -155,7 +160,7 @@ If you see mixed content errors, ensure all requests (including backend API call
 2. Frontend API Calls
    Ensure all API calls to the backend use the correct URL, including the `/api` prefix. This is typically configured through the `BACKEND_URL` environment variable.
 
-3. IAM Role and Temporary Token
+3. IAM Role and Temporary Credentials
    - The backend fetches the EC2 role and temporary credentials using IMDSv2
    - The frontend receives the temporary token from the backend
    - The backend refreshes the temporary credentials automatically when needed
@@ -163,6 +168,12 @@ If you see mixed content errors, ensure all requests (including backend API call
 
 4. Local Development
    For local development without an EC2 instance, you may need to modify the authentication method or use AWS credentials directly. Ensure you don't commit any sensitive information to version control.
+
+5. Security Considerations
+   - Always use HTTPS in production
+   - Regularly rotate and update IAM roles and policies
+   - Monitor AWS CloudTrail logs for any suspicious activities
+   - Implement proper error handling to avoid exposing sensitive information
 
 ## License
 MIT License
