@@ -22,13 +22,25 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 COPY public/config.js /usr/share/nginx/html/
 COPY public/credentials-polyfill.js /usr/share/nginx/html/
 
-# Basic nginx configuration
+# Enhanced nginx configuration with CORS and proper proxy settings
 RUN echo 'server { \
     listen 80; \
+    \
+    # CORS headers \
+    add_header Access-Control-Allow-Origin * always; \
+    add_header Access-Control-Allow-Methods "GET, POST, OPTIONS" always; \
+    add_header Access-Control-Allow-Headers "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization" always; \
+    add_header Access-Control-Expose-Headers "Content-Length,Content-Range" always; \
+    \
     location / { \
         root /usr/share/nginx/html; \
         index index.html; \
         try_files $uri $uri/ /index.html; \
+    } \
+    \
+    # Handle OPTIONS requests \
+    if ($request_method = OPTIONS) { \
+        return 204; \
     } \
 }' > /etc/nginx/conf.d/default.conf
 

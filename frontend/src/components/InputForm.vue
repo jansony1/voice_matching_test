@@ -44,6 +44,9 @@
     <p v-if="credentialsValidated" :class="{ 'text-success': credentialsValid, 'text-danger': !credentialsValid }">
       {{ credentialsValid ? 'Credentials are valid' : 'Invalid credentials' }}
     </p>
+    <p v-if="validationError" class="text-danger">
+      {{ validationError }}
+    </p>
 
     <div v-if="credentialsValid" class="transcription-mode-container">
       <div class="form-group">
@@ -123,18 +126,23 @@
 import './InputForm.css'
 import AudioRecorder from './AudioRecorder.vue'
 
-const BACKEND_URL = (window.configs && window.configs.BACKEND_URL) || 'http://localhost:8000'
-console.log('Using backend URL:', BACKEND_URL) // Debug log
+// Get backend URL from config with debug logging
+const BACKEND_URL = window.configs?.BACKEND_URL
+console.log('Config object:', window.configs)
+console.log('Using backend URL:', BACKEND_URL)
 
-// Helper function to build API URL
-function buildApiUrl(path) {
-  return `${BACKEND_URL}${path.startsWith('/') ? path : '/' + path}`
+if (!BACKEND_URL) {
+  console.error('Backend URL not found in config!')
 }
 
 export default {
   name: 'InputForm',
   components: {
     AudioRecorder,
+  },
+  created() {
+    // Log configuration on component creation
+    console.log('Component created with backend URL:', BACKEND_URL)
   },
   data() {
     return {
@@ -151,6 +159,7 @@ export default {
       status: 'idle',
       s3Status: 'idle',
       error: null,
+      validationError: null,
       showAccessKeyId: false,
       showSecretAccessKey: false
     }
@@ -172,28 +181,46 @@ export default {
       this.showSecretAccessKey = !this.showSecretAccessKey
     },
     async validateCredentials() {
+      this.validationError = null;
+      this.credentialsValidated = false;
+      
       try {
-        const response = await fetch(buildApiUrl('/validate_credentials'), {
+        console.log('Starting credentials validation...');
+        console.log('Using backend URL:', BACKEND_URL);
+        
+        const requestData = {
+          aws_access_key_id: this.awsAccessKeyId,
+          aws_secret_access_key: this.awsSecretAccessKey,
+          aws_region: this.awsRegion
+        };
+        console.log('Request data:', requestData);
+
+        const response = await fetch(`${BACKEND_URL}/validate_credentials`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({
-            aws_access_key_id: this.awsAccessKeyId,
-            aws_secret_access_key: this.awsSecretAccessKey,
-            aws_region: this.awsRegion
-          })
-        })
+          body: JSON.stringify(requestData)
+        });
+
+        console.log('Response status:', response.status);
+        const responseData = await response.text();
+        console.log('Response data:', responseData);
+
         if (response.ok) {
-          this.credentialsValid = true
+          this.credentialsValid = true;
+          console.log('Credentials validated successfully');
         } else {
-          this.credentialsValid = false
+          this.credentialsValid = false;
+          this.validationError = `Server returned error: ${response.status} - ${responseData}`;
+          console.error('Validation failed:', this.validationError);
         }
       } catch (error) {
-        console.error('Error validating credentials:', error)
-        this.credentialsValid = false
+        console.error('Error during validation:', error);
+        this.credentialsValid = false;
+        this.validationError = `Error: ${error.message}`;
       } finally {
-        this.credentialsValidated = true
+        this.credentialsValidated = true;
       }
     },
     async submitS3Transcription() {
@@ -203,7 +230,7 @@ export default {
       this.error = null
 
       try {
-        const response = await fetch(buildApiUrl('/transcribe'), {
+        const response = await fetch(`${BACKEND_URL}/transcribe`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -247,7 +274,7 @@ export default {
     },
     async callBedrock(transcription) {
       try {
-        const response = await fetch(buildApiUrl('/bedrock'), {
+        const response = await fetch(`${BACKEND_URL}/bedrock`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
