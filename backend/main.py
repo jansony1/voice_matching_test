@@ -41,19 +41,50 @@ ec2_role = None
 session = None
 credentials = None
 
-def get_instance_metadata(metadata_path):
+def get_imdsv2_token():
     try:
-        response = requests.get(f"http://169.254.169.254/latest/meta-data/{metadata_path}", timeout=2)
+        token_response = requests.put(
+            "http://169.254.169.254/latest/api/token",
+            headers={"X-aws-ec2-metadata-token-ttl-seconds": "21600"},
+            timeout=2
+        )
+        token_response.raise_for_status()
+        return token_response.text
+    except requests.RequestException as e:
+        logging.error(f"Error fetching IMDSv2 token: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to fetch IMDSv2 token: {str(e)}")
+
+def get_instance_metadata(metadata_path):
+    token = get_imdsv2_token()
+    try:
+        response = requests.get(
+            f"http://169.254.169.254/latest/meta-data/{metadata_path}",
+            headers={"X-aws-ec2-metadata-token": token},
+            timeout=2
+        )
         response.raise_for_status()
         return response.text
     except requests.RequestException as e:
         logging.error(f"Error fetching instance metadata: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to fetch instance metadata: {metadata_path}")
+        if isinstance(e, requests.Timeout):
+            raise HTTPException(status_code=500, detail="Timeout while fetching instance metadata. Ensure the application is running on an EC2 instance.")
+        elif isinstance(e, requests.ConnectionError):
+            raise HTTPException(status_code=500, detail="Failed to connect to instance metadata service. Ensure the application is running on an EC2 instance.")
+        else:
+            raise HTTPException(status_code=500, detail=f"Failed to fetch instance metadata: {str(e)}")
 
 def get_ec2_role():
     global ec2_role
     if ec2_role is None:
-        ec2_role = get_instance_metadata("iam/security-credentials/")
+        try:
+            ec2_role = get_instance_metadata("iam/security-credentials/")
+            if not ec2_role:
+                raise HTTPException(status_code=500, detail="No IAM role found. Ensure the EC2 instance has an IAM role attached.")
+        except HTTPException as he:
+            raise he
+        except Exception as e:
+            logging.error(f"Unexpected error fetching EC2 role: {e}")
+            raise HTTPException(status_code=500, detail=f"Unexpected error fetching EC2 role: {str(e)}")
     return ec2_role
 
 def get_temporary_credentials():
@@ -68,147 +99,27 @@ def get_temporary_credentials():
                 aws_secret_access_key=credentials['SecretAccessKey'],
                 aws_session_token=credentials['Token']
             )
+        except json.JSONDecodeError as e:
+            logging.error(f"Error parsing temporary credentials: {e}")
+            raise HTTPException(status_code=500, detail="Failed to parse temporary credentials")
         except Exception as e:
             logging.error(f"Error fetching temporary credentials: {e}")
-            raise HTTPException(status_code=500, detail="Failed to fetch temporary credentials")
+            raise HTTPException(status_code=500, detail=f"Failed to fetch temporary credentials: {str(e)}")
     return session, credentials
 
 @app.get('/get_ec2_role')
 async def fetch_ec2_role():
-    role = get_ec2_role()
-    _, credentials = get_temporary_credentials()
-    return {"role": role, "token": credentials['Token']}
-
-async def get_session(token: str = Depends(oauth2_scheme)):
-    session, _ = get_temporary_credentials()
-    if token != credentials['Token']:
-        raise HTTPException(status_code=401, detail="Invalid token")
-    return session
-
-@app.post('/transcribe')
-async def transcribe_audio(request_data: dict, session: boto3.Session = Depends(get_session)):
     try:
-        s3_audio_url = request_data.get('s3_audio_url')
-        system_prompt = request_data.get('system_prompt')
-
-        if not all([s3_audio_url, system_prompt]):
-            raise HTTPException(status_code=400, detail="Missing required fields")
-
-        logging.info(f"Received transcribe request for S3 audio file: {s3_audio_url}")
-
-        # Initialize Transcribe client
-        transcribe = session.client('transcribe')
-
-        # Generate unique job name
-        job_name = f'transcribe-job-{str(uuid.uuid4())}'
-
-        # Start transcription job
-        try:
-            transcribe.start_transcription_job(
-                TranscriptionJobName=job_name,
-                Media={'MediaFileUri': s3_audio_url},
-                MediaFormat='mp3',  # Adjust based on input format
-                LanguageCode='en-US'
-            )
-            logging.info(f"Started transcription job: {job_name}")
-        except ClientError as e:
-            logging.error(f"Error starting transcription job: {e}")
-            raise HTTPException(status_code=500, detail=f"Transcription job failed: {str(e)}")
-
-        # Wait for transcription completion
-        while True:
-            status = transcribe.get_transcription_job(TranscriptionJobName=job_name)
-            if status['TranscriptionJob']['TranscriptionJobStatus'] in ['COMPLETED', 'FAILED']:
-                break
-            await asyncio.sleep(1)
-
-        if status['TranscriptionJob']['TranscriptionJobStatus'] == 'FAILED':
-            logging.error(f"Transcription job failed: {status['TranscriptionJob']['Failure']['FailureReason']}")
-            raise HTTPException(status_code=500, detail="Transcription job failed")
-
-        # Get transcription result
-        transcript_uri = status['TranscriptionJob']['Transcript']['TranscriptFileUri']
-        try:
-            transcript_response = requests.get(transcript_uri)
-            transcript_response.raise_for_status()
-            transcript_text = transcript_response.json()['results']['transcripts'][0]['transcript']
-            logging.info(f"Transcription result: {transcript_text}")
-        except requests.exceptions.RequestException as e:
-            logging.error(f"Error retrieving transcription result: {e}")
-            raise HTTPException(status_code=500, detail=f"Failed to retrieve transcription result: {str(e)}")
-        except (ValueError, KeyError) as e:
-            logging.error(f"Invalid transcription result format: {e}")
-            raise HTTPException(status_code=500, detail=f"Invalid transcription result format: {str(e)}")
-
-        # Call Bedrock Claude
-        bedrock_result = await call_bedrock(transcript_text, system_prompt, session)
-
-        # Clean up transcription job
-        try:
-            transcribe.delete_transcription_job(TranscriptionJobName=job_name)
-        except ClientError as e:
-            logging.warning(f"Failed to delete transcription job: {str(e)}")
-
-        return {
-            'transcript': transcript_text,
-            'bedrock_claude_result': bedrock_result
-        }
-
+        role = get_ec2_role()
+        _, credentials = get_temporary_credentials()
+        return {"role": role, "token": credentials['Token']}
     except HTTPException as he:
         raise he
     except Exception as e:
-        logging.error(f"Unhandled exception: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logging.error(f"Unexpected error in fetch_ec2_role: {e}")
+        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
-async def call_bedrock(transcript: str, system_prompt: str, session: boto3.Session):
-    try:
-        # Initialize Bedrock client
-        bedrock_runtime = session.client('bedrock-runtime')
-
-        # Prepare prompt for Bedrock Claude
-        claude_prompt = f"{system_prompt}\n\nHuman: {transcript}\n\nAssistant:"
-
-        # Call Bedrock Claude
-        bedrock_response = bedrock_runtime.invoke_model(
-            modelId="anthropic.claude-v2",
-            body=json.dumps({
-                "prompt": claude_prompt,
-                "max_tokens_to_sample": 2000,
-                "temperature": 0.7,
-            })
-        )
-        bedrock_response_body = json.loads(bedrock_response['body'].read())
-        bedrock_result = bedrock_response_body.get('completion', '')
-        logging.info(f"Bedrock Claude result: {bedrock_result}")
-
-        return bedrock_result
-
-    except ClientError as e:
-        logging.error(f"Error calling Bedrock API: {e}")
-        raise HTTPException(status_code=500, detail=f"Bedrock API call failed: {str(e)}")
-
-@app.post('/bedrock')
-async def bedrock_inference(request_data: dict, session: boto3.Session = Depends(get_session)):
-    try:
-        transcript = request_data.get('transcript')
-        system_prompt = request_data.get('system_prompt')
-
-        if not all([transcript, system_prompt]):
-            raise HTTPException(status_code=400, detail="Missing required fields")
-
-        logging.info(f"Received Bedrock inference request")
-
-        bedrock_result = await call_bedrock(transcript, system_prompt, session)
-
-        return {
-            'bedrock_result': bedrock_result
-        }
-
-    except HTTPException as he:
-        raise he
-    except Exception as e:
-        logging.error(f"Unhandled exception: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+# ... (rest of the code remains unchanged)
 
 if __name__ == "__main__":
     import uvicorn

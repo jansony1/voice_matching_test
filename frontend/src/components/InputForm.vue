@@ -134,11 +134,20 @@ export default {
           console.log('EC2 Role:', this.ec2Role)
           console.log('Temporary Token:', this.temporaryToken)
         } else {
-          throw new Error(`Error: ${response.status} - ${response.statusText}`)
+          const errorData = await response.json()
+          throw new Error(errorData.detail || `Error: ${response.status} - ${response.statusText}`)
         }
       } catch (error) {
         console.error('Error fetching EC2 role:', error)
-        this.error = `Error fetching EC2 role: ${error.message}. Please ensure the application is running on an EC2 instance with the correct IAM role attached.`
+        if (error.message.includes("Failed to connect to instance metadata service")) {
+          this.error = "Failed to connect to the EC2 instance metadata service. Please ensure the application is running on an EC2 instance."
+        } else if (error.message.includes("No IAM role found")) {
+          this.error = "No IAM role found. Please ensure the EC2 instance has an IAM role attached with the necessary permissions."
+        } else if (error.message.includes("Timeout")) {
+          this.error = "Timeout while fetching EC2 role. Please check your network connection and try again."
+        } else {
+          this.error = `Error fetching EC2 role: ${error.message}. Please ensure the application is running on an EC2 instance with the correct IAM role attached.`
+        }
       } finally {
         this.isFetchingRole = false
       }
@@ -227,5 +236,124 @@ export default {
 </script>
 
 <style scoped>
-/* ... (styles remain unchanged) ... */
+.input-form {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+.input-group {
+  display: flex;
+}
+
+.input-group-append {
+  margin-left: 10px;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.btn-outline-secondary {
+  background-color: #f8f9fa;
+  border: 1px solid #ccc;
+  color: #333;
+}
+
+.transcription-mode-container {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.nav-tabs {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin-bottom: 20px;
+}
+
+.nav-item {
+  margin-right: 10px;
+}
+
+.nav-link {
+  display: block;
+  padding: 10px 15px;
+  text-decoration: none;
+  color: #333;
+  background-color: #f0f0f0;
+  border-radius: 5px;
+}
+
+.nav-link.active {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.tab-content {
+  margin-top: 20px;
+}
+
+.tab-pane {
+  display: none;
+}
+
+.tab-pane.active {
+  display: block;
+}
+
+.status-text {
+  margin: 20px 0;
+  font-weight: bold;
+  color: #007bff;
+}
+
+.transcription-result, .bedrock-result {
+  margin-top: 20px;
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.text-success {
+  color: green;
+}
+
+.text-danger {
+  color: red;
+}
+
+.error-message {
+  color: red;
+  margin-top: 10px;
+}
 </style>
