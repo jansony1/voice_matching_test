@@ -22,7 +22,7 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 COPY public/config.js /usr/share/nginx/html/
 COPY public/credentials-polyfill.js /usr/share/nginx/html/
 
-# Enhanced nginx configuration with CORS and proper proxy settings
+# Enhanced nginx configuration with CORS
 RUN echo 'server { \
     listen 80; \
     \
