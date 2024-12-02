@@ -169,21 +169,14 @@ async def transcribe_audio(request_data: dict):
         # Extract data from request
         s3_audio_url = request_data.get('s3_audio_url')
         system_prompt = request_data.get('system_prompt')
-        aws_access_key_id = request_data.get('aws_access_key_id')
-        aws_secret_access_key = request_data.get('aws_secret_access_key')
-        aws_region = request_data.get('aws_region', 'us-west-2')
 
-        if not all([s3_audio_url, system_prompt, aws_access_key_id, aws_secret_access_key]):
+        if not all([s3_audio_url, system_prompt]):
             raise HTTPException(status_code=400, detail="Missing required fields")
 
         logging.info(f"Received transcribe request for S3 audio file: {s3_audio_url}")
 
-        # Configure AWS session
-        session = boto3.Session(
-            aws_access_key_id=aws_access_key_id,
-            aws_secret_access_key=aws_secret_access_key,
-            region_name=aws_region
-        )
+        # Get AWS session using EC2 instance role
+        session, _ = get_temporary_credentials()
 
         # Initialize Transcribe client
         transcribe = session.client('transcribe')
@@ -230,12 +223,7 @@ async def transcribe_audio(request_data: dict):
             raise HTTPException(status_code=500, detail=f"Invalid transcription result format: {str(e)}")
 
         # Call Bedrock Claude
-        aws_credentials = {
-            'aws_access_key_id': aws_access_key_id,
-            'aws_secret_access_key': aws_secret_access_key,
-            'aws_region': aws_region
-        }
-        bedrock_result = await call_bedrock(transcript_text, system_prompt, aws_credentials)
+        bedrock_result = await call_bedrock(transcript_text, system_prompt, session)
 
         # Clean up transcription job
         try:
@@ -254,26 +242,48 @@ async def transcribe_audio(request_data: dict):
         logging.error(f"Unhandled exception: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# Update the call_bedrock function to use the session directly
+async def call_bedrock(transcript: str, system_prompt: str, session: boto3.Session):
+    try:
+        # Initialize Bedrock client
+        bedrock_runtime = session.client('bedrock-runtime')
+
+        # Prepare prompt for Bedrock Claude
+        claude_prompt = f"{system_prompt}\n\nHuman: {transcript}\n\nAssistant:"
+
+        # Call Bedrock Claude
+        bedrock_response = bedrock_runtime.invoke_model(
+            modelId="anthropic.claude-v2",
+            body=json.dumps({
+                "prompt": claude_prompt,
+                "max_tokens_to_sample": 2000,
+                "temperature": 0.7,
+            })
+        )
+        bedrock_response_body = json.loads(bedrock_response['body'].read())
+        bedrock_result = bedrock_response_body.get('completion', '')
+        logging.info(f"Bedrock Claude result: {bedrock_result}")
+
+        return bedrock_result
+
+    except Exception as e:
+        logging.error(f"Error calling Bedrock API: {e}")
+        raise HTTPException(status_code=500, detail=f"Bedrock API call failed: {str(e)}")
+
+# Update the bedrock_inference function as well
 @app.post('/bedrock')
 async def bedrock_inference(request_data: dict):
     try:
         transcript = request_data.get('transcript')
         system_prompt = request_data.get('system_prompt')
-        aws_access_key_id = request_data.get('aws_access_key_id')
-        aws_secret_access_key = request_data.get('aws_secret_access_key')
-        aws_region = request_data.get('aws_region', 'us-west-2')
 
-        if not all([transcript, system_prompt, aws_access_key_id, aws_secret_access_key]):
+        if not all([transcript, system_prompt]):
             raise HTTPException(status_code=400, detail="Missing required fields")
 
         logging.info(f"Received Bedrock inference request")
 
-        aws_credentials = {
-            'aws_access_key_id': aws_access_key_id,
-            'aws_secret_access_key': aws_secret_access_key,
-            'aws_region': aws_region
-        }
-        bedrock_result = await call_bedrock(transcript, system_prompt, aws_credentials)
+        session, _ = get_temporary_credentials()
+        bedrock_result = await call_bedrock(transcript, system_prompt, session)
 
         return {
             'bedrock_result': bedrock_result
@@ -284,7 +294,7 @@ async def bedrock_inference(request_data: dict):
     except Exception as e:
         logging.error(f"Unhandled exception: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-        
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
