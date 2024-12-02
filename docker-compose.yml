@@ -13,7 +13,7 @@ services:
       - backend
     networks:
       - voice-matching-network
-
+  
   backend:
     build: 
       context: ./backend

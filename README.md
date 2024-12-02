@@ -7,7 +7,7 @@ VoiceSync is an advanced cloud-powered voice processing platform that leverages 
 ### System Workflow
 
 1. Start: The user initiates the system.
-2. Fetch EC2 Role: The system retrieves the IAM role associated with the EC2 instance.
+2. Fetch EC2 Role: The system retrieves the IAM role associated with the EC2 instance using IMDSv2.
 3. Get Temporary Token: The system obtains a temporary token for AWS service authentication.
 4. Input the System Prompt
 5. Choose Input Method: The user selects one of two input methods:
@@ -20,7 +20,7 @@ VoiceSync is an advanced cloud-powered voice processing platform that leverages 
 8. Bedrock Inference: The transcribed text is processed using AWS Bedrock for inference.
 9. Display Results: The system displays the results of the transcription and inference.
 
-This workflow covers the main functionalities of the VoiceSync system, including IAM Role-based authentication, flexible audio input methods, audio transcription, AI-based inference, and result presentation.
+This workflow covers the main functionalities of the VoiceSync system, including IAM Role-based authentication using IMDSv2, flexible audio input methods, audio transcription, AI-based inference, and result presentation.
 
 ## IAM Role Setup
 
@@ -42,6 +42,7 @@ Before deploying the application, you need to set up an IAM role with the necess
    - Choose an Amazon Linux 2 or Ubuntu AMI.
    - In the "Configure Instance" step, select the IAM role you created (e.g., "VoiceSyncEC2Role").
    - Configure other settings as needed (security group, key pair, etc.).
+   - Ensure that IMDSv2 is enabled for the instance (this is the default for new instances).
 
 2. Connect to your EC2 instance via SSH.
 
@@ -67,15 +68,12 @@ Before deploying the application, you need to set up an IAM role with the necess
 
 4. Clone your VoiceSync repository to the EC2 instance.
 
-
-
 5. Configure ALB
    - Add a listener rule for HTTPS (port 443), with the default rule pointing to the EC2 deployment on port 80
    - Set a new rule to forward requests with the path pattern `/api/*` to the backend service (EC2 instance port 8000)
    - Ensure that the EC2 security group (80/8000) is open to the ALB security group
    - Ensure that the ALB security group has port 443 open
-   - Set up Cerficate with ACM
-
+   - Set up Certificate with ACM
 
 6. Create Environment Variables with Backend URL:
    ```bash
@@ -87,14 +85,13 @@ Before deploying the application, you need to set up an IAM role with the necess
    EOL
    ```
 
-6. Build and Start Services:
+7. Build and Start Services:
    ```bash
    docker-compose up --build -d
    ```
 
-7. Access Application:
+8. Access Application:
    https://your-alb-address.com
-
 
 ### Using the Application
 
@@ -144,7 +141,8 @@ Error fetching EC2 role
 ```
 Solution:
 - Ensure the EC2 instance has the correct IAM role attached with the necessary permissions
-- Check the EC2 instance metadata is accessible (http://169.254.169.254 should be reachable from the instance)
+- Check that IMDSv2 is enabled and accessible (http://169.254.169.254 should be reachable from the instance)
+- Verify that the instance has the necessary permissions to access the IMDS
 
 3. Mixed Content Error
 If you see mixed content errors, ensure all requests (including backend API calls) use the same protocol (HTTP or HTTPS).
@@ -158,8 +156,9 @@ If you see mixed content errors, ensure all requests (including backend API call
    Ensure all API calls to the backend use the correct URL, including the `/api` prefix. This is typically configured through the `BACKEND_URL` environment variable.
 
 3. IAM Role and Temporary Token
-   - The frontend fetches the EC2 role and temporary token from the backend
-   - The backend refreshes the temporary token automatically when needed
+   - The backend fetches the EC2 role and temporary credentials using IMDSv2
+   - The frontend receives the temporary token from the backend
+   - The backend refreshes the temporary credentials automatically when needed
    - Ensure your IAM role has the minimum necessary permissions for your application's functionality
 
 4. Local Development
