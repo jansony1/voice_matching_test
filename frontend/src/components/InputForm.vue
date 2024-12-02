@@ -1,7 +1,121 @@
 <template>
-  <!-- Keep existing template -->
   <div class="input-form">
-    <!-- ... rest of the template ... -->
+    <h2>AWS Credentials</h2>
+    <div class="form-group">
+      <div class="input-group">
+        <input 
+          :type="showAccessKeyId ? 'text' : 'password'" 
+          v-model="awsAccessKeyId" 
+          placeholder="Access Key ID" 
+          class="form-control" 
+        />
+        <div class="input-group-append">
+          <button 
+            @click="toggleAccessKeyVisibility" 
+            class="btn btn-outline-secondary"
+          >
+            {{ showAccessKeyId ? 'Hide' : 'Show' }}
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="input-group">
+        <input 
+          :type="showSecretAccessKey ? 'text' : 'password'" 
+          v-model="awsSecretAccessKey" 
+          placeholder="Secret Access Key" 
+          class="form-control" 
+        />
+        <div class="input-group-append">
+          <button 
+            @click="toggleSecretKeyVisibility" 
+            class="btn btn-outline-secondary"
+          >
+            {{ showSecretAccessKey ? 'Hide' : 'Show' }}
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <input v-model="awsRegion" placeholder="Region (e.g. us-west-2)" class="form-control" />
+    </div>
+    <button @click="validateCredentials" class="btn btn-primary">Validate Credentials</button>
+    <p v-if="credentialsValidated" :class="{ 'text-success': credentialsValid, 'text-danger': !credentialsValid }">
+      {{ credentialsValid ? 'Credentials are valid' : 'Invalid credentials' }}
+    </p>
+
+    <div v-if="credentialsValid" class="transcription-mode-container">
+      <div class="form-group">
+        <label for="systemPrompt">System Prompt</label>
+        <textarea id="systemPrompt" v-model="systemPrompt" placeholder="Enter system prompt" class="form-control"></textarea>
+      </div>
+
+      <ul class="nav nav-tabs">
+        <li class="nav-item">
+          <a class="nav-link" :class="{ active: transcriptionMode === 'realtime' }" href="#" @click.prevent="transcriptionMode = 'realtime'">Real-time Speech Transcription</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" :class="{ active: transcriptionMode === 's3file' }" href="#" @click.prevent="transcriptionMode = 's3file'">S3 Audio File</a>
+        </li>
+      </ul>
+
+      <div class="tab-content">
+        <div class="tab-pane" :class="{ 'active': transcriptionMode === 'realtime' }">
+          <div class="realtime-transcription">
+            <AudioRecorder 
+              ref="audioRecorder" 
+              :awsCredentials="awsCredentials"
+              :systemPrompt="systemPrompt"
+              @transcriptionUpdate="handleTranscriptionUpdate"
+              @recordingStopped="handleRecordingStopped"
+              @recordingStarted="handleRecordingStarted"
+            />
+            <div v-if="status === 'matching'" class="status-text">
+              Matching...
+            </div>
+            <div v-if="status === 'matched'" class="status-text">
+              Match Result
+            </div>
+            <div v-if="transcriptionResult" class="transcription-result">
+              <h3>Transcription Result</h3>
+              <pre>{{ transcriptionResult }}</pre>
+            </div>
+            <div v-if="bedrockResult" class="bedrock-result">
+              <h3>Bedrock Inference Result</h3>
+              <pre>{{ bedrockResult }}</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-pane" :class="{ 'active': transcriptionMode === 's3file' }">
+          <div class="s3file-transcription">
+            <div class="form-group">
+              <label for="s3AudioFileUrl">S3 Audio File URL</label>
+              <input type="text" id="s3AudioFileUrl" v-model="s3AudioFileUrl" placeholder="Enter S3 Audio File URL" class="form-control" />
+            </div>
+            <button @click="submitS3Transcription" :disabled="s3Status === 'matching'" class="btn btn-primary">
+              {{ s3Status === 'matching' ? 'Matching...' : 'Submit' }}
+            </button>
+            <div v-if="s3Status === 'matched'" class="status-text">
+              Match Result
+            </div>
+            <div v-if="transcriptionResult" class="transcription-result">
+              <h3>S3 Transcription Result</h3>
+              <pre>{{ transcriptionResult }}</pre>
+            </div>
+            <div v-if="bedrockResult" class="bedrock-result">
+              <h3>S3 Bedrock Inference Result</h3>
+              <pre>{{ bedrockResult }}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="error" class="error-message">
+      {{ error }}
+    </div>
   </div>
 </template>
 
@@ -9,23 +123,18 @@
 import './InputForm.css'
 import AudioRecorder from './AudioRecorder.vue'
 
-// Get backend URL from config with debug logging
-const BACKEND_URL = window.configs?.BACKEND_URL
-console.log('Config object:', window.configs)
-console.log('Using backend URL:', BACKEND_URL)
+const BACKEND_URL = (window.configs && window.configs.BACKEND_URL) || 'http://localhost:8000'
+console.log('Using backend URL:', BACKEND_URL) // Debug log
 
-if (!BACKEND_URL) {
-  console.error('Backend URL not found in config!')
+// Helper function to build API URL
+function buildApiUrl(path) {
+  return `${BACKEND_URL}${path.startsWith('/') ? path : '/' + path}`
 }
 
 export default {
   name: 'InputForm',
   components: {
     AudioRecorder,
-  },
-  created() {
-    // Log configuration on component creation
-    console.log('Component created with backend URL:', BACKEND_URL)
   },
   data() {
     return {
@@ -64,8 +173,7 @@ export default {
     },
     async validateCredentials() {
       try {
-        console.log('Validating credentials with URL:', BACKEND_URL)
-        const response = await fetch(`${BACKEND_URL}/validate_credentials`, {
+        const response = await fetch(buildApiUrl('/validate_credentials'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -95,7 +203,7 @@ export default {
       this.error = null
 
       try {
-        const response = await fetch(`${BACKEND_URL}/transcribe`, {
+        const response = await fetch(buildApiUrl('/transcribe'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -139,7 +247,7 @@ export default {
     },
     async callBedrock(transcription) {
       try {
-        const response = await fetch(`${BACKEND_URL}/bedrock`, {
+        const response = await fetch(buildApiUrl('/bedrock'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -168,5 +276,124 @@ export default {
 </script>
 
 <style scoped>
-/* Keep existing styles */
+.input-form {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+.input-group {
+  display: flex;
+}
+
+.input-group-append {
+  margin-left: 10px;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.btn-outline-secondary {
+  background-color: #f8f9fa;
+  border: 1px solid #ccc;
+  color: #333;
+}
+
+.transcription-mode-container {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.nav-tabs {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin-bottom: 20px;
+}
+
+.nav-item {
+  margin-right: 10px;
+}
+
+.nav-link {
+  display: block;
+  padding: 10px 15px;
+  text-decoration: none;
+  color: #333;
+  background-color: #f0f0f0;
+  border-radius: 5px;
+}
+
+.nav-link.active {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.tab-content {
+  margin-top: 20px;
+}
+
+.tab-pane {
+  display: none;
+}
+
+.tab-pane.active {
+  display: block;
+}
+
+.status-text {
+  margin: 20px 0;
+  font-weight: bold;
+  color: #007bff;
+}
+
+.transcription-result, .bedrock-result {
+  margin-top: 20px;
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.text-success {
+  color: green;
+}
+
+.text-danger {
+  color: red;
+}
+
+.error-message {
+  color: red;
+  margin-top: 10px;
+}
 </style>
