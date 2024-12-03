@@ -73,11 +73,11 @@ Before deploying the application, you need to set up an IAM role with the necess
 
 5. Configure ALB (Application Load Balancer):
    - Create an ALB in the AWS Console if you haven't already.
-   - Add a listener rule for HTTPS (port 443), with the default rule pointing to the EC2 deployment on port 80.
+   - Add a listener rule for HTTPS (port 443), with the default rule pointing to the EC2 deployment on port 8080.
    - Set a new rule to forward requests with the path pattern `/api/*` to the backend service (EC2 instance port 8000).
-   - Ensure that the EC2 security group (80/8000) is open to the ALB security group.
+   - Ensure that the EC2 security group (8080/8000) is open to the ALB security group.
    - Ensure that the ALB security group has port 443 open.
-   - Set up an SSL/TLS certificate with AWS Certificate Manager (ACM) for your domain.
+   - Set up an SSL/TLS certificate with AWS Certificate Manager (ACM) for your domain, and associate it with above 443 port
 
 6. Create Environment Variables with Backend URL:
    ```bash
