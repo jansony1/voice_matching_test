@@ -68,7 +68,7 @@
               <label for="s3AudioFileUrl">S3 Audio File URL</label>
               <input type="text" id="s3AudioFileUrl" v-model="s3AudioFileUrl" placeholder="Enter S3 destination path (e.g., s3://bucket-name/path/file.mp3)" class="form-control" />
             </div>
-            <button @click="submitS3Transcription" :disabled="s3Status === 'matching' || !selectedFile" class="btn btn-primary">
+            <button @click="submitS3Transcription" :disabled="s3Status === 'matching' || !selectedFile || !s3AudioFileUrl || !systemPrompt" class="btn btn-primary">
               {{ s3Status === 'matching' ? 'Processing...' : 'Submit' }}
             </button>
             <div v-if="uploadProgress > 0 && uploadProgress < 100" class="upload-progress">
@@ -219,8 +219,8 @@ export default {
         this.error = "Please fetch the EC2 role first."
         return
       }
-      if (!this.selectedFile || !this.s3AudioFileUrl) {
-        this.error = "Please select a file and provide an S3 destination path."
+      if (!this.selectedFile || !this.s3AudioFileUrl || !this.systemPrompt) {
+        this.error = "Please select a file, provide an S3 destination path, and enter a system prompt."
         return
       }
 
@@ -232,11 +232,13 @@ export default {
 
       try {
         // First upload the file to S3
+        console.log('Starting file upload to S3...')
         const uploadResult = await this.uploadFileToS3()
         this.uploadProgress = 100
         console.log('File uploaded successfully:', uploadResult)
 
-        // Then proceed with transcription
+        // Then proceed with transcription using the S3 URL from the upload result
+        console.log('Starting transcription with S3 URL:', uploadResult.s3_url)
         const response = await fetch(`${BACKEND_URL}/transcribe`, {
           method: 'POST',
           headers: {
@@ -244,7 +246,7 @@ export default {
             'Authorization': `Bearer ${this.awsCredentials.sessionToken}`
           },
           body: JSON.stringify({
-            s3_audio_url: this.s3AudioFileUrl,
+            s3_audio_url: uploadResult.s3_url,
             system_prompt: this.systemPrompt
           })
         })
