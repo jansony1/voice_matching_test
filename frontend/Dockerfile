@@ -22,9 +22,12 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 COPY public/config.js /usr/share/nginx/html/
 COPY public/credentials-polyfill.js /usr/share/nginx/html/
 
-# Enhanced nginx configuration with CORS
+# Enhanced nginx configuration with CORS and file upload settings
 RUN echo 'server { \
     listen 80; \
+    \
+    # File upload settings \
+    client_max_body_size 10M; \
     \
     # CORS headers \
     add_header Access-Control-Allow-Origin * always; \

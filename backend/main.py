@@ -1,6 +1,6 @@
 import logging
 import os
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 import boto3
 import json
@@ -11,6 +11,7 @@ from botocore.exceptions import ClientError
 from fastapi.security import OAuth2PasswordBearer
 from datetime import datetime, timezone
 from dateutil import parser
+from urllib.parse import urlparse
 
 # Configure logging
 log_file = os.path.join(os.path.dirname(__file__), 'app.log')
@@ -168,6 +169,60 @@ async def fetch_ec2_role():
     except Exception as e:
         logging.error(f"Unexpected error in fetch_ec2_role: {e}")
         raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
+
+@app.post('/upload_to_s3')
+async def upload_to_s3(
+    file: UploadFile = File(...),
+    s3_path: str = Form(...),
+):
+    try:
+        logging.info(f"Received file upload request: {file.filename} to {s3_path}")
+        
+        # Parse S3 path
+        s3_url = urlparse(s3_path)
+        if s3_url.scheme != 's3':
+            raise HTTPException(status_code=400, detail="Invalid S3 path. Must start with 's3://'")
+        
+        bucket_name = s3_url.netloc
+        # Remove leading slash from key
+        object_key = s3_url.path.lstrip('/')
+        
+        if not bucket_name or not object_key:
+            raise HTTPException(status_code=400, detail="Invalid S3 path format. Must be 's3://bucket-name/path/to/file'")
+
+        # Get AWS session
+        session, _ = get_temporary_credentials()
+        s3_client = session.client('s3')
+
+        # Upload file
+        try:
+            file_content = await file.read()
+            s3_client.put_object(
+                Bucket=bucket_name,
+                Key=object_key,
+                Body=file_content,
+                ContentType=file.content_type
+            )
+            logging.info(f"Successfully uploaded file to S3: s3://{bucket_name}/{object_key}")
+            
+            return {
+                "message": "File uploaded successfully",
+                "s3_url": f"s3://{bucket_name}/{object_key}"
+            }
+        except ClientError as e:
+            error_code = e.response['Error']['Code']
+            error_message = e.response['Error']['Message']
+            logging.error(f"S3 upload error: {error_code} - {error_message}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"S3 upload failed: {error_code} - {error_message}"
+            )
+            
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        logging.error(f"Unexpected error in upload_to_s3: {e}")
+        raise HTTPException(status_code=500, detail=f"Unexpected error during file upload: {str(e)}")
 
 async def call_bedrock(transcript: str, system_prompt: str, session: boto3.Session):
     try:

@@ -55,12 +55,25 @@
         <div class="tab-pane" :class="{ 'active': transcriptionMode === 's3file' }">
           <div class="s3file-transcription">
             <div class="form-group">
-              <label for="s3AudioFileUrl">S3 Audio File URL</label>
-              <input type="text" id="s3AudioFileUrl" v-model="s3AudioFileUrl" placeholder="Enter S3 Audio File URL" class="form-control" />
+              <label for="audioFile">Audio File</label>
+              <input 
+                type="file" 
+                id="audioFile" 
+                @change="handleFileChange" 
+                accept="audio/*"
+                class="form-control"
+              />
             </div>
-            <button @click="submitS3Transcription" :disabled="s3Status === 'matching'" class="btn btn-primary">
-              {{ s3Status === 'matching' ? 'Matching...' : 'Submit' }}
+            <div class="form-group">
+              <label for="s3AudioFileUrl">S3 Audio File URL</label>
+              <input type="text" id="s3AudioFileUrl" v-model="s3AudioFileUrl" placeholder="Enter S3 destination path (e.g., s3://bucket-name/path/file.mp3)" class="form-control" />
+            </div>
+            <button @click="submitS3Transcription" :disabled="s3Status === 'matching' || !selectedFile" class="btn btn-primary">
+              {{ s3Status === 'matching' ? 'Processing...' : 'Submit' }}
             </button>
+            <div v-if="uploadProgress > 0 && uploadProgress < 100" class="upload-progress">
+              Uploading: {{ uploadProgress }}%
+            </div>
             <div v-if="s3Status === 'matched'" class="status-text">
               Match Result
             </div>
@@ -116,6 +129,8 @@ export default {
       error: null,
       ec2Role: null,
       isFetchingRole: false,
+      selectedFile: null,
+      uploadProgress: 0,
       awsCredentials: {
         region: null,
         accessKeyId: '',
@@ -125,6 +140,16 @@ export default {
     }
   },
   methods: {
+    handleFileChange(event) {
+      const file = event.target.files[0]
+      if (file) {
+        this.selectedFile = file
+        // Reset results when new file is selected
+        this.transcriptionResult = ''
+        this.bedrockResult = ''
+        this.error = null
+      }
+    },
     async fetchEC2Role() {
       this.isFetchingRole = true
       this.error = null
@@ -165,17 +190,53 @@ export default {
         this.isFetchingRole = false
       }
     },
+    async uploadFileToS3() {
+      if (!this.selectedFile || !this.s3AudioFileUrl) {
+        throw new Error('Please select a file and provide an S3 destination path')
+      }
+
+      const formData = new FormData()
+      formData.append('file', this.selectedFile)
+      formData.append('s3_path', this.s3AudioFileUrl)
+
+      const response = await fetch(`${BACKEND_URL}/upload_to_s3`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.awsCredentials.sessionToken}`
+        },
+        body: formData
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.detail || `Error: ${response.status} - ${response.statusText}`)
+      }
+
+      return await response.json()
+    },
     async submitS3Transcription() {
       if (!this.awsCredentials.sessionToken) {
         this.error = "Please fetch the EC2 role first."
         return
       }
+      if (!this.selectedFile || !this.s3AudioFileUrl) {
+        this.error = "Please select a file and provide an S3 destination path."
+        return
+      }
+
       this.s3Status = 'matching'
       this.transcriptionResult = ''
       this.bedrockResult = ''
       this.error = null
+      this.uploadProgress = 0
 
       try {
+        // First upload the file to S3
+        const uploadResult = await this.uploadFileToS3()
+        this.uploadProgress = 100
+        console.log('File uploaded successfully:', uploadResult)
+
+        // Then proceed with transcription
         const response = await fetch(`${BACKEND_URL}/transcribe`, {
           method: 'POST',
           headers: {
@@ -198,8 +259,8 @@ export default {
           throw new Error(errorData.detail || `Error: ${response.status} - ${response.statusText}`)
         }
       } catch (error) {
-        console.error('Error submitting S3 transcription:', error)
-        this.error = `Error submitting S3 transcription: ${error.message}`
+        console.error('Error in S3 transcription process:', error)
+        this.error = `Error: ${error.message}`
         this.s3Status = 'idle'
       }
     },
@@ -291,6 +352,11 @@ export default {
   color: #fff;
 }
 
+.btn-primary:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
 .btn-outline-secondary {
   background-color: #f8f9fa;
   border: 1px solid #ccc;
@@ -370,5 +436,11 @@ pre {
 .error-message {
   color: red;
   margin-top: 10px;
+}
+
+.upload-progress {
+  margin: 10px 0;
+  color: #007bff;
+  font-weight: bold;
 }
 </style>
