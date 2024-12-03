@@ -21,6 +21,10 @@ export default {
     systemPrompt: {
       type: String,
       required: true
+    },
+    selectedModel: {
+      type: String,
+      required: true
     }
   },
   data() {
@@ -91,7 +95,7 @@ export default {
           credentials: {
             accessKeyId: this.awsCredentials.accessKeyId,
             secretAccessKey: this.awsCredentials.secretAccessKey,
-            sessionToken: this.awsCredentials.sessionToken // Add session token
+            sessionToken: this.awsCredentials.sessionToken
           },
         });
 
@@ -164,6 +168,9 @@ export default {
         // Clean and store the final transcription
         this.finalTranscription = this.cleanTranscription(this.transcription);
         this.$emit('recordingStopped', this.finalTranscription);
+
+        // Call Bedrock with the final transcription and selected model
+        await this.callBedrock(this.finalTranscription);
       } catch (error) {
         console.error('Error stopping recording:', error);
         this.error = `Error stopping recording: ${error.message}`;
@@ -194,6 +201,33 @@ export default {
         int16Array[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
       }
       return Buffer.from(int16Array.buffer);
+    },
+    async callBedrock(transcription) {
+      try {
+        const response = await fetch(`${process.env.VUE_APP_BACKEND_URL}/bedrock`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.awsCredentials.sessionToken}`
+          },
+          body: JSON.stringify({
+            transcript: transcription,
+            system_prompt: this.systemPrompt,
+            model_name: this.selectedModel
+          })
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          this.$emit('bedrockResult', result.bedrock_result);
+        } else {
+          const errorData = await response.json();
+          throw new Error(errorData.detail || `Error: ${response.status} - ${response.statusText}`);
+        }
+      } catch (error) {
+        console.error('Error calling Bedrock:', error);
+        this.error = `Error calling Bedrock: ${error.message}`;
+      }
     },
   },
 }

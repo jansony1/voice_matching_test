@@ -13,6 +13,26 @@ from datetime import datetime, timezone
 from dateutil import parser
 from urllib.parse import urlparse
 
+# Define supported models and their configurations
+SUPPORTED_MODELS = {
+    "claude-3-haiku": {
+        "id": "anthropic.claude-3-haiku-20240307-v1:0",
+        "config": {
+            "temperature": 0.5,
+            "topP": 0.9,
+            "maxTokens": 1000
+        }
+    },
+    "claude-3-5-haiku": {
+        "id": "anthropic.claude-3-5-haiku-20241022-v1:0",
+        "config": {
+            "temperature": 0.5,
+            "topP": 0.9,
+            "maxTokens": 1000
+        }
+    }
+}
+
 # Configure logging
 log_file = os.path.join(os.path.dirname(__file__), 'app.log')
 logging.basicConfig(
@@ -149,18 +169,11 @@ def get_temporary_credentials():
             raise HTTPException(status_code=500, detail=f"Failed to fetch temporary credentials: {str(e)}")
     return session, credentials
 
-def generate_conversation(bedrock_client, model_id, system_prompts, messages):
+def generate_conversation(bedrock_client, model_id, system_prompts, messages, inference_config):
     """
     Sends messages to a model using the Bedrock Converse API.
     """
     logging.info(f"Generating message with model {model_id}")
-
-    # Updated inference parameters
-    inference_config = {
-        "temperature": 0.5,
-        "topP": 0.9,
-        "maxTokens": 1000
-    }
 
     try:
         # Send the message using the converse API
@@ -184,13 +197,17 @@ def generate_conversation(bedrock_client, model_id, system_prompts, messages):
         logging.error(f"Error in generate_conversation: {e}")
         raise
 
-async def call_bedrock(transcript: str, system_prompt: str, session: boto3.Session):
+async def call_bedrock(transcript: str, system_prompt: str, session: boto3.Session, model_name: str):
     try:
         # Initialize Bedrock runtime client
         bedrock_runtime = session.client('bedrock-runtime')
 
-        # Model ID for Claude 3 Sonnet
-        model_id = "anthropic.claude-3-haiku-20240307-v1:0"
+        if model_name not in SUPPORTED_MODELS:
+            raise ValueError(f"Unsupported model: {model_name}")
+
+        model_info = SUPPORTED_MODELS[model_name]
+        model_id = model_info["id"]
+        inference_config = model_info["config"]
 
         # Prepare system prompts and messages
         system_prompts = [{"text": system_prompt}]
@@ -204,13 +221,14 @@ async def call_bedrock(transcript: str, system_prompt: str, session: boto3.Sessi
             bedrock_runtime,
             model_id,
             system_prompts,
-            messages
+            messages,
+            inference_config
         )
 
         # Extract the model's response
         output_message = response['output']['message']
         result = output_message['content'][0]['text']
-        logging.info(f"Bedrock Claude result: {result}")
+        logging.info(f"Bedrock {model_name} result: {result}")
 
         return result
 
@@ -299,11 +317,15 @@ async def transcribe_audio(request_data: dict):
         # Extract data from request
         s3_audio_url = request_data.get('s3_audio_url')
         system_prompt = request_data.get('system_prompt')
+        model_name = request_data.get('model_name')
 
-        if not all([s3_audio_url, system_prompt]):
+        if not all([s3_audio_url, system_prompt, model_name]):
             raise HTTPException(status_code=400, detail="Missing required fields")
 
-        logging.info(f"Received transcribe request for S3 audio file: {s3_audio_url}")
+        if model_name not in SUPPORTED_MODELS:
+            raise HTTPException(status_code=400, detail=f"Unsupported model: {model_name}")
+
+        logging.info(f"Received transcribe request for S3 audio file: {s3_audio_url} using model: {model_name}")
 
         # Get AWS session using EC2 instance role
         session, _ = get_temporary_credentials()
@@ -352,8 +374,8 @@ async def transcribe_audio(request_data: dict):
             logging.error(f"Invalid transcription result format: {e}")
             raise HTTPException(status_code=500, detail=f"Invalid transcription result format: {str(e)}")
 
-        # Call Bedrock Claude
-        bedrock_result = await call_bedrock(transcript_text, system_prompt, session)
+        # Call Bedrock Claude with the specified model
+        bedrock_result = await call_bedrock(transcript_text, system_prompt, session, model_name)
 
         # Clean up transcription job
         try:
@@ -377,14 +399,18 @@ async def bedrock_inference(request_data: dict):
     try:
         transcript = request_data.get('transcript')
         system_prompt = request_data.get('system_prompt')
+        model_name = request_data.get('model_name')
 
-        if not all([transcript, system_prompt]):
+        if not all([transcript, system_prompt, model_name]):
             raise HTTPException(status_code=400, detail="Missing required fields")
 
-        logging.info(f"Received Bedrock inference request")
+        if model_name not in SUPPORTED_MODELS:
+            raise HTTPException(status_code=400, detail=f"Unsupported model: {model_name}")
+
+        logging.info(f"Received Bedrock inference request for model: {model_name}")
 
         session, _ = get_temporary_credentials()
-        bedrock_result = await call_bedrock(transcript, system_prompt, session)
+        bedrock_result = await call_bedrock(transcript, system_prompt, session, model_name)
 
         return {
             'bedrock_result': bedrock_result

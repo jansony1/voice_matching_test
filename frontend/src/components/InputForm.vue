@@ -11,6 +11,14 @@
 
     <div v-if="awsCredentials.sessionToken">
       <div class="form-group">
+        <label for="modelSelect" class="highlight-label">Select Model</label>
+        <select id="modelSelect" v-model="selectedModel" class="form-control">
+          <option value="claude-3-haiku">Claude 3 Haiku</option>
+          <option value="claude-3-5-haiku">Claude 3.5 Haiku</option>
+        </select>
+      </div>
+
+      <div class="form-group">
         <label for="systemPrompt" class="highlight-label">System Prompt</label>
         <textarea id="systemPrompt" v-model="systemPrompt" placeholder="Enter system prompt" class="form-control"></textarea>
       </div>
@@ -31,6 +39,7 @@
               ref="audioRecorder" 
               :systemPrompt="systemPrompt"
               :awsCredentials="awsCredentials"
+              :selectedModel="selectedModel"
               @transcriptionUpdate="handleTranscriptionUpdate"
               @recordingStopped="handleRecordingStopped"
               @recordingStarted="handleRecordingStarted"
@@ -136,7 +145,8 @@ export default {
         accessKeyId: '',
         secretAccessKey: '',
         sessionToken: ''
-      }
+      },
+      selectedModel: 'claude-3-haiku'
     }
   },
   methods: {
@@ -247,7 +257,8 @@ export default {
           },
           body: JSON.stringify({
             s3_audio_url: uploadResult.s3_url,
-            system_prompt: this.systemPrompt
+            system_prompt: this.systemPrompt,
+            model_name: this.selectedModel
           })
         })
 
@@ -294,7 +305,8 @@ export default {
           },
           body: JSON.stringify({
             transcript: transcription,
-            system_prompt: this.systemPrompt
+            system_prompt: this.systemPrompt,
+            model_name: this.selectedModel
           })
         })
         if (response.ok) {
