@@ -11,7 +11,7 @@
 
     <div v-if="awsCredentials.sessionToken">
       <div class="form-group">
-        <label for="systemPrompt">System Prompt</label>
+        <label for="systemPrompt" class="highlight-label">System Prompt</label>
         <textarea id="systemPrompt" v-model="systemPrompt" placeholder="Enter system prompt" class="form-control"></textarea>
       </div>
 
@@ -55,7 +55,7 @@
         <div class="tab-pane" :class="{ 'active': transcriptionMode === 's3file' }">
           <div class="s3file-transcription">
             <div class="form-group">
-              <label for="audioFile">Audio File</label>
+              <label for="audioFile" class="highlight-label">Audio File</label>
               <input 
                 type="file" 
                 id="audioFile" 
@@ -65,7 +65,7 @@
               />
             </div>
             <div class="form-group">
-              <label for="s3AudioFileUrl">S3 Audio File URL</label>
+              <label for="s3AudioFileUrl" class="highlight-label">S3 Audio File URL</label>
               <input type="text" id="s3AudioFileUrl" v-model="s3AudioFileUrl" placeholder="Enter S3 destination path (e.g., s3://bucket-name/path/file.mp3)" class="form-control" />
             </div>
             <button @click="submitS3Transcription" :disabled="s3Status === 'matching' || !selectedFile || !s3AudioFileUrl || !systemPrompt" class="btn btn-primary">
@@ -324,6 +324,18 @@ export default {
 
 .form-group {
   margin-bottom: 20px;
+}
+
+.highlight-label {
+  font-weight: bold;
+  color: #007bff;
+  font-size: 1.1em;
+  margin-bottom: 8px;
+  display: block;
+  background-color: #f8f9fa;
+  padding: 5px 10px;
+  border-radius: 3px;
+  border-left: 3px solid #007bff;
 }
 
 .form-control {

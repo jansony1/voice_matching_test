@@ -149,6 +149,74 @@ def get_temporary_credentials():
             raise HTTPException(status_code=500, detail=f"Failed to fetch temporary credentials: {str(e)}")
     return session, credentials
 
+def generate_conversation(bedrock_client, model_id, system_prompts, messages):
+    """
+    Sends messages to a model using the Bedrock Converse API.
+    """
+    logging.info(f"Generating message with model {model_id}")
+
+    # Inference parameters
+    inference_config = {
+        "temperature": 0.5,
+        "top_k": 200
+    }
+
+    try:
+        # Send the message using the converse API
+        response = bedrock_client.converse(
+            modelId=model_id,
+            messages=messages,
+            system=system_prompts,
+            inferenceConfig=inference_config
+        )
+
+        # Log token usage
+        token_usage = response['usage']
+        logging.info(f"Input tokens: {token_usage['inputTokens']}")
+        logging.info(f"Output tokens: {token_usage['outputTokens']}")
+        logging.info(f"Total tokens: {token_usage['totalTokens']}")
+        logging.info(f"Stop reason: {response['stopReason']}")
+
+        return response
+
+    except Exception as e:
+        logging.error(f"Error in generate_conversation: {e}")
+        raise
+
+async def call_bedrock(transcript: str, system_prompt: str, session: boto3.Session):
+    try:
+        # Initialize Bedrock runtime client
+        bedrock_runtime = session.client('bedrock-runtime')
+
+        # Model ID for Claude 3 Sonnet
+        model_id = "anthropic.claude-3-haiku-20240307-v1:0"
+
+        # Prepare system prompts and messages
+        system_prompts = [{"text": system_prompt}]
+        messages = [{
+            "role": "user",
+            "content": [{"text": transcript}]
+        }]
+
+        # Generate conversation using the Converse API
+        response = generate_conversation(
+            bedrock_runtime,
+            model_id,
+            system_prompts,
+            messages
+        )
+
+        # Extract the model's response
+        output_message = response['output']['message']
+        result = output_message['content'][0]['text']
+        logging.info(f"Bedrock Claude result: {result}")
+
+        return result
+
+    except Exception as e:
+        logging.error(f"Error calling Bedrock API: {e}")
+        raise HTTPException(status_code=500, detail=f"Bedrock API call failed: {str(e)}")
+
 @app.get('/get_ec2_role')
 async def fetch_ec2_role():
     try:
@@ -223,33 +291,6 @@ async def upload_to_s3(
     except Exception as e:
         logging.error(f"Unexpected error in upload_to_s3: {e}")
         raise HTTPException(status_code=500, detail=f"Unexpected error during file upload: {str(e)}")
-
-async def call_bedrock(transcript: str, system_prompt: str, session: boto3.Session):
-    try:
-        # Initialize Bedrock client
-        bedrock_runtime = session.client('bedrock-runtime')
-
-        # Prepare prompt for Bedrock Claude
-        claude_prompt = f"{system_prompt}\n\nHuman: {transcript}\n\nAssistant:"
-
-        # Call Bedrock Claude
-        bedrock_response = bedrock_runtime.invoke_model(
-            modelId="anthropic.claude-v2",
-            body=json.dumps({
-                "prompt": claude_prompt,
-                "max_tokens_to_sample": 2000,
-                "temperature": 0.7,
-            })
-        )
-        bedrock_response_body = json.loads(bedrock_response['body'].read())
-        bedrock_result = bedrock_response_body.get('completion', '')
-        logging.info(f"Bedrock Claude result: {bedrock_result}")
-
-        return bedrock_result
-
-    except Exception as e:
-        logging.error(f"Error calling Bedrock API: {e}")
-        raise HTTPException(status_code=500, detail=f"Bedrock API call failed: {str(e)}")
 
 @app.post('/transcribe')
 async def transcribe_audio(request_data: dict):
