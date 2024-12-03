@@ -6,6 +6,8 @@ VoiceSync is an advanced cloud-powered voice processing platform that leverages 
 
 ### System Workflow
 
+![Flow Chat](./assets/pic/flowchart.png)
+
 1. Start: The user initiates the system.
 2. Fetch EC2 Role: The system retrieves the IAM role associated with the EC2 instance using IMDSv2.
 3. Get Temporary Token: The system obtains temporary AWS credentials for service authentication.
