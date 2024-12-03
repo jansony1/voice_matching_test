@@ -155,10 +155,11 @@ def generate_conversation(bedrock_client, model_id, system_prompts, messages):
     """
     logging.info(f"Generating message with model {model_id}")
 
-    # Inference parameters
+    # Updated inference parameters
     inference_config = {
         "temperature": 0.5,
-        "top_k": 200
+        "topP": 0.9,
+        "maxTokens": 1000
     }
 
     try:
