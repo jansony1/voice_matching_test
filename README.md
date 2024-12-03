@@ -64,6 +64,9 @@ Before deploying the application, you need to set up an IAM role with the necess
    sudo usermod -aG docker ubuntu
    sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
    sudo chmod +x /usr/local/bin/docker-compose
+
+   # Modify Hop of
+   aws ec2 modify-instance-metadata-options --instance-id <Current_EC2_ID> --http-tokens required --http-endpoint enabled --http-put-response-hop-limit 2
    ```
 
 4. Clone your VoiceSync repository to the EC2 instance.
