@@ -1,7 +1,7 @@
 import logging
 import os
 from datetime import datetime
-from config import APP_LOG_FILE, EXECUTION_TIMES_LOG_FILE
+from .config import APP_LOG_FILE, EXECUTION_TIMES_LOG_FILE
 
 def setup_logging():
     """

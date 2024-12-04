@@ -5,7 +5,7 @@ import boto3
 from fastapi import HTTPException
 from datetime import datetime, timezone
 from dateutil import parser
-from config import DEFAULT_AWS_REGION, METADATA_SERVICE_URL
+from .config import DEFAULT_AWS_REGION, METADATA_SERVICE_URL
 
 def get_imdsv2_token():
     """

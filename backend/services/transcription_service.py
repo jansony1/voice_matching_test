@@ -4,8 +4,8 @@ import asyncio
 import requests
 from fastapi import HTTPException
 from urllib.parse import urlparse
-from config import SUPPORTED_MODELS
-from bedrock_service import call_bedrock
+from .config import SUPPORTED_MODELS
+from .bedrock_service import call_bedrock
 
 async def transcribe_audio(session, s3_audio_url: str, system_prompt: str, model_name: str):
     """

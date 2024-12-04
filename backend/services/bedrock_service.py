@@ -2,8 +2,8 @@ import logging
 import time
 import boto3
 from fastapi import HTTPException
-from config import SUPPORTED_MODELS
-from logging_utils import log_execution_time
+from .config import SUPPORTED_MODELS
+from .logging_utils import log_execution_time
 
 def generate_conversation(bedrock_client, model_id, system_prompts, messages, inference_config):
     """
