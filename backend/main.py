@@ -1,5 +1,6 @@
 import logging
 import os
+import time
 from fastapi import FastAPI, HTTPException, Depends, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 import boto3
@@ -35,6 +36,8 @@ SUPPORTED_MODELS = {
 
 # Configure logging
 log_file = os.path.join(os.path.dirname(__file__), 'app.log')
+execution_log_file = os.path.join(os.path.dirname(__file__), 'execution_times.log')
+
 logging.basicConfig(
     level=logging.DEBUG,
     format='%(asctime)s %(levelname)s: %(message)s',
@@ -176,6 +179,7 @@ def generate_conversation(bedrock_client, model_id, system_prompts, messages, in
     logging.info(f"Generating message with model {model_id}")
 
     try:
+        start_time = time.time()
         # Send the message using the converse API
         response = bedrock_client.converse(
             modelId=model_id,
@@ -183,6 +187,11 @@ def generate_conversation(bedrock_client, model_id, system_prompts, messages, in
             system=system_prompts,
             inferenceConfig=inference_config
         )
+        end_time = time.time()
+        execution_time = end_time - start_time
+
+        # Log execution time
+        log_execution_time(model_id, execution_time)
 
         # Log token usage
         token_usage = response['usage']
@@ -190,6 +199,7 @@ def generate_conversation(bedrock_client, model_id, system_prompts, messages, in
         logging.info(f"Output tokens: {token_usage['outputTokens']}")
         logging.info(f"Total tokens: {token_usage['totalTokens']}")
         logging.info(f"Stop reason: {response['stopReason']}")
+        logging.info(f"Execution time: {execution_time:.2f} seconds")
 
         return response
 
