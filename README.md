@@ -106,6 +106,15 @@ Before deploying the application, you need to set up an IAM role with the necess
 8. Access Application:
    Open https://your-alb-address.com in your web browser.
 
+9. Latency check for inference
+   ```bash
+  tail -f backend/execution_times.log 
+  2024-12-04T05:27:47.788226,anthropic.claude-3-haiku-20240307-v1:0,0.6913
+  2024-12-04T05:43:12.861047,anthropic.claude-3-haiku-20240307-v1:0,0.9740
+  2024-12-04T05:44:53.981923,anthropic.claude-3-5-haiku-20241022-v1:0,1.4702
+  2024-12-04T05:45:21.244671,anthropic.claude-3-5-haiku-20241022-v1:0,1.8307
+   ```
+
 ### Using the Application
 
 1. Open the application in your web browser.
