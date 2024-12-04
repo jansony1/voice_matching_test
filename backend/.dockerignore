@@ -1,12 +1,23 @@
+# Python virtual environments
 venv
+.venv
+env
+.env
+
+# Compiled Python files
 __pycache__
 *.pyc
 *.pyo
 *.pyd
 .Python
-env
-pip-log.txt
-pip-delete-this-directory.txt
+
+# Logs and databases
+*.log
+*.sqlite3
+app.log
+execution_times.log
+
+# Testing and coverage
 .tox
 .coverage
 .coverage.*
@@ -14,8 +25,32 @@ pip-delete-this-directory.txt
 nosetests.xml
 coverage.xml
 *.cover
-*.log
-.git
-.mypy_cache
 .pytest_cache
 .hypothesis
+
+# Development and IDE files
+.git
+.mypy_cache
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Dependency directories
+node_modules
+
+# Backup files
+*.bak
+*.gho
+*.ori
+*.orig
+*.tmp

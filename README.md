@@ -72,6 +72,8 @@ Before deploying the application, you need to set up an IAM role with the necess
    ```
 
 4. Clone your VoiceSync repository to the EC2 instance.
+   ```
+   git clone https://github.com/jansony1/voice_matching_test.git && cd voice_matching_test
 
 5. Configure ALB (Application Load Balancer):
    - Create an ALB in the AWS Console if you haven't already.
@@ -93,7 +95,12 @@ Before deploying the application, you need to set up an IAM role with the necess
 
 7. Build and Start Services:
    ```bash
+   ### start the full stack
    docker-compose up --build -d
+
+   ### clean up the stack
+   docker-compose down
+
    ```
 
 8. Access Application:
@@ -126,10 +133,18 @@ Before deploying the application, you need to set up an IAM role with the necess
 │   ├── public/                   # Static assets
 │   └── Dockerfile               # Frontend Docker configuration
 ├── backend/                      # Python backend service
-│   ├── main.py                  # Main application
-│   └── Dockerfile               # Backend Docker configuration
+│   ├── main.py                  # Main application entry point
+│   ├── services/                # Modular service components
+│   │   ├── config.py            # Configuration and constants
+│   │   ├── logging_utils.py     # Logging management
+│   │   ├── aws_utils.py         # AWS-related utilities
+│   │   ├── bedrock_service.py   # Bedrock API interactions
+│   │   └── transcription_service.py  # Audio transcription logic
+│   ├── Dockerfile               # Backend Docker configuration
+│   └── requirements.txt         # Python dependencies
 └── docker-compose.yml           # Docker Compose configuration
 ```
+
 
 ### Common Issues and Troubleshooting
 

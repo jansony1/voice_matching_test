@@ -3,3 +3,5 @@ uvicorn
 boto3
 requests
 python-multipart
+python-dateutil
+python-jose
