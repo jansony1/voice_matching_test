@@ -21,7 +21,7 @@ SUPPORTED_MODELS = {
 }
 
 # Logging configurations
-LOG_DIR = os.path.dirname(__file__)
+LOG_DIR = os.path.dirname(os.path.dirname(__file__))
 APP_LOG_FILE = os.path.join(LOG_DIR, 'app.log')
 EXECUTION_TIMES_LOG_FILE = os.path.join(LOG_DIR, 'execution_times.log')
 
