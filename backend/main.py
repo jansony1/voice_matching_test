@@ -67,6 +67,21 @@ session = None
 credentials = None
 aws_region = None
 
+
+def log_execution_time(model_id, execution_time):
+    """
+    Log the execution time of Bedrock API calls to a CSV file.
+    Format: timestamp,model_id,execution_time
+    """
+    try:
+        timestamp = datetime.now().isoformat()
+        log_entry = f"{timestamp},{model_id},{execution_time:.4f}\n"
+        
+        with open(execution_log_file, 'a') as f:
+            f.write(log_entry)
+        
+        logging.info(f"Logged execution time for model {model_id}: {execution_time:.4f} seconds")
+
 def get_aws_region():
     global aws_region
     if aws_region is None:
@@ -318,8 +333,7 @@ async def upload_to_s3(
     except HTTPException as he:
         raise he
     except Exception as e:
-        logging.error(f"Unexpected error in upload_to_s3: {e}")
-        raise HTTPException(status_code=500, detail=f"Unexpected error during file upload: {str(e)}")
+        logging.error(f"Failed to log execution time: {e}")
 
 @app.post('/transcribe')
 async def transcribe_audio(request_data: dict):
