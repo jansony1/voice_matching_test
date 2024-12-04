@@ -81,6 +81,9 @@ def log_execution_time(model_id, execution_time):
             f.write(log_entry)
         
         logging.info(f"Logged execution time for model {model_id}: {execution_time:.4f} seconds")
+    except Exception as e:
+        logging.error(f"Failed to log execution time: {e}")
+
 
 def get_aws_region():
     global aws_region
