@@ -149,29 +149,38 @@ export default {
         sessionToken: ''
       },
       supportedModels: {},
-      selectedModel: '' // Will be set after loading models
+      selectedModel: null // Changed from empty string to null for better validation
     }
   },
   methods: {
     async loadSupportedModels() {
       try {
+        console.log('Loading models configuration...')
         const response = await fetch('/shared/config/models_config.json')
         if (response.ok) {
           const config = await response.json()
+          console.log('Loaded models:', config.supported_models)
           this.supportedModels = config.supported_models
           
           // Set default selected model to the first model in the list
           const firstModelKey = Object.keys(this.supportedModels)[0]
-          this.selectedModel = firstModelKey
+          if (firstModelKey) {
+            console.log('Setting default model:', firstModelKey)
+            this.selectedModel = firstModelKey
+          }
         } else {
           console.error('Failed to load models configuration')
           // Fallback to fetch from original location if shared config fails
           const fallbackResponse = await fetch('/models_config.json')
           if (fallbackResponse.ok) {
             const config = await fallbackResponse.json()
+            console.log('Loaded models from fallback:', config.supported_models)
             this.supportedModels = config.supported_models
             const firstModelKey = Object.keys(this.supportedModels)[0]
-            this.selectedModel = firstModelKey
+            if (firstModelKey) {
+              console.log('Setting default model from fallback:', firstModelKey)
+              this.selectedModel = firstModelKey
+            }
           } else {
             console.error('Failed to load models configuration from fallback location')
           }
