@@ -24,11 +24,11 @@
             "config": {
                 "temperature": 0.5,
                 "topP": 0.9,
-                "maxTokens": 1000,
-                "additionalModelRequestFields": {
-                    "inferenceConfig": {
-                        "topK": 20
-                    }
+                "maxTokens": 1000
+            },
+            "additionalModelRequestFields": {
+                "inferenceConfig": {
+                    "topK": 20
                 }
             }
         },
@@ -38,11 +38,11 @@
             "config": {
                 "temperature": 0.5,
                 "topP": 0.9,
-                "maxTokens": 1000,
-                "additionalModelRequestFields": {
-                    "inferenceConfig": {
-                        "topK": 20
-                    }
+                "maxTokens": 1000
+            },
+            "additionalModelRequestFields": {
+                "inferenceConfig": {
+                    "topK": 20
                 }
             }
         },
@@ -52,11 +52,11 @@
             "config": {
                 "temperature": 0.5,
                 "topP": 0.9,
-                "maxTokens": 1000,
-                "additionalModelRequestFields": {
-                    "inferenceConfig": {
-                        "topK": 20
-                    }
+                "maxTokens": 1000
+            },
+            "additionalModelRequestFields": {
+                "inferenceConfig": {
+                    "topK": 20
                 }
             }
         }

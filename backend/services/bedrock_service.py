@@ -6,21 +6,50 @@ from fastapi import HTTPException
 from .config import SUPPORTED_MODELS
 from .logging_utils import log_execution_time
 
-def generate_conversation(bedrock_client, model_id, system_prompts, messages, inference_config):
+
+
+def generate_conversation(
+    bedrock_client, 
+    model_id, 
+    system_prompts, 
+    messages, 
+    inference_config, 
+    additional_model_request_fields=None):
     """
     Sends messages to a model using the Bedrock Converse API.
+    
+    Parameters:
+        bedrock_client: The Bedrock client used to interact with the API.
+        model_id: The ID of the model to use.
+        system_prompts: System prompts to pass to the model.
+        messages: User messages for the conversation.
+        inference_config: Configuration for model inference (e.g., temperature, max tokens).
+        additional_model_request_fields: (Optional) Additional fields for specific models.
     """
     logging.info(f"Generating message with model {model_id}")
 
     try:
         start_time = time.time()
-        # Send the message using the converse API
-        response = bedrock_client.converse(
-            modelId=model_id,
-            messages=messages,
-            system=system_prompts,
-            inferenceConfig=inference_config
-        )
+
+        # 动态构建请求参数
+        if additional_model_request_fields:
+            # 调用方式包含 additionalModelRequestFields
+            response = bedrock_client.converse(
+                modelId=model_id,
+                messages=messages,
+                system=system_prompts,
+                inferenceConfig=inference_config,
+                additionalModelRequestFields=additional_model_request_fields
+            )
+        else:
+            # 调用方式不包含 additionalModelRequestFields
+            response = bedrock_client.converse(
+                modelId=model_id,
+                messages=messages,
+                system=system_prompts,
+                inferenceConfig=inference_config
+            )
+
         end_time = time.time()
         execution_time = end_time - start_time
 
@@ -37,8 +66,9 @@ def generate_conversation(bedrock_client, model_id, system_prompts, messages, in
         return response
 
     except Exception as e:
-        logging.error(f"Error in generate_conversation: {e}")
+        logging.error(f"Error generating conversation: {e}")
         raise
+
 
 async def call_bedrock(transcript: str, system_prompt: str, session: boto3.Session, model_name: str):
     """
@@ -60,6 +90,7 @@ async def call_bedrock(transcript: str, system_prompt: str, session: boto3.Sessi
         model_info = SUPPORTED_MODELS[model_name]
         model_id = model_info["id"]
         inference_config = model_info["config"]
+        additional_request_fields = inference_config.get("additionalModelRequestFields", {})
 
         # Prepare system prompts and messages
         system_prompts = [{"text": system_prompt}]
@@ -74,7 +105,8 @@ async def call_bedrock(transcript: str, system_prompt: str, session: boto3.Sessi
             model_id,
             system_prompts,
             messages,
-            inference_config
+            inference_config,
+            additional_request_fields
         )
 
         # Extract the model's response
