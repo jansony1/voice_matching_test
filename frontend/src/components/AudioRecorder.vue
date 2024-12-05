@@ -204,7 +204,8 @@ export default {
     },
     async callBedrock(transcription) {
       try {
-        const response = await fetch(`${process.env.VUE_APP_BACKEND_URL}/bedrock`, {
+        // Use window.configs.BACKEND_URL instead of process.env
+        const response = await fetch(`${window.configs.BACKEND_URL}/bedrock`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
