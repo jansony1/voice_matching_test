@@ -1,7 +1,7 @@
 <template>
   <div class="audio-recorder">
-    <button @click="startRecording" :disabled="isRecording" class="btn btn-primary">Start Recording</button>
-    <button @click="stopRecording" :disabled="!isRecording" class="btn btn-secondary">Stop Recording</button>
+    <button @click="startRecording" :disabled="isRecording || isStopping" class="btn btn-primary">Start Recording</button>
+    <button @click="stopRecording" :disabled="!isRecording || isStopping" class="btn btn-secondary">Stop Recording</button>
     <div v-if="error" class="error-message">
       {{ error }}
     </div>
@@ -30,6 +30,7 @@ export default {
   data() {
     return {
       isRecording: false,
+      isStopping: false,  // 新增状态标志
       transcription: '',
       transcribeClient: null,
       error: null,
@@ -66,6 +67,8 @@ export default {
     },
 
     async startRecording() {
+      if (this.isRecording || this.isStopping) return;  // 防止重复启动
+      
       try {
         this.error = null;
         this.transcription = '';
@@ -137,33 +140,42 @@ export default {
       } catch (error) {
         console.error('Error starting recording:', error);
         this.error = `Error starting recording: ${error.message}`;
-        await this.stopRecording();
+        this.cleanupResources();  // 使用新的清理方法
       }
     },
+
+    // 新增资源清理方法
+    async cleanupResources() {
+      if (this.processor) {
+        this.processor.disconnect();
+        this.processor = null;
+      }
+      if (this.audioInput) {
+        this.audioInput.disconnect();
+        this.audioInput = null;
+      }
+      if (this.mediaStream) {
+        this.mediaStream.getTracks().forEach(track => track.stop());
+        this.mediaStream = null;
+      }
+      if (this.audioContext) {
+        await this.audioContext.close();
+        this.audioContext = null;
+      }
+      if (this.transcribeClient) {
+        await this.transcribeClient.destroy();
+        this.transcribeClient = null;
+      }
+    },
+
     async stopRecording() {
+      if (!this.isRecording || this.isStopping) return;  // 防止重复停止
+      
       try {
+        this.isStopping = true;  // 设置停止标志
         this.isRecording = false;
         
-        if (this.processor) {
-          this.processor.disconnect();
-          this.processor = null;
-        }
-        if (this.audioInput) {
-          this.audioInput.disconnect();
-          this.audioInput = null;
-        }
-        if (this.mediaStream) {
-          this.mediaStream.getTracks().forEach(track => track.stop());
-          this.mediaStream = null;
-        }
-        if (this.audioContext) {
-          await this.audioContext.close();
-          this.audioContext = null;
-        }
-        if (this.transcribeClient) {
-          await this.transcribeClient.destroy();
-          this.transcribeClient = null;
-        }
+        await this.cleanupResources();  // 使用新的清理方法
         
         // Clean and store the final transcription
         this.finalTranscription = this.cleanTranscription(this.transcription);
@@ -174,8 +186,11 @@ export default {
       } catch (error) {
         console.error('Error stopping recording:', error);
         this.error = `Error stopping recording: ${error.message}`;
+      } finally {
+        this.isStopping = false;  // 重置停止标志
       }
     },
+
     async *audioStreamGenerator() {
       const self = this;
       let audioBuffer = [];
@@ -194,6 +209,7 @@ export default {
         await new Promise(resolve => setTimeout(resolve, 10));
       }
     },
+
     float32ToInt16(float32Array) {
       const int16Array = new Int16Array(float32Array.length);
       for (let i = 0; i < float32Array.length; i++) {
@@ -202,7 +218,13 @@ export default {
       }
       return Buffer.from(int16Array.buffer);
     },
+
     async callBedrock(transcription) {
+      if (!transcription.trim()) {
+        console.log('Empty transcription, skipping Bedrock call');
+        return;
+      }
+
       try {
         // Use window.configs.BACKEND_URL instead of process.env
         const response = await fetch(`${window.configs.BACKEND_URL}/bedrock`, {
