@@ -1,5 +1,6 @@
 import logging
 import time
+import json
 import boto3
 from fastapi import HTTPException
 from .config import SUPPORTED_MODELS
@@ -46,7 +47,12 @@ async def call_bedrock(transcript: str, system_prompt: str, session: boto3.Sessi
     try:
         # Initialize Bedrock runtime client
         bedrock_runtime = session.client('bedrock-runtime')
-        logging.info(f"Model Name is : {model_name}")
+
+        # Print SUPPORTED_MODELS content for debugging
+        logging.info("=== SUPPORTED MODELS CONFIGURATION ===")
+        logging.info(json.dumps(SUPPORTED_MODELS, indent=2))
+        logging.info("=====================================")
+        logging.info(f"Requested model name: {model_name}")
 
         if model_name not in SUPPORTED_MODELS:
             raise ValueError(f"Unsupported model: {model_name}")
