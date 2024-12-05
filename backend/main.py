@@ -101,6 +101,9 @@ async def upload_to_s3(
 @app.post('/transcribe')
 async def handle_transcribe_audio(request_data: dict):
     try:
+        logging.info("=== Transcribe Request Data ===")
+        logging.info(f"Request data: {request_data}")
+        
         # Get AWS session
         session, _ = get_temporary_credentials()
 
@@ -108,6 +111,21 @@ async def handle_transcribe_audio(request_data: dict):
         s3_audio_url = request_data.get('s3_audio_url')
         system_prompt = request_data.get('system_prompt')
         model_name = request_data.get('model_name')
+
+        # Log parameters
+        logging.info(f"s3_audio_url: {s3_audio_url}")
+        logging.info(f"system_prompt: {system_prompt}")
+        logging.info(f"model_name: {model_name}")
+
+        # Validate required parameters
+        if not all([s3_audio_url, system_prompt, model_name]):
+            missing_fields = []
+            if not s3_audio_url: missing_fields.append("s3_audio_url")
+            if not system_prompt: missing_fields.append("system_prompt")
+            if not model_name: missing_fields.append("model_name")
+            error_msg = f"Missing required fields: {', '.join(missing_fields)}"
+            logging.error(error_msg)
+            raise HTTPException(status_code=400, detail=error_msg)
 
         # Call transcription service
         result = await transcribe_audio(session, s3_audio_url, system_prompt, model_name)

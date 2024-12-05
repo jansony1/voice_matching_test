@@ -1,5 +1,6 @@
 import logging
 import uuid
+import json
 import asyncio
 import requests
 from fastapi import HTTPException
@@ -16,7 +17,14 @@ async def transcribe_audio(session, s3_audio_url: str, system_prompt: str, model
         if not all([s3_audio_url, system_prompt, model_name]):
             raise HTTPException(status_code=400, detail="Missing required fields")
 
+        # Log SUPPORTED_MODELS content
+        logging.info("=== SUPPORTED MODELS IN TRANSCRIBE SERVICE ===")
+        logging.info(json.dumps(SUPPORTED_MODELS, indent=2))
+        logging.info("============================================")
+        logging.info(f"Requested model name: {model_name}")
+
         if model_name not in SUPPORTED_MODELS:
+            logging.error(f"Model {model_name} not found in supported models")
             raise HTTPException(status_code=400, detail=f"Unsupported model: {model_name}")
 
         logging.info(f"Received transcribe request for S3 audio file: {s3_audio_url} using model: {model_name}")
@@ -64,6 +72,11 @@ async def transcribe_audio(session, s3_audio_url: str, system_prompt: str, model
         except (ValueError, KeyError) as e:
             logging.error(f"Invalid transcription result format: {e}")
             raise HTTPException(status_code=500, detail=f"Invalid transcription result format: {str(e)}")
+
+        # Log before calling Bedrock
+        logging.info("About to call Bedrock with transcription result")
+        logging.info(f"Using model: {model_name}")
+        logging.info(f"System prompt: {system_prompt}")
 
         # Call Bedrock Claude with the specified model
         bedrock_result = await call_bedrock(transcript_text, system_prompt, session, model_name)
