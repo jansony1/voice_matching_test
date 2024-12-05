@@ -11,6 +11,8 @@ services:
       - BACKEND_URL=${BACKEND_URL:-http://backend:8000/api}
     depends_on:
       - backend
+    volumes:
+      - ./shared:/usr/share/nginx/html/shared
     networks:
       - voice-matching-network
   
@@ -24,6 +26,7 @@ services:
       - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-west-2}
     volumes:
       - ./backend:/app
+      - ./shared:/app/shared
     networks:
       - voice-matching-network
 

@@ -1,24 +1,24 @@
 import os
+import json
 
-# Define supported models and their configurations
-SUPPORTED_MODELS = {
-    "claude-3-haiku": {
-        "id": "anthropic.claude-3-haiku-20240307-v1:0",
-        "config": {
-            "temperature": 0.5,
-            "topP": 0.9,
-            "maxTokens": 1000
-        }
-    },
-    "claude-3-5-haiku": {
-        "id": "anthropic.claude-3-5-haiku-20241022-v1:0",
-        "config": {
-            "temperature": 0.5,
-            "topP": 0.9,
-            "maxTokens": 1000
-        }
-    }
-}
+# Path to the shared models configuration
+MODELS_CONFIG_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'shared', 'config', 'models_config.json')
+
+# Load models configuration from the shared JSON file
+def load_models_config():
+    try:
+        with open(MODELS_CONFIG_PATH, 'r') as f:
+            config = json.load(f)
+            return config.get('supported_models', {})
+    except FileNotFoundError:
+        print(f"Warning: Models configuration file not found at {MODELS_CONFIG_PATH}")
+        return {}
+    except json.JSONDecodeError:
+        print(f"Error: Invalid JSON in models configuration file at {MODELS_CONFIG_PATH}")
+        return {}
+
+# Define supported models dynamically from the configuration file
+SUPPORTED_MODELS = load_models_config()
 
 # Logging configurations
 LOG_DIR = os.path.dirname(os.path.dirname(__file__))

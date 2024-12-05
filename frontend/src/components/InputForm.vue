@@ -13,8 +13,9 @@
       <div class="form-group">
         <label for="modelSelect" class="highlight-label">Select Model</label>
         <select id="modelSelect" v-model="selectedModel" class="form-control">
-          <option value="claude-3-haiku">Claude 3 Haiku</option>
-          <option value="claude-3-5-haiku">Claude 3.5 Haiku</option>
+          <option v-for="(model, key) in supportedModels" :key="key" :value="key">
+            {{ model.display_name }}
+          </option>
         </select>
       </div>
 
@@ -125,6 +126,7 @@ export default {
   },
   created() {
     console.log('Component created with backend URL:', BACKEND_URL)
+    this.loadSupportedModels()
   },
   data() {
     return {
@@ -146,18 +148,36 @@ export default {
         secretAccessKey: '',
         sessionToken: ''
       },
-      selectedModel: 'claude-3-haiku'
+      supportedModels: {},
+      selectedModel: '' // Will be set after loading models
     }
   },
   methods: {
-    handleFileChange(event) {
-      const file = event.target.files[0]
-      if (file) {
-        this.selectedFile = file
-        // Reset results when new file is selected
-        this.transcriptionResult = ''
-        this.bedrockResult = ''
-        this.error = null
+    async loadSupportedModels() {
+      try {
+        const response = await fetch('/shared/config/models_config.json')
+        if (response.ok) {
+          const config = await response.json()
+          this.supportedModels = config.supported_models
+          
+          // Set default selected model to the first model in the list
+          const firstModelKey = Object.keys(this.supportedModels)[0]
+          this.selectedModel = firstModelKey
+        } else {
+          console.error('Failed to load models configuration')
+          // Fallback to fetch from original location if shared config fails
+          const fallbackResponse = await fetch('/models_config.json')
+          if (fallbackResponse.ok) {
+            const config = await fallbackResponse.json()
+            this.supportedModels = config.supported_models
+            const firstModelKey = Object.keys(this.supportedModels)[0]
+            this.selectedModel = firstModelKey
+          } else {
+            console.error('Failed to load models configuration from fallback location')
+          }
+        }
+      } catch (error) {
+        console.error('Error loading models configuration:', error)
       }
     },
     async fetchEC2Role() {

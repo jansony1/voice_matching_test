@@ -1,0 +1,64 @@
+{
+    "supported_models": {
+        "claude-3-haiku": {
+            "display_name": "Claude 3 Haiku",
+            "id": "anthropic.claude-3-haiku-20240307-v1:0",
+            "config": {
+                "temperature": 0.5,
+                "topP": 0.9,
+                "maxTokens": 1000
+            }
+        },
+        "claude-3-5-haiku": {
+            "display_name": "Claude 3.5 Haiku",
+            "id": "anthropic.claude-3-5-haiku-20241022-v1:0",
+            "config": {
+                "temperature": 0.5,
+                "topP": 0.9,
+                "maxTokens": 1000
+            }
+        },
+        "nova-micro": {
+            "display_name": "Nova Micro",
+            "id": "us.amazon.nova-micro-v1:0",
+            "config": {
+                "temperature": 0.5,
+                "topP": 0.9,
+                "maxTokens": 1000,
+                "additionalModelRequestFields": {
+                    "inferenceConfig": {
+                        "topK": 20
+                    }
+                }
+            }
+        },
+        "nova-lite": {
+            "display_name": "Nova Lite",
+            "id": "us.amazon.nova-lite-v1:0",
+            "config": {
+                "temperature": 0.5,
+                "topP": 0.9,
+                "maxTokens": 1000,
+                "additionalModelRequestFields": {
+                    "inferenceConfig": {
+                        "topK": 20
+                    }
+                }
+            }
+        },
+        "nova-pro": {
+            "display_name": "Nova Pro",
+            "id": "us.amazon.nova-pro-v1:0",
+            "config": {
+                "temperature": 0.5,
+                "topP": 0.9,
+                "maxTokens": 1000,
+                "additionalModelRequestFields": {
+                    "inferenceConfig": {
+                        "topK": 20
+                    }
+                }
+            }
+        }
+    }
+}

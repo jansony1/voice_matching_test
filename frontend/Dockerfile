@@ -6,7 +6,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
-# Copy source code
+# Copy source code and shared config
 COPY . .
 
 # Build production version
