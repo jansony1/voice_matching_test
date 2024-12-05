@@ -6,12 +6,14 @@ WORKDIR /app
 COPY frontend/package*.json ./
 RUN npm install
 
-# Copy source code
+# Copy frontend source code first
 COPY frontend/ .
 
-# Create shared config directory and copy configuration
-RUN mkdir -p ./public/shared/config
-COPY shared/config/models_config.json ./public/shared/config/
+# Create shared config directory
+RUN mkdir -p public/shared/config
+
+# Copy shared configuration
+COPY shared/config/models_config.json public/shared/config/
 
 # Build production version
 RUN npm run build
@@ -26,10 +28,8 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 COPY frontend/public/config.js /usr/share/nginx/html/
 COPY frontend/public/credentials-polyfill.js /usr/share/nginx/html/
 
-# Create shared config directory
+# Create shared config directory and copy configuration
 RUN mkdir -p /usr/share/nginx/html/shared/config
-
-# Copy shared configuration to nginx html directory
 COPY --from=builder /app/public/shared/config/models_config.json /usr/share/nginx/html/shared/config/
 
 # Enhanced nginx configuration with CORS and file upload settings
