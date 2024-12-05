@@ -6,8 +6,6 @@ from fastapi import HTTPException
 from .config import SUPPORTED_MODELS
 from .logging_utils import log_execution_time
 
-
-
 def generate_conversation(
     bedrock_client, 
     model_id, 
@@ -31,24 +29,20 @@ def generate_conversation(
     try:
         start_time = time.time()
 
-        # 动态构建请求参数
+        # 构建基本请求参数
+        request_params = {
+            'modelId': model_id,
+            'messages': messages,
+            'system': system_prompts,
+            'inferenceConfig': inference_config
+        }
+
+        # 如果有额外的请求字段，添加到请求参数中
         if additional_model_request_fields:
-            # 调用方式包含 additionalModelRequestFields
-            response = bedrock_client.converse(
-                modelId=model_id,
-                messages=messages,
-                system=system_prompts,
-                inferenceConfig=inference_config,
-                additionalModelRequestFields=additional_model_request_fields
-            )
-        else:
-            # 调用方式不包含 additionalModelRequestFields
-            response = bedrock_client.converse(
-                modelId=model_id,
-                messages=messages,
-                system=system_prompts,
-                inferenceConfig=inference_config
-            )
+            request_params['additionalModelRequestFields'] = additional_model_request_fields
+
+        # 执行单次调用
+        response = bedrock_client.converse(**request_params)
 
         end_time = time.time()
         execution_time = end_time - start_time
@@ -68,7 +62,6 @@ def generate_conversation(
     except Exception as e:
         logging.error(f"Error generating conversation: {e}")
         raise
-
 
 async def call_bedrock(transcript: str, system_prompt: str, session: boto3.Session, model_name: str):
     """
@@ -90,7 +83,7 @@ async def call_bedrock(transcript: str, system_prompt: str, session: boto3.Sessi
         model_info = SUPPORTED_MODELS[model_name]
         model_id = model_info["id"]
         inference_config = model_info["config"]
-        additional_request_fields = inference_config.get("additionalModelRequestFields", {})
+        additional_request_fields = inference_config.pop("additionalModelRequestFields", None)
 
         # Prepare system prompts and messages
         system_prompts = [{"text": system_prompt}]
