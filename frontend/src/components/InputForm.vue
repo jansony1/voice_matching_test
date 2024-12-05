@@ -78,7 +78,7 @@
               <label for="s3AudioFileUrl" class="highlight-label">S3 Audio File URL</label>
               <input type="text" id="s3AudioFileUrl" v-model="s3AudioFileUrl" placeholder="Enter S3 destination path (e.g., s3://bucket-name/path/file.mp3)" class="form-control" />
             </div>
-            <button @click="submitS3Transcription" :disabled="s3Status === 'matching' || !selectedFile || !s3AudioFileUrl || !systemPrompt" class="btn btn-primary">
+            <button @click="submitS3Transcription" :disabled="!systemPrompt || !selectedFile || !s3AudioFileUrl" class="btn btn-primary">
               {{ s3Status === 'matching' ? 'Processing...' : 'Submit' }}
             </button>
             <div v-if="uploadProgress > 0 && uploadProgress < 100" class="upload-progress">
