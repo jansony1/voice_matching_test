@@ -1,4 +1,4 @@
-<!-- 前面的代码保持不变，直到methods部分 -->
+<!-- 前面的代码保持不变，只修改handleRecordingStopped方法 -->
 <template>
   <div class="input-form">
     <button @click="fetchEC2Role" class="btn btn-primary" :disabled="isFetchingRole">
@@ -45,6 +45,7 @@
               @transcriptionUpdate="handleTranscriptionUpdate"
               @recordingStopped="handleRecordingStopped"
               @recordingStarted="handleRecordingStarted"
+              @bedrockResult="handleBedrockResult"
             />
             <div v-if="status === 'matching'" class="status-text">
               Matching...
@@ -154,7 +155,6 @@ export default {
     }
   },
   methods: {
-    // 添加handleFileChange函数
     handleFileChange(event) {
       const file = event.target.files[0]
       if (file) {
@@ -313,51 +313,26 @@ export default {
       this.transcriptionResult = transcription
       this.status = 'matching'
     },
-    async handleRecordingStopped(finalTranscription) {
+    handleRecordingStopped(finalTranscription) {
+      // 只更新转录结果，不再调用Bedrock
       this.transcriptionResult = finalTranscription
       this.status = 'matched'
-      await this.callBedrock(finalTranscription)
+    },
+    handleBedrockResult(result) {
+      // 处理来自AudioRecorder的Bedrock结果
+      this.bedrockResult = result
     },
     handleRecordingStarted() {
       this.status = 'matching'
       this.transcriptionResult = ''
       this.bedrockResult = ''
-    },
-    async callBedrock(transcription) {
-      if (!this.awsCredentials.sessionToken) {
-        this.error = "Please fetch the EC2 role first."
-        return
-      }
-      try {
-        const response = await fetch(`${BACKEND_URL}/bedrock`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${this.awsCredentials.sessionToken}`
-          },
-          body: JSON.stringify({
-            transcript: transcription,
-            system_prompt: this.systemPrompt,
-            model_name: this.selectedModel
-          })
-        })
-        if (response.ok) {
-          const result = await response.json()
-          this.bedrockResult = result.bedrock_result
-        } else {
-          const errorData = await response.json()
-          throw new Error(errorData.detail || `Error: ${response.status} - ${response.statusText}`)
-        }
-      } catch (error) {
-        console.error('Error calling Bedrock:', error)
-        this.error = `Error calling Bedrock: ${error.message}`
-      }
     }
   }
 }
 </script>
 
 <style scoped>
+/* 样式保持不变 */
 .input-form {
   max-width: 800px;
   margin: 0 auto;
