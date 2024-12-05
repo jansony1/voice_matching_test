@@ -3,13 +3,15 @@ FROM node:18-alpine as builder
 WORKDIR /app
 
 # Install dependencies
-COPY package*.json ./
+COPY frontend/package*.json ./
 RUN npm install
 
 # Copy source code
-COPY . .
-# Copy shared configuration
-COPY shared/config/models_config.json /app/public/shared/config/
+COPY frontend/ .
+
+# Create shared config directory and copy configuration
+RUN mkdir -p ./public/shared/config
+COPY shared/config/models_config.json ./public/shared/config/
 
 # Build production version
 RUN npm run build
@@ -21,8 +23,8 @@ FROM nginx:alpine
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Copy config.js and polyfill to nginx html directory
-COPY public/config.js /usr/share/nginx/html/
-COPY public/credentials-polyfill.js /usr/share/nginx/html/
+COPY frontend/public/config.js /usr/share/nginx/html/
+COPY frontend/public/credentials-polyfill.js /usr/share/nginx/html/
 
 # Create shared config directory
 RUN mkdir -p /usr/share/nginx/html/shared/config
@@ -56,7 +58,7 @@ RUN echo 'server { \
 }' > /etc/nginx/conf.d/default.conf
 
 # Copy the entrypoint script
-COPY docker-entrypoint.sh /
+COPY frontend/docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint.sh
 
 EXPOSE 80

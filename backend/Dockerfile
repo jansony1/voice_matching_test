@@ -8,12 +8,12 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and install Python dependencies
-COPY requirements.txt .
+COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy all backend files
-COPY main.py .
-COPY services/ ./services/
+COPY backend/main.py .
+COPY backend/services/ ./services/
 
 # Create shared config directory and copy configuration
 RUN mkdir -p /app/shared/config
