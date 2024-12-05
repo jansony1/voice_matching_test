@@ -15,13 +15,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY backend/main.py .
 COPY backend/services/ ./services/
 
-# Create shared config directory and copy configuration
-RUN mkdir -p shared/config
-COPY shared/config/models_config.json shared/config/
-
 # Create logs directory with proper permissions
 RUN mkdir -p /app/logs && \
     chmod 777 /app/logs
+
+# Create shared config directory (will be mounted by docker-compose)
+RUN mkdir -p /app/shared/config && \
+    chmod 777 /app/shared/config
 
 # Expose the application port
 EXPOSE 8000
