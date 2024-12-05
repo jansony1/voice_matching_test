@@ -1,3 +1,4 @@
+<!-- 前面的代码保持不变，直到methods部分 -->
 <template>
   <div class="input-form">
     <button @click="fetchEC2Role" class="btn btn-primary" :disabled="isFetchingRole">
@@ -153,6 +154,17 @@ export default {
     }
   },
   methods: {
+    // 添加handleFileChange函数
+    handleFileChange(event) {
+      const file = event.target.files[0]
+      if (file) {
+        this.selectedFile = file
+        console.log('File selected:', file.name)
+      } else {
+        this.selectedFile = null
+        console.log('No file selected')
+      }
+    },
     async loadSupportedModels() {
       try {
         const response = await fetch('/shared/config/models_config.json')
