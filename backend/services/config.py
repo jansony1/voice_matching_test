@@ -1,8 +1,8 @@
 import os
 import json
 
-# Path to the shared models configuration
-MODELS_CONFIG_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'shared', 'config', 'models_config.json')
+# In Docker environment, the config file is mounted at /app/shared/config/models_config.json
+MODELS_CONFIG_PATH = '/app/shared/config/models_config.json'
 
 # Load models configuration from the shared JSON file
 def load_models_config():
