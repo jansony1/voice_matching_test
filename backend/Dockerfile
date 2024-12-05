@@ -15,6 +15,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY main.py .
 COPY services/ ./services/
 
+# Create shared config directory and copy configuration
+RUN mkdir -p /app/shared/config
+COPY shared/config/models_config.json /app/shared/config/
+
 # Expose the application port
 EXPOSE 8000
 

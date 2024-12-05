@@ -6,8 +6,10 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
-# Copy source code and shared config
+# Copy source code
 COPY . .
+# Copy shared configuration
+COPY shared/config/models_config.json /app/public/shared/config/
 
 # Build production version
 RUN npm run build
@@ -21,6 +23,12 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 # Copy config.js and polyfill to nginx html directory
 COPY public/config.js /usr/share/nginx/html/
 COPY public/credentials-polyfill.js /usr/share/nginx/html/
+
+# Create shared config directory
+RUN mkdir -p /usr/share/nginx/html/shared/config
+
+# Copy shared configuration to nginx html directory
+COPY --from=builder /app/public/shared/config/models_config.json /usr/share/nginx/html/shared/config/
 
 # Enhanced nginx configuration with CORS and file upload settings
 RUN echo 'server { \
