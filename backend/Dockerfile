@@ -15,10 +15,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY backend/main.py .
 COPY backend/services/ ./services/
 
-# Create shared config directory first
+# Create shared config directory and copy configuration
 RUN mkdir -p shared/config
-
-# Then copy shared configuration
 COPY shared/config/models_config.json shared/config/
 
 # Expose the application port
