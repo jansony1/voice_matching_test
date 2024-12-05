@@ -1,23 +1,29 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import { nodePolyfills } from 'vite-plugin-node-polyfills'
+import path from 'path'
 
+// https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [
-    vue(),
-    nodePolyfills({
-      protocolImports: true,
-    }),
-  ],
+  plugins: [vue()],
   resolve: {
     alias: {
-      'buffer': 'buffer',
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+  server: {
+    host: '0.0.0.0',
+    port: 3000,
+    // Serve static files from shared directory
+    fs: {
+      strict: false,
+      allow: ['..']
     }
   },
-  define: {
-    'process.env': {},
-  },
-  optimizeDeps: {
-    include: ['buffer'],
+  build: {
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, 'index.html'),
+      },
+    },
   },
 })
