@@ -19,6 +19,10 @@ COPY backend/services/ ./services/
 RUN mkdir -p shared/config
 COPY shared/config/models_config.json shared/config/
 
+# Create logs directory with proper permissions
+RUN mkdir -p /app/logs && \
+    chmod 777 /app/logs
+
 # Expose the application port
 EXPOSE 8000
 

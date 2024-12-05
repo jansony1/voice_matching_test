@@ -21,7 +21,7 @@ def load_models_config():
 SUPPORTED_MODELS = load_models_config()
 
 # Logging configurations
-LOG_DIR = os.path.dirname(os.path.dirname(__file__))
+LOG_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'logs')  # /app/logs in container
 APP_LOG_FILE = os.path.join(LOG_DIR, 'app.log')
 EXECUTION_TIMES_LOG_FILE = os.path.join(LOG_DIR, 'execution_times.log')
 

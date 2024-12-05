@@ -30,7 +30,6 @@ def generate_conversation(bedrock_client, model_id, system_prompts, messages, in
         token_usage = response['usage']
         logging.info(f"Input tokens: {token_usage['inputTokens']}")
         logging.info(f"Output tokens: {token_usage['outputTokens']}")
-        logging.info(f"Total tokens: {token_usage['totalTokens']}")
         logging.info(f"Stop reason: {response['stopReason']}")
         logging.info(f"Execution time: {execution_time:.2f} seconds")
 
@@ -47,6 +46,7 @@ async def call_bedrock(transcript: str, system_prompt: str, session: boto3.Sessi
     try:
         # Initialize Bedrock runtime client
         bedrock_runtime = session.client('bedrock-runtime')
+        logging.info(f"Model Name is : {model_name}")
 
         if model_name not in SUPPORTED_MODELS:
             raise ValueError(f"Unsupported model: {model_name}")
