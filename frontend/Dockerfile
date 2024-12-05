@@ -6,14 +6,17 @@ WORKDIR /app
 COPY frontend/package*.json ./
 RUN npm install
 
-# Copy frontend source code first
+# Copy all frontend files first
 COPY frontend/ .
 
-# Create shared config directory
-RUN mkdir -p public/shared/config
+# Build production version
+RUN npm run build
+
+# 创建目标目录
+RUN mkdir -p ./public/shared/config
 
 # Copy shared configuration
-COPY shared/config/models_config.json public/shared/config/
+COPY shared/config/models_config.json ./public/shared/config/
 
 # Build production version
 RUN npm run build
