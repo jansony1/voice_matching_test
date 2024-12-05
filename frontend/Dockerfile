@@ -9,14 +9,9 @@ RUN npm install
 # Copy all frontend files first
 COPY frontend/ .
 
-# Build production version
-RUN npm run build
-
-# 创建目标目录
-RUN mkdir -p ./public/shared/config
-
-# Copy shared configuration
-COPY shared/config/models_config.json ./public/shared/config/
+# Create shared directory structure and copy configuration
+RUN mkdir -p public/shared/config
+COPY shared/config/models_config.json public/shared/config/
 
 # Build production version
 RUN npm run build
