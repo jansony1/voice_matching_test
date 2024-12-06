@@ -7,7 +7,7 @@ COPY frontend/package*.json ./
 RUN npm install
 
 # Create directory structure first
-RUN mkdir -p public/shared/config
+# RUN mkdir -p public/shared/config
 
 # Copy all frontend files
 COPY frontend/ .
