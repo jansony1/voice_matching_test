@@ -41,15 +41,6 @@ chars = string.ascii_letters + string.digits
 RANDOM_PASSWORD = ''.join(random.choice(chars) for _ in range(8))
 logging.info(f"Generated random password for user zxxm: {RANDOM_PASSWORD}")
 
-def read_llm_generate_dict():
-    """Read the content of llm_generate_dict.txt"""
-    try:
-        with open(LLM_GENERATE_DICT_PATH, 'r') as f:
-            return f.read().strip()
-    except Exception as e:
-        logging.error(f"Error reading llm_generate_dict.txt: {e}")
-        raise HTTPException(status_code=500, detail="Error reading system prompt file")
-
 @app.post('/login')
 async def login(credentials: dict):
     username = credentials.get('username')
@@ -62,6 +53,75 @@ async def login(credentials: dict):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
     return {"message": "Login successful"}
+
+def read_llm_generate_dict():
+    """Read the content of llm_generate_dict.txt"""
+    try:
+        with open(LLM_GENERATE_DICT_PATH, 'r') as f:
+            content = f.read().strip()
+            if not content:
+                raise ValueError("System prompt file is empty")
+            return content
+    except Exception as e:
+        logging.error(f"Error reading llm_generate_dict.txt: {e}")
+        raise HTTPException(status_code=500, detail="Error reading system prompt file")
+
+def process_json_data(json_data):
+    """Process JSON data to extract words and format them"""
+    try:
+        # Parse JSON if it's a string
+        if isinstance(json_data, str):
+            json_data = json.loads(json_data)
+        
+        # Ensure it's a list
+        if not isinstance(json_data, list):
+            raise ValueError("JSON data must be an array")
+        
+        # Extract only the "word" values
+        words = [item.get("word") for item in json_data if item.get("word")]
+        
+        # Format as a string set
+        formatted_str = "{" + ", ".join(f'"{word}"' for word in words) + "}"
+        
+        return formatted_str
+    except Exception as e:
+        logging.error(f"Error processing JSON data: {e}")
+        raise ValueError(f"Invalid JSON format: {str(e)}")
+
+@app.post('/generate_variation')
+async def generate_variation(request_data: dict):
+    try:
+        # Get JSON data from request
+        json_data = request_data.get('json_data')
+        if not json_data:
+            raise HTTPException(status_code=400, detail="Missing JSON data")
+
+        # Process JSON data to extract and format words
+        try:
+            formatted_input = process_json_data(json_data)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+
+        # Get the system prompt from llm_generate_dict.txt
+        system_prompt = read_llm_generate_dict()
+
+        # Get AWS session
+        session, _ = get_temporary_credentials()
+        
+        # Call Bedrock service with Claude 3 Sonnet
+        model_name="claude-3-sonnet-20240229-v1:0"
+
+        bedrock_result = await call_bedrock(formatted_input, system_prompt, session, model_name)
+
+        return {
+            'bedrock_result': bedrock_result
+        }
+
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        logging.error(f"Variation generation error: {e}")
+        raise HTTPException(status_code=500, detail=f"Variation generation failed: {str(e)}")
 
 @app.get('/get_ec2_role')
 async def fetch_ec2_role():
@@ -83,43 +143,6 @@ async def fetch_ec2_role():
     except Exception as e:
         logging.error(f"Unexpected error in fetch_ec2_role: {e}")
         raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
-
-@app.post('/generate_variation')
-async def generate_variation(request_data: dict):
-    try:
-        # Get JSON data from request
-        json_data = request_data.get('json_data')
-        if not json_data:
-            raise HTTPException(status_code=400, detail="Missing JSON data")
-
-        # Validate JSON data
-        try:
-            if isinstance(json_data, str):
-                json_data = json.loads(json_data)
-        except json.JSONDecodeError:
-            raise HTTPException(status_code=400, detail="Invalid JSON format")
-
-        # Get the system prompt from llm_generate_dict.txt
-        system_prompt = read_llm_generate_dict()
-
-        # Get AWS session
-        session, _ = get_temporary_credentials()
-        
-        # Call Bedrock service with Claude 3 Sonnet
-        model_name="claude-3-5-sonnet"
-
-        bedrock_result = await call_bedrock(json_data, system_prompt, session, model_name)
-
-        return {
-            'bedrock_result': bedrock_result
-        }
-      
-
-    except HTTPException as he:
-        raise he
-    except Exception as e:
-        logging.error(f"Variation generation error: {e}")
-        raise HTTPException(status_code=500, detail=f"Variation generation failed: {str(e)}")
 
 @app.post('/upload_to_s3')
 async def upload_to_s3(
