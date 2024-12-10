@@ -20,9 +20,10 @@ Instructions:
 - Utilize parallel processing for large dictionaries.
 - Apply heuristic rules to quickly filter candidates.
 - Provide only the best match.
-- !If no good match, state "No match found".
-- !Do not explain the match.
+- If no good match, state "No match found".
+- Do not explain the match.
 - Consider common speech recognition errors.
+- Consider common TTS situation.
 
 Text: {text}
 Dictionary: {generate_result}

@@ -8,21 +8,46 @@ VoiceSync is an advanced cloud-powered voice processing platform that leverages 
 
 ![Flow Chat](./assets/pic/flowchart.png)
 
-1. Start: The user initiates the system.
+1. Login: Enter username and password to access the system
 2. Fetch EC2 Role: The system retrieves the IAM role associated with the EC2 instance using IMDSv2.
 3. Get Temporary Token: The system obtains temporary AWS credentials for service authentication.
-4. Input the System Prompt
-5. Choose Input Method: The user selects one of two input methods:
-   - Real-time audio recording
-   - S3 file upload
-6. Audio Input: Based on the user's choice, one of the following actions is performed:
+4. Input Method Selection:
+   - Enter system prompt manually, or
+   - Upload custom dictionary to generate variations
+   - Choose between real-time recording or S3 file upload
+5. Audio Input: Based on the user's choice, one of the following actions is performed:
    - Record real-time audio, or
    - Upload an audio file to S3
-7. Transcribe Audio: The system transcribes the audio input into text.
-8. Bedrock Inference: The transcribed text is processed using AWS Bedrock for inference.
-9. Display Results: The system displays the results of the transcription and inference.
+6. Transcribe Audio: The system transcribes the audio input into text.
+7. Bedrock Inference: The transcribed text is processed using AWS Bedrock for inference.
+8. Display Results: The system displays the results of the transcription and inference.
 
-This workflow covers the main functionalities of the VoiceSync system, including IAM Role-based authentication using IMDSv2, flexible audio input methods, audio transcription, AI-based inference, and result presentation.
+This workflow covers the main functionalities of the VoiceSync system, including authentication, IAM Role-based authentication using IMDSv2, flexible audio input methods, audio transcription, AI-based inference, and result presentation.
+
+### Authentication
+
+The system uses a simple authentication mechanism:
+- Username: zxxm
+- Password: An 8-character random string generated at backend startup
+- The password is logged in the backend container logs
+- Users must log in before accessing any system features
+
+### Custom Dictionary Upload
+
+The system supports generating variations from a custom dictionary:
+1. Prepare a JSON file with the following format:
+   ```json
+   [
+     {"word": "WORD1", "extra_info": "info1"},
+     {"word": "WORD2", "extra_info": "info2"}
+   ]
+   ```
+2. Click the "Choose File" button to upload your JSON file
+3. Click "Generate Variation" to process the dictionary
+4. The system will extract words and generate variations using Claude 3.5 Sonnet
+5. Generated variations will automatically update the system prompt
+
+[Rest of README remains unchanged from here]
 
 ## IAM Role Setup
 
@@ -105,8 +130,10 @@ Before deploying the application, you need to set up an IAM role with the necess
 
 8. Access Application:
    Open https://your-alb-address.com in your web browser.
+9. Check Password
+   docker logs -f <backend-container-id>
 
-9. Latency check for inference
+10. Latency check for inference
    ```bash
    tail -f backend/execution_times.log 
    2024-12-04T05:27:47.788226,anthropic.claude-3-haiku-20240307-v1:0,0.6913
