@@ -1,4 +1,3 @@
-<!-- Previous code remains unchanged until the template -->
 <template>
   <div class="input-form">
     <!-- Login Form -->
@@ -60,6 +59,7 @@
           <!-- Variation controls -->
           <div class="variation-controls">
             <div class="file-upload-container">
+              <label class="highlight-label">Upload JSON File</label>
               <input 
                 type="file" 
                 @change="handleJsonFileChange" 
@@ -69,9 +69,11 @@
               />
               <small class="file-hint">Upload JSON file for variation</small>
             </div>
-            <button @click="generateVariation" class="btn btn-secondary" :disabled="!jsonFile">
-              Generate Variation
-            </button>
+            <div class="generate-button-container">
+              <button @click="generateVariation" class="btn btn-secondary" :disabled="!jsonFile">
+                Generate Variation
+              </button>
+            </div>
           </div>
         </div>
 
@@ -562,13 +564,19 @@ export default {
 /* Variation controls */
 .variation-controls {
   display: flex;
-  align-items: center;
-  margin-top: 10px;
-  gap: 10px;
+  flex-direction: column;
+  margin-top: 15px;
+  gap: 15px;
 }
 
 .file-upload-container {
-  flex: 1;
+  width: 100%;
+}
+
+.generate-button-container {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
 }
 
 .file-hint {

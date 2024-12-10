@@ -1,5 +1,14 @@
 {
     "supported_models": {
+        "claude-3-5-sonnet": {
+            "display_name": "Claude 3.5 Sonnet V2",
+            "id": "anthropic.claude-3-5-sonnet-20241022-v2:0",
+            "config": {
+                "temperature": 0.5,
+                "topP": 0.9,
+                "maxTokens": 1000
+            }
+        },
         "claude-3-haiku": {
             "display_name": "Claude 3 Haiku",
             "id": "anthropic.claude-3-haiku-20240307-v1:0",
