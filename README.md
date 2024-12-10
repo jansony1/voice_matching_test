@@ -131,7 +131,10 @@ Before deploying the application, you need to set up an IAM role with the necess
 8. Access Application:
    Open https://your-alb-address.com in your web browser.
 9. Check Password
-   docker logs -f <backend-container-id>
+   ```bash
+   docker logs -f 7efe985a8d19
+   Generated random password for user zxxm: {password}
+   ```
 
 10. Latency check for inference
    ```bash
