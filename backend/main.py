@@ -57,7 +57,7 @@ async def login(credentials: dict):
 def read_llm_generate_dict():
     """Read the content of llm_generate_dict.txt"""
     try:
-        with open(LLM_GENERATE_DICT_PATH, 'r') as f:
+        with open(LLM_GENERATE_DICT_PATH, 'r', encoding='utf-8') as f:
             content = f.read().strip()
             if not content:
                 raise ValueError("System prompt file is empty")
@@ -99,17 +99,23 @@ async def generate_variation(request_data: dict):
         # Process JSON data to extract and format words
         try:
             formatted_input = process_json_data(json_data)
+            logging.info(f"Formatted input: {formatted_input}")
         except ValueError as e:
             raise HTTPException(status_code=400, detail=str(e))
 
         # Get the system prompt from llm_generate_dict.txt
         system_prompt = read_llm_generate_dict()
+        logging.info(f"System prompt length: {len(system_prompt)}")
+        logging.info(f"System prompt first 100 chars: {system_prompt[:100]}")
+
+        # Replace placeholder in system prompt
+        system_prompt = system_prompt.replace("{input_dict}", formatted_input)
 
         # Get AWS session
         session, _ = get_temporary_credentials()
         
-        # Call Bedrock service with Claude 3 Sonnet
-        model_name="claude-3-sonnet-20240229-v1:0"
+        # Call Bedrock service with Claude 3.5 Sonnet
+        model_name = "claude-3-5-sonnet"  # Updated to match models_config.json
 
         bedrock_result = await call_bedrock(formatted_input, system_prompt, session, model_name)
 
