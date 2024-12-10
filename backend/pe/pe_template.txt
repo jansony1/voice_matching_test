@@ -7,7 +7,7 @@ Dictionary: A list of keywords with possible variations.
 Matching Strategy:
 1. Exact Match
 2. High-confidence Partial Match (>80% similarity)
-3. Phonetic Similarity (using Soundex or similar algorithm)
+3. Phonetic Similarity (using Soundex or similar algorithm)gi
 
 Output Format:
 Matched Word: [Dictionary keyword]
