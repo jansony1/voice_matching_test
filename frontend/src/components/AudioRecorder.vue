@@ -30,7 +30,7 @@ export default {
   data() {
     return {
       isRecording: false,
-      isStopping: false,  // 新增状态标志
+      isStopping: false,
       transcription: '',
       transcribeClient: null,
       error: null,
@@ -39,42 +39,55 @@ export default {
       audioInput: null,
       processor: null,
       finalTranscription: '',
-      transcriptionBuffer: [],
-      lastProcessedIndex: 0
+      partialTranscript: '',
+      isPartial: false
     }
   },
   methods: {
-    cleanTranscription(transcript) {
-      // Remove punctuation, convert to uppercase, and trim
-      const cleanedTranscript = transcript
-        .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
-        .toUpperCase()
-        .trim();
+    processTranscript(results) {
+      if (!results || results.length === 0) return;
 
-      // Split into words and remove duplicates while preserving order
-      const words = cleanedTranscript.split(/\s+/);
-      const uniqueWords = [];
-      const seenWords = new Set();
+      const result = results[0];
+      if (!result.Alternatives || result.Alternatives.length === 0) return;
 
-      for (const word of words) {
-        if (!seenWords.has(word)) {
-          uniqueWords.push(word);
-          seenWords.add(word);
+      const transcript = result.Alternatives[0].Transcript.trim();
+      const isPartial = !result.IsPartial;
+
+      if (isPartial) {
+        // 这是一个部分结果，更新部分转录
+        this.partialTranscript = transcript;
+      } else {
+        // 这是一个最终结果，将其添加到完整转录中
+        if (transcript) {
+          // 只有当转录不为空时才处理
+          const words = transcript.split(/\s+/);
+          const lastTranscriptWords = this.transcription.split(/\s+/);
+          
+          // 检查新单词是否已经存在于最后的转录中
+          const newWords = words.filter(word => !lastTranscriptWords.includes(word));
+          
+          if (newWords.length > 0) {
+            // 只添加新的单词
+            this.transcription = this.transcription
+              ? `${this.transcription} ${newWords.join(' ')}`
+              : newWords.join(' ');
+          }
         }
+        this.partialTranscript = ''; // 清除部分转录
       }
 
-      return uniqueWords.join(' ');
+      // 发出更新事件
+      this.$emit('transcriptionUpdate', this.transcription);
     },
 
     async startRecording() {
-      if (this.isRecording || this.isStopping) return;  // 防止重复启动
+      if (this.isRecording || this.isStopping) return;
       
       try {
         this.error = null;
         this.transcription = '';
+        this.partialTranscript = '';
         this.finalTranscription = '';
-        this.transcriptionBuffer = [];
-        this.lastProcessedIndex = 0;
         
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
           throw new Error("Your browser doesn't support audio recording");
@@ -92,7 +105,6 @@ export default {
         this.isRecording = true;
         this.$emit('recordingStarted');
 
-        // Initialize AWS Transcribe client with all credentials
         this.transcribeClient = new TranscribeStreamingClient({
           region: this.awsCredentials.region,
           credentials: {
@@ -102,49 +114,29 @@ export default {
           },
         });
 
-        // Start transcription
         const command = new StartStreamTranscriptionCommand({
           LanguageCode: "en-US",
           MediaSampleRateHertz: this.audioContext.sampleRate,
           MediaEncoding: "pcm",
           AudioStream: this.audioStreamGenerator(),
+          EnablePartialResultsStabilization: true,
+          PartialResultsStability: "HIGH"
         });
 
         const response = await this.transcribeClient.send(command);
 
         for await (const event of response.TranscriptResultStream) {
           if (event.TranscriptEvent && event.TranscriptEvent.Transcript) {
-            const results = event.TranscriptEvent.Transcript.Results;
-            if (results && results.length > 0 && results[0].Alternatives && results[0].Alternatives.length > 0) {
-              const transcript = results[0].Alternatives[0].Transcript.trim();
-              
-              // Only process if the transcript is new
-              if (transcript && !this.transcriptionBuffer.includes(transcript)) {
-                this.transcriptionBuffer.push(transcript);
-                
-                // Keep only the last few transcripts to prevent memory bloat
-                if (this.transcriptionBuffer.length > 5) {
-                  this.transcriptionBuffer.shift();
-                }
-
-                // Update transcription with unique words
-                this.transcription = this.cleanTranscription(
-                  this.transcriptionBuffer.join(' ')
-                );
-
-                this.$emit('transcriptionUpdate', this.transcription);
-              }
-            }
+            this.processTranscript(event.TranscriptEvent.Transcript.Results);
           }
         }
       } catch (error) {
         console.error('Error starting recording:', error);
         this.error = `Error starting recording: ${error.message}`;
-        this.cleanupResources();  // 使用新的清理方法
+        this.cleanupResources();
       }
     },
 
-    // 新增资源清理方法
     async cleanupResources() {
       if (this.processor) {
         this.processor.disconnect();
@@ -169,31 +161,30 @@ export default {
     },
 
     async stopRecording() {
-      if (!this.isRecording || this.isStopping) return;  // 防止重复停止
+      if (!this.isRecording || this.isStopping) return;
       
       try {
-        this.isStopping = true;  // 设置停止标志
+        this.isStopping = true;
         this.isRecording = false;
         
-        await this.cleanupResources();  // 使用新的清理方法
+        await this.cleanupResources();
         
-        // Clean and store the final transcription
-        this.finalTranscription = this.cleanTranscription(this.transcription);
+        // 清理并存储最终转录
+        this.finalTranscription = this.transcription.trim();
         this.$emit('recordingStopped', this.finalTranscription);
 
-        // Call Bedrock with the final transcription and selected model
+        // 调用 Bedrock
         await this.callBedrock(this.finalTranscription);
       } catch (error) {
         console.error('Error stopping recording:', error);
         this.error = `Error stopping recording: ${error.message}`;
       } finally {
-        this.isStopping = false;  // 重置停止标志
+        this.isStopping = false;
       }
     },
 
     async *audioStreamGenerator() {
-      const self = this;
-      let audioBuffer = [];
+      const audioBuffer = [];
 
       this.processor.onaudioprocess = (e) => {
         const inputData = e.inputBuffer.getChannelData(0);
@@ -226,7 +217,6 @@ export default {
       }
 
       try {
-        // Use window.configs.BACKEND_URL instead of process.env
         const response = await fetch(`${window.configs.BACKEND_URL}/bedrock`, {
           method: 'POST',
           headers: {
