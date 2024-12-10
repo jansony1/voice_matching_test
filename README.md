@@ -127,14 +127,14 @@ Before deploying the application, you need to set up an IAM role with the necess
    docker-compose down
 
    ```
-
-8. Access Application:
-   Open https://your-alb-address.com in your web browser.
-9. Check Password
+8. Check Password
    ```bash
    docker logs -f 7efe985a8d19
-   Generated random password for user zxxm: {password}
+   Generated random password for username zxxm: {password}
    ```
+9. Access Application:
+   Open https://your-alb-address.com in your web browser.
+
 
 10. Latency check for inference
    ```bash
@@ -144,11 +144,6 @@ Before deploying the application, you need to set up an IAM role with the necess
    2024-12-04T05:44:53.981923,anthropic.claude-3-5-haiku-20241022-v1:0,1.4702
    ```
 
-### Using the Application
-
-1. Open the application in your web browser.
-2. Click the "Get EC2 Role and Start" button to fetch the IAM role and temporary token.
-3. Once authenticated, you can use the real-time speech transcription or S3 file upload features.
 
 ### Configuration Notes
 
