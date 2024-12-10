@@ -120,7 +120,7 @@ export default {
           MediaEncoding: "pcm",
           AudioStream: this.audioStreamGenerator(),
           EnablePartialResultsStabilization: true,
-          PartialResultsStability: "HIGH"
+          PartialResultsStability: "high"  // 修改为小写
         });
 
         const response = await this.transcribeClient.send(command);
