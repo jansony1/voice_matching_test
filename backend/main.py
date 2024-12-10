@@ -1,4 +1,8 @@
 import logging
+import json
+import random
+import string
+from pathlib import Path
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
@@ -29,6 +33,36 @@ app.add_middleware(
 # OAuth2 scheme for token
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
+# Path to llm_generate_dict.txt
+LLM_GENERATE_DICT_PATH = Path(__file__).parent / "pe" / "llm_generate_dict.txt"
+
+# Generate random 8-character password with letters and numbers
+chars = string.ascii_letters + string.digits
+RANDOM_PASSWORD = ''.join(random.choice(chars) for _ in range(8))
+logging.info(f"Generated random password for user zxxm: {RANDOM_PASSWORD}")
+
+def read_llm_generate_dict():
+    """Read the content of llm_generate_dict.txt"""
+    try:
+        with open(LLM_GENERATE_DICT_PATH, 'r') as f:
+            return f.read().strip()
+    except Exception as e:
+        logging.error(f"Error reading llm_generate_dict.txt: {e}")
+        raise HTTPException(status_code=500, detail="Error reading system prompt file")
+
+@app.post('/login')
+async def login(credentials: dict):
+    username = credentials.get('username')
+    password = credentials.get('password')
+    
+    if not username or not password:
+        raise HTTPException(status_code=400, detail="Missing username or password")
+    
+    if username != 'zxxm' or password != RANDOM_PASSWORD:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    return {"message": "Login successful"}
+
 @app.get('/get_ec2_role')
 async def fetch_ec2_role():
     try:
@@ -49,6 +83,43 @@ async def fetch_ec2_role():
     except Exception as e:
         logging.error(f"Unexpected error in fetch_ec2_role: {e}")
         raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
+
+@app.post('/generate_variation')
+async def generate_variation(request_data: dict):
+    try:
+        # Get JSON data from request
+        json_data = request_data.get('json_data')
+        if not json_data:
+            raise HTTPException(status_code=400, detail="Missing JSON data")
+
+        # Validate JSON data
+        try:
+            if isinstance(json_data, str):
+                json_data = json.loads(json_data)
+        except json.JSONDecodeError:
+            raise HTTPException(status_code=400, detail="Invalid JSON format")
+
+        # Get the system prompt from llm_generate_dict.txt
+        system_prompt = read_llm_generate_dict()
+
+        # Get AWS session
+        session, _ = get_temporary_credentials()
+        
+        # Call Bedrock service with Claude 3 Sonnet
+        model_name="claude-3-5-sonnet"
+
+        bedrock_result = await call_bedrock(json_data, system_prompt, session, model_name)
+
+        return {
+            'bedrock_result': bedrock_result
+        }
+      
+
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        logging.error(f"Variation generation error: {e}")
+        raise HTTPException(status_code=500, detail=f"Variation generation failed: {str(e)}")
 
 @app.post('/upload_to_s3')
 async def upload_to_s3(

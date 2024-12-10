@@ -1,101 +1,152 @@
-<!-- 前面的代码保持不变，只修改handleRecordingStopped方法 -->
+<!-- Previous code remains unchanged until the template -->
 <template>
   <div class="input-form">
-    <button @click="fetchEC2Role" class="btn btn-primary" :disabled="isFetchingRole">
-      {{ isFetchingRole ? 'Fetching EC2 Role...' : 'Get EC2 Role and Start' }}
-    </button>
-
-    <div v-if="ec2Role" class="role-info">
-      <h3>EC2 Role: {{ ec2Role }}</h3>
-      <p>Authentication successful. You can now use the application.</p>
+    <!-- Login Form -->
+    <div v-if="!isLoggedIn" class="login-form">
+      <h2>Login Required</h2>
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input 
+          type="text" 
+          id="username" 
+          v-model="loginForm.username" 
+          class="form-control"
+          placeholder="Enter username"
+        />
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input 
+          type="password" 
+          id="password" 
+          v-model="loginForm.password" 
+          class="form-control"
+          placeholder="Enter password"
+        />
+      </div>
+      <button @click="handleLogin" class="btn btn-primary" :disabled="isLoggingIn">
+        {{ isLoggingIn ? 'Logging in...' : 'Login' }}
+      </button>
+      <div v-if="loginError" class="error-message">
+        {{ loginError }}
+      </div>
     </div>
 
-    <div v-if="awsCredentials.sessionToken">
-      <div class="form-group">
-        <label for="modelSelect" class="highlight-label">Select Model</label>
-        <select id="modelSelect" v-model="selectedModel" class="form-control">
-          <option v-for="(model, key) in supportedModels" :key="key" :value="key">
-            {{ model.display_name }}
-          </option>
-        </select>
+    <!-- Main Content (only shown after login) -->
+    <div v-else>
+      <button @click="fetchEC2Role" class="btn btn-primary" :disabled="isFetchingRole">
+        {{ isFetchingRole ? 'Fetching EC2 Role...' : 'Get EC2 Role and Start' }}
+      </button>
+
+      <div v-if="ec2Role" class="role-info">
+        <h3>EC2 Role: {{ ec2Role }}</h3>
+        <p>Authentication successful. You can now use the application.</p>
       </div>
 
-      <div class="form-group">
-        <label for="systemPrompt" class="highlight-label">System Prompt</label>
-        <textarea id="systemPrompt" v-model="systemPrompt" placeholder="Enter system prompt" class="form-control"></textarea>
-      </div>
+      <div v-if="awsCredentials.sessionToken">
+        <div class="form-group">
+          <label for="modelSelect" class="highlight-label">Select Model</label>
+          <select id="modelSelect" v-model="selectedModel" class="form-control">
+            <option v-for="(model, key) in supportedModels" :key="key" :value="key">
+              {{ model.display_name }}
+            </option>
+          </select>
+        </div>
 
-      <ul class="nav nav-tabs">
-        <li class="nav-item">
-          <a class="nav-link" :class="{ active: transcriptionMode === 'realtime' }" href="#" @click.prevent="transcriptionMode = 'realtime'">Real-time Speech Transcription</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" :class="{ active: transcriptionMode === 's3file' }" href="#" @click.prevent="transcriptionMode = 's3file'">S3 Audio File</a>
-        </li>
-      </ul>
-
-      <div class="tab-content">
-        <div class="tab-pane" :class="{ 'active': transcriptionMode === 'realtime' }">
-          <div class="realtime-transcription">
-            <AudioRecorder 
-              ref="audioRecorder" 
-              :systemPrompt="systemPrompt"
-              :awsCredentials="awsCredentials"
-              :selectedModel="selectedModel"
-              @transcriptionUpdate="handleTranscriptionUpdate"
-              @recordingStopped="handleRecordingStopped"
-              @recordingStarted="handleRecordingStarted"
-              @bedrockResult="handleBedrockResult"
-            />
-            <div v-if="status === 'matching'" class="status-text">
-              Matching...
+        <div class="form-group">
+          <label for="systemPrompt" class="highlight-label">System Prompt</label>
+          <textarea id="systemPrompt" v-model="systemPrompt" placeholder="Enter system prompt" class="form-control"></textarea>
+          
+          <!-- Variation controls -->
+          <div class="variation-controls">
+            <div class="file-upload-container">
+              <input 
+                type="file" 
+                @change="handleJsonFileChange" 
+                accept=".json"
+                class="form-control"
+                id="jsonFileInput"
+              />
+              <small class="file-hint">Upload JSON file for variation</small>
             </div>
-            <div v-if="status === 'matched'" class="status-text">
-              Match Result
-            </div>
-            <div v-if="transcriptionResult" class="transcription-result">
-              <h3>Transcription Result</h3>
-              <pre>{{ transcriptionResult }}</pre>
-            </div>
-            <div v-if="bedrockResult" class="bedrock-result">
-              <h3>Bedrock Inference Result</h3>
-              <pre>{{ bedrockResult }}</pre>
-            </div>
+            <button @click="generateVariation" class="btn btn-secondary" :disabled="!jsonFile">
+              Generate Variation
+            </button>
           </div>
         </div>
 
-        <div class="tab-pane" :class="{ 'active': transcriptionMode === 's3file' }">
-          <div class="s3file-transcription">
-            <div class="form-group">
-              <label for="audioFile" class="highlight-label">Audio File</label>
-              <input 
-                type="file" 
-                id="audioFile" 
-                @change="handleFileChange" 
-                accept="audio/*"
-                class="form-control"
+        <ul class="nav nav-tabs">
+          <li class="nav-item">
+            <a class="nav-link" :class="{ active: transcriptionMode === 'realtime' }" href="#" @click.prevent="transcriptionMode = 'realtime'">Real-time Speech Transcription</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" :class="{ active: transcriptionMode === 's3file' }" href="#" @click.prevent="transcriptionMode = 's3file'">S3 Audio File</a>
+          </li>
+        </ul>
+
+        <div class="tab-content">
+          <div class="tab-pane" :class="{ 'active': transcriptionMode === 'realtime' }">
+            <div class="realtime-transcription">
+              <AudioRecorder 
+                ref="audioRecorder" 
+                :systemPrompt="systemPrompt"
+                :awsCredentials="awsCredentials"
+                :selectedModel="selectedModel"
+                @transcriptionUpdate="handleTranscriptionUpdate"
+                @recordingStopped="handleRecordingStopped"
+                @recordingStarted="handleRecordingStarted"
+                @bedrockResult="handleBedrockResult"
               />
+              <div v-if="status === 'matching'" class="status-text">
+                Matching...
+              </div>
+              <div v-if="status === 'matched'" class="status-text">
+                Match Result
+              </div>
+              <div v-if="transcriptionResult" class="transcription-result">
+                <h3>Transcription Result</h3>
+                <pre>{{ transcriptionResult }}</pre>
+              </div>
+              <div v-if="bedrockResult" class="bedrock-result">
+                <h3>Bedrock Inference Result</h3>
+                <pre>{{ bedrockResult }}</pre>
+              </div>
             </div>
-            <div class="form-group">
-              <label for="s3AudioFileUrl" class="highlight-label">S3 Audio File URL</label>
-              <input type="text" id="s3AudioFileUrl" v-model="s3AudioFileUrl" placeholder="Enter S3 destination path (e.g., s3://bucket-name/path/file.mp3)" class="form-control" />
-            </div>
-            <button @click="submitS3Transcription" :disabled="!systemPrompt || !selectedFile || !s3AudioFileUrl" class="btn btn-primary">
-              {{ s3Status === 'matching' ? 'Processing...' : 'Submit' }}
-            </button>
-            <div v-if="uploadProgress > 0 && uploadProgress < 100" class="upload-progress">
-              Uploading: {{ uploadProgress }}%
-            </div>
-            <div v-if="s3Status === 'matched'" class="status-text">
-              Match Result
-            </div>
-            <div v-if="transcriptionResult" class="transcription-result">
-              <h3>S3 Transcription Result</h3>
-              <pre>{{ transcriptionResult }}</pre>
-            </div>
-            <div v-if="bedrockResult" class="bedrock-result">
-              <h3>S3 Bedrock Inference Result</h3>
-              <pre>{{ bedrockResult }}</pre>
+          </div>
+
+          <div class="tab-pane" :class="{ 'active': transcriptionMode === 's3file' }">
+            <div class="s3file-transcription">
+              <div class="form-group">
+                <label for="audioFile" class="highlight-label">Audio File</label>
+                <input 
+                  type="file" 
+                  id="audioFile" 
+                  @change="handleFileChange" 
+                  accept="audio/*"
+                  class="form-control"
+                />
+              </div>
+              <div class="form-group">
+                <label for="s3AudioFileUrl" class="highlight-label">S3 Audio File URL</label>
+                <input type="text" id="s3AudioFileUrl" v-model="s3AudioFileUrl" placeholder="Enter S3 destination path (e.g., s3://bucket-name/path/file.mp3)" class="form-control" />
+              </div>
+              <button @click="submitS3Transcription" :disabled="!systemPrompt || !selectedFile || !s3AudioFileUrl" class="btn btn-primary">
+                {{ s3Status === 'matching' ? 'Processing...' : 'Submit' }}
+              </button>
+              <div v-if="uploadProgress > 0 && uploadProgress < 100" class="upload-progress">
+                Uploading: {{ uploadProgress }}%
+              </div>
+              <div v-if="s3Status === 'matched'" class="status-text">
+                Match Result
+              </div>
+              <div v-if="transcriptionResult" class="transcription-result">
+                <h3>S3 Transcription Result</h3>
+                <pre>{{ transcriptionResult }}</pre>
+              </div>
+              <div v-if="bedrockResult" class="bedrock-result">
+                <h3>S3 Bedrock Inference Result</h3>
+                <pre>{{ bedrockResult }}</pre>
+              </div>
             </div>
           </div>
         </div>
@@ -132,6 +183,13 @@ export default {
   },
   data() {
     return {
+      isLoggedIn: false,
+      isLoggingIn: false,
+      loginError: null,
+      loginForm: {
+        username: '',
+        password: ''
+      },
       s3AudioFileUrl: '',
       systemPrompt: '',
       transcriptionResult: '',
@@ -151,10 +209,102 @@ export default {
         sessionToken: ''
       },
       supportedModels: {},
-      selectedModel: ''
+      selectedModel: '',
+      jsonFile: null
     }
   },
   methods: {
+    async handleLogin() {
+      if (!this.loginForm.username || !this.loginForm.password) {
+        this.loginError = 'Please enter both username and password'
+        return
+      }
+
+      this.isLoggingIn = true
+      this.loginError = null
+
+      try {
+        const response = await fetch(`${BACKEND_URL}/login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            username: this.loginForm.username,
+            password: this.loginForm.password
+          })
+        })
+
+        if (response.ok) {
+          this.isLoggedIn = true
+          this.loginError = null
+        } else {
+          const error = await response.json()
+          throw new Error(error.detail || 'Login failed')
+        }
+      } catch (error) {
+        console.error('Login error:', error)
+        this.loginError = error.message
+      } finally {
+        this.isLoggingIn = false
+      }
+    },
+    handleJsonFileChange(event) {
+      const file = event.target.files[0]
+      if (file) {
+        if (!file.name.endsWith('.json')) {
+          this.error = 'Please upload a JSON file'
+          event.target.value = '' // Reset file input
+          this.jsonFile = null
+          return
+        }
+        this.jsonFile = file
+        this.error = null
+      } else {
+        this.jsonFile = null
+      }
+    },
+    async generateVariation() {
+      if (!this.jsonFile) {
+        this.error = 'Please upload a JSON file'
+        return
+      }
+
+      try {
+        const fileContent = await this.jsonFile.text()
+        let jsonData
+        try {
+          jsonData = JSON.parse(fileContent)
+        } catch (e) {
+          this.error = 'Invalid JSON format'
+          return
+        }
+
+        const response = await fetch(`${BACKEND_URL}/generate_variation`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.awsCredentials.sessionToken}`
+          },
+          body: JSON.stringify({
+            json_data: jsonData
+          })
+        })
+
+        if (response.ok) {
+          const result = await response.json()
+          this.systemPrompt = result.bedrock_result
+          this.error = null
+        } else {
+          const errorData = await response.json()
+          throw new Error(errorData.detail || `Error: ${response.status} - ${response.statusText}`)
+        }
+      } catch (error) {
+        console.error('Error generating variation:', error)
+        this.error = `Error generating variation: ${error.message}`
+      }
+    },
+    // Rest of the methods remain unchanged
     handleFileChange(event) {
       const file = event.target.files[0]
       if (file) {
@@ -314,12 +464,10 @@ export default {
       this.status = 'matching'
     },
     handleRecordingStopped(finalTranscription) {
-      // 只更新转录结果，不再调用Bedrock
       this.transcriptionResult = finalTranscription
       this.status = 'matched'
     },
     handleBedrockResult(result) {
-      // 处理来自AudioRecorder的Bedrock结果
       this.bedrockResult = result
     },
     handleRecordingStarted() {
@@ -332,13 +480,29 @@ export default {
 </script>
 
 <style scoped>
-/* 样式保持不变 */
+/* Previous styles remain unchanged */
 .input-form {
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
   border: 1px solid #ccc;
   border-radius: 5px;
+}
+
+/* Login form styles */
+.login-form {
+  max-width: 400px;
+  margin: 40px auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f8f9fa;
+}
+
+.login-form h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #007bff;
 }
 
 .form-group {
@@ -385,11 +549,35 @@ export default {
   color: #fff;
 }
 
-.btn-primary:disabled {
+.btn-secondary {
+  background-color: #6c757d;
+  color: #fff;
+}
+
+.btn:disabled {
   background-color: #ccc;
   cursor: not-allowed;
 }
 
+/* Variation controls */
+.variation-controls {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+  gap: 10px;
+}
+
+.file-upload-container {
+  flex: 1;
+}
+
+.file-hint {
+  color: #6c757d;
+  margin-top: 5px;
+  display: block;
+}
+
+/* Rest of the styles remain unchanged */
 .btn-outline-secondary {
   background-color: #f8f9fa;
   border: 1px solid #ccc;
