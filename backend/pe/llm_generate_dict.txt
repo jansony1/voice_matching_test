@@ -11,7 +11,23 @@ You are a word variation generator which will be used for voice navigation later
 Instructions:
 1. The generated variations should be de-duplicated and sorted by likelihood from highest to lowest. 
 2. variations for each item shouold not exceed 6 aim to generate possible variations as much as possible. Begin!
-3.The final output should be a JSON object where the keys are the original words, and the values are lists of variations.
+3. The final output should be a JSON object where the keys are the original words, and the values are lists of variations.
+4. Output only contain required info, like below. Do not output any other words
+{
+"HAAGEN-DAZS": [
+"Ha and Dass.",
+"Haagen Dazs.",
+"Hagen Dass.",
+"Hogan doss.",
+"Pagodas.",
+"Hogen doss.",
+"Hagen doss."
+],
+"NESPRESSO": [
+"Espresso.",
+]
+}
+
 
 
 

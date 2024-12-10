@@ -2,6 +2,7 @@ import logging
 import json
 import random
 import string
+import re
 from pathlib import Path
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
@@ -33,13 +34,48 @@ app.add_middleware(
 # OAuth2 scheme for token
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-# Path to llm_generate_dict.txt
+# Path to files
 LLM_GENERATE_DICT_PATH = Path(__file__).parent / "pe" / "llm_generate_dict.txt"
+PE_TEMPLATE_PATH = Path(__file__).parent / "pe" / "pe_template.txt"
 
 # Generate random 8-character password with letters and numbers
 chars = string.ascii_letters + string.digits
 RANDOM_PASSWORD = ''.join(random.choice(chars) for _ in range(8))
 logging.info(f"Generated random password for user zxxm: {RANDOM_PASSWORD}")
+
+def read_template():
+    """Read the content of pe_template.txt"""
+    try:
+        with open(PE_TEMPLATE_PATH, 'r', encoding='utf-8') as f:
+            content = f.read().strip()
+            if not content:
+                raise ValueError("Template file is empty")
+            return content
+    except Exception as e:
+        logging.error(f"Error reading pe_template.txt: {e}")
+        raise HTTPException(status_code=500, detail="Error reading template file")
+
+def extract_json_from_bedrock_result(result: str) -> str:
+    """Extract only the JSON part from Bedrock result"""
+    try:
+        # Find the JSON object in the result
+        json_match = re.search(r'\{[^{]*"[^"]+"\s*:\s*\[[^\]]*\][^}]*\}', result)
+        if not json_match:
+            raise ValueError("No JSON found in Bedrock result")
+        
+        json_str = json_match.group(0)
+        
+        # Log the rest of the content
+        other_content = result.replace(json_str, '').strip()
+        logging.info(f"Additional Bedrock output: {other_content}")
+        
+        # Validate JSON
+        json.loads(json_str)  # This will raise JSONDecodeError if invalid
+        return json_str
+        
+    except Exception as e:
+        logging.error(f"Error extracting JSON from Bedrock result: {e}")
+        raise ValueError(f"Failed to process Bedrock result: {str(e)}")
 
 @app.post('/login')
 async def login(credentials: dict):
@@ -119,8 +155,15 @@ async def generate_variation(request_data: dict):
 
         bedrock_result = await call_bedrock(formatted_input, system_prompt, session, model_name)
 
+        # Extract JSON from Bedrock result
+        json_result = extract_json_from_bedrock_result(bedrock_result)
+
+        # Read template and replace placeholder
+        template = read_template()
+        final_result = template.replace("{generate_result}", json_result)
+
         return {
-            'bedrock_result': bedrock_result
+            'bedrock_result': final_result
         }
 
     except HTTPException as he:
