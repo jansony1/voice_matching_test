@@ -39,8 +39,8 @@ export default {
       audioInput: null,
       processor: null,
       finalTranscription: '',
-      partialTranscript: '',
-      isPartial: false
+      currentTranscript: '',
+      resultId: null
     }
   },
   methods: {
@@ -50,34 +50,34 @@ export default {
       const result = results[0];
       if (!result.Alternatives || result.Alternatives.length === 0) return;
 
-      const transcript = result.Alternatives[0].Transcript.trim();
-      const isPartial = !result.IsPartial;
+      const transcript = result.Alternatives[0].Transcript;
+      
+      // 只处理非空的转录结果
+      if (!transcript.trim()) return;
 
-      if (isPartial) {
-        // 这是一个部分结果，更新部分转录
-        this.partialTranscript = transcript;
-      } else {
-        // 这是一个最终结果，将其添加到完整转录中
-        if (transcript) {
-          // 只有当转录不为空时才处理
-          const words = transcript.split(/\s+/);
-          const lastTranscriptWords = this.transcription.split(/\s+/);
-          
-          // 检查新单词是否已经存在于最后的转录中
-          const newWords = words.filter(word => !lastTranscriptWords.includes(word));
-          
-          if (newWords.length > 0) {
-            // 只添加新的单词
-            this.transcription = this.transcription
-              ? `${this.transcription} ${newWords.join(' ')}`
-              : newWords.join(' ');
-          }
-        }
-        this.partialTranscript = ''; // 清除部分转录
+      // 如果是新的结果ID，重置当前转录
+      if (this.resultId !== result.ResultId) {
+        this.resultId = result.ResultId;
+        this.currentTranscript = '';
       }
 
-      // 发出更新事件
-      this.$emit('transcriptionUpdate', this.transcription);
+      // 根据IsPartial标志处理结果
+      if (result.IsPartial) {
+        // 部分结果：更新当前转录但不更新最终转录
+        this.currentTranscript = transcript.trim();
+        // 发出更新事件但使用临时结果
+        this.$emit('transcriptionUpdate', this.currentTranscript);
+      } else {
+        // 最终结果：更新当前转录和最终转录
+        this.currentTranscript = transcript.trim();
+        
+        // 如果是新的完整结果，添加到最终转录
+        if (this.currentTranscript && this.currentTranscript !== this.transcription) {
+          this.transcription = this.currentTranscript;
+          // 发出更新事件使用最终结果
+          this.$emit('transcriptionUpdate', this.transcription);
+        }
+      }
     },
 
     async startRecording() {
@@ -86,7 +86,8 @@ export default {
       try {
         this.error = null;
         this.transcription = '';
-        this.partialTranscript = '';
+        this.currentTranscript = '';
+        this.resultId = null;
         this.finalTranscription = '';
         
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -119,8 +120,11 @@ export default {
           MediaSampleRateHertz: this.audioContext.sampleRate,
           MediaEncoding: "pcm",
           AudioStream: this.audioStreamGenerator(),
+          ShowSpeakerLabels: false,
           EnablePartialResultsStabilization: true,
-          PartialResultsStability: "high"  // 修改为小写
+          PartialResultsStability: "high",
+          VocabularyName: "",
+          SessionId: Date.now().toString()
         });
 
         const response = await this.transcribeClient.send(command);
@@ -169,7 +173,7 @@ export default {
         
         await this.cleanupResources();
         
-        // 清理并存储最终转录
+        // 使用最终的完整转录
         this.finalTranscription = this.transcription.trim();
         this.$emit('recordingStopped', this.finalTranscription);
 
