@@ -27,12 +27,12 @@ Instructions:
 "Espresso.",
 ]
 }
-
-
+5. Just generate the entire variations dict, do not give partial response!!
 
 
 Example:
-, given the input:
+
+given the input:
 {"HAAGEN-DAZS", "NESPRESSO"，"LULULEMON"}
 
 A possible output could be:
