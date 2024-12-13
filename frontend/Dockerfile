@@ -32,12 +32,23 @@ COPY frontend/public/credentials-polyfill.js /usr/share/nginx/html/
 RUN mkdir -p /usr/share/nginx/html/shared/config
 COPY --from=builder /app/public/shared/config/models_config.json /usr/share/nginx/html/shared/config/
 
-# Enhanced nginx configuration with CORS and file upload settings
+# Enhanced nginx configuration with CORS, file upload, and timeout settings
 RUN echo 'server { \
     listen 80; \
     \
     # File upload settings \
     client_max_body_size 10M; \
+    \
+    # Timeout configurations \
+    client_header_timeout 30s; \
+    client_body_timeout 30s; \
+    send_timeout 30s; \
+    keepalive_timeout 65s; \
+    \
+    # Proxy timeout settings - increased for long-running APIs \
+    proxy_connect_timeout 60s; \
+    proxy_send_timeout 60s; \
+    proxy_read_timeout 600s;  # 10 minutes for generate_variation \
     \
     # CORS headers \
     add_header Access-Control-Allow-Origin * always; \
