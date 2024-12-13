@@ -8,6 +8,7 @@ from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
 from urllib.parse import urlparse
+import asyncio
 
 # Import custom modules from services directory
 from services.config import SUPPORTED_MODELS
@@ -77,6 +78,98 @@ def extract_json_from_bedrock_result(result: str) -> str:
         logging.error(f"Error extracting JSON from Bedrock result: {e}")
         raise ValueError(f"Failed to process Bedrock result: {str(e)}")
 
+
+def process_json_data(json_data):
+    """Process JSON data to extract words and format them"""
+    try:
+        # Parse JSON if it's a string
+        if isinstance(json_data, str):
+            json_data = json.loads(json_data)
+        
+        # Ensure it's a list
+        if not isinstance(json_data, list):
+            raise ValueError("JSON data must be an array")
+        
+        # Extract only the "word" values
+        words = [item.get("word") for item in json_data if item.get("word")]
+        
+        # Format as a string set
+        formatted_str = "{" + ", ".join(f'"{word}"' for word in words) + "}"
+        
+        return words, formatted_str
+    except Exception as e:
+        logging.error(f"Error processing JSON data: {e}")
+        raise ValueError(f"Invalid JSON format: {str(e)}")
+
+async def generate_batch_variations(session, words_batch, system_prompt, model_name):
+    """Generate variations for a batch of words"""
+    try:
+        # Format batch as input dict
+        batch_dict = "{" + ", ".join(f'"{word}"' for word in words_batch) + "}"
+        
+        # Replace placeholder in system prompt
+        batch_system_prompt = system_prompt.replace("{input_dict}", batch_dict)
+        
+        # Call Bedrock service
+        bedrock_result = await call_bedrock(batch_dict, batch_system_prompt, session, model_name)
+        
+        # Extract JSON from result
+        json_result = extract_json_from_bedrock_result(bedrock_result)
+        
+        return json.loads(json_result)
+    except Exception as e:
+        logging.error(f"Batch variation generation error: {e}")
+        raise HTTPException(status_code=500, detail=f"Batch variation generation failed: {str(e)}")
+
+@app.post('/generate_variation')
+async def generate_variation(request_data: dict):
+    try:
+        # Get JSON data from request
+        json_data = request_data.get('json_data')
+        if not json_data:
+            raise HTTPException(status_code=400, detail="Missing JSON data")
+
+        # Process JSON data to extract words
+        words, formatted_input = process_json_data(json_data)
+        logging.info(f"Formatted input: {formatted_input}")
+
+        # Get the system prompt from llm_generate_dict.txt
+        system_prompt = read_llm_generate_dict()
+        logging.info(f"System prompt length: {len(system_prompt)}")
+
+        # Get AWS session
+        session, _ = get_temporary_credentials()
+        
+        # Call Bedrock service with Claude 3.5 Sonnet
+        model_name = "claude-3-5-sonnet"
+
+        # Batch processing: 2-3 words per batch to control token usage
+        batch_size = 5
+        all_variations = {}
+
+        # Process words in batches
+        for i in range(0, len(words), batch_size):
+            words_batch = words[i:i+batch_size]
+            batch_variations = await generate_batch_variations(session, words_batch, system_prompt, model_name)
+            all_variations.update(batch_variations)
+
+        # Combine variations into a single JSON
+        final_json_result = json.dumps(all_variations)
+
+        # Read template and replace placeholder
+        template = read_template()
+        final_result = template.replace("{generate_result}", final_json_result)
+
+        return {
+            'bedrock_result': final_result
+        }
+
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        logging.error(f"Variation generation error: {e}")
+        raise HTTPException(status_code=500, detail=f"Variation generation failed: {str(e)}")
+
 @app.post('/login')
 async def login(credentials: dict):
     username = credentials.get('username')
@@ -101,76 +194,6 @@ def read_llm_generate_dict():
     except Exception as e:
         logging.error(f"Error reading llm_generate_dict.txt: {e}")
         raise HTTPException(status_code=500, detail="Error reading system prompt file")
-
-def process_json_data(json_data):
-    """Process JSON data to extract words and format them"""
-    try:
-        # Parse JSON if it's a string
-        if isinstance(json_data, str):
-            json_data = json.loads(json_data)
-        
-        # Ensure it's a list
-        if not isinstance(json_data, list):
-            raise ValueError("JSON data must be an array")
-        
-        # Extract only the "word" values
-        words = [item.get("word") for item in json_data if item.get("word")]
-        
-        # Format as a string set
-        formatted_str = "{" + ", ".join(f'"{word}"' for word in words) + "}"
-        
-        return formatted_str
-    except Exception as e:
-        logging.error(f"Error processing JSON data: {e}")
-        raise ValueError(f"Invalid JSON format: {str(e)}")
-
-@app.post('/generate_variation')
-async def generate_variation(request_data: dict):
-    try:
-        # Get JSON data from request
-        json_data = request_data.get('json_data')
-        if not json_data:
-            raise HTTPException(status_code=400, detail="Missing JSON data")
-
-        # Process JSON data to extract and format words
-        try:
-            formatted_input = process_json_data(json_data)
-            logging.info(f"Formatted input: {formatted_input}")
-        except ValueError as e:
-            raise HTTPException(status_code=400, detail=str(e))
-
-        # Get the system prompt from llm_generate_dict.txt
-        system_prompt = read_llm_generate_dict()
-        logging.info(f"System prompt length: {len(system_prompt)}")
-        logging.info(f"System prompt first 100 chars: {system_prompt[:100]}")
-
-        # Replace placeholder in system prompt
-        system_prompt = system_prompt.replace("{input_dict}", formatted_input)
-
-        # Get AWS session
-        session, _ = get_temporary_credentials()
-        
-        # Call Bedrock service with Claude 3.5 Sonnet
-        model_name = "claude-3-5-sonnet"  # Updated to match models_config.json
-
-        bedrock_result = await call_bedrock(formatted_input, system_prompt, session, model_name)
-
-        # Extract JSON from Bedrock result
-        json_result = extract_json_from_bedrock_result(bedrock_result)
-
-        # Read template and replace placeholder
-        template = read_template()
-        final_result = template.replace("{generate_result}", json_result)
-
-        return {
-            'bedrock_result': final_result
-        }
-
-    except HTTPException as he:
-        raise he
-    except Exception as e:
-        logging.error(f"Variation generation error: {e}")
-        raise HTTPException(status_code=500, detail=f"Variation generation failed: {str(e)}")
 
 @app.get('/get_ec2_role')
 async def fetch_ec2_role():
