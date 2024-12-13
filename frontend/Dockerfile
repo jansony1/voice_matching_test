@@ -33,21 +33,39 @@ COPY frontend/public/credentials-polyfill.js /usr/share/nginx/html/
 RUN mkdir -p /usr/share/nginx/html/shared/config
 COPY --from=builder /app/public/shared/config/models_config.json /usr/share/nginx/html/shared/config/
 
-# Enhanced nginx configuration with CORS and file upload settings
+# Enhanced nginx configuration with extended timeouts and CORS settings
 RUN echo 'server { \
     listen 80; \
     \
-    # File upload settings \
-    client_max_body_size 10M; \
-    # Increase timeout for backend response
-    proxy_read_timeout 600s; \
+    # Extended timeout and performance settings \
+    client_max_body_size 50M; \
+    client_body_timeout 600s; \
+    client_header_timeout 600s; \
+    keepalive_timeout 600s; \
+    send_timeout 600s; \
+    proxy_connect_timeout 600s; \
     proxy_send_timeout 600s; \
+    proxy_read_timeout 600s; \
+    fastcgi_read_timeout 600s; \
     \
     # CORS headers \
     add_header Access-Control-Allow-Origin * always; \
     add_header Access-Control-Allow-Methods "GET, POST, OPTIONS" always; \
     add_header Access-Control-Allow-Headers "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization" always; \
     add_header Access-Control-Expose-Headers "Content-Length,Content-Range" always; \
+    \
+    location /api { \
+        proxy_pass http://backend:8000; \
+        proxy_set_header Host $host; \
+        proxy_set_header X-Real-IP $remote_addr; \
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; \
+        proxy_set_header X-Forwarded-Proto $scheme; \
+        \
+        # Extended proxy timeouts \
+        proxy_connect_timeout 600s; \
+        proxy_send_timeout 600s; \
+        proxy_read_timeout 600s; \
+    } \
     \
     location / { \
         root /usr/share/nginx/html; \

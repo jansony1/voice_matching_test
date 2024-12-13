@@ -166,7 +166,6 @@
 import './InputForm.css'
 import AudioRecorder from './AudioRecorder.vue'
 
-// Get backend URL from config with debug logging
 const BACKEND_URL = window.configs?.BACKEND_URL
 console.log('Config object:', window.configs)
 console.log('Using backend URL:', BACKEND_URL)
@@ -273,9 +272,9 @@ export default {
         return
       }
 
-      // Create an AbortController with a 10-minute timeout
+      // Create an AbortController with a 15-minute timeout (extended from 10)
       const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 10 * 60 * 1000) // 10 minutes
+      const timeoutId = setTimeout(() => controller.abort(), 15 * 60 * 1000) // 15 minutes
 
       try {
         const fileContent = await this.jsonFile.text()
@@ -302,6 +301,13 @@ export default {
         // Clear the timeout if the request completes successfully
         clearTimeout(timeoutId)
 
+        // Check for non-JSON responses
+        const contentType = response.headers.get('content-type')
+        if (!contentType || !contentType.includes('application/json')) {
+          const errorText = await response.text()
+          throw new Error(`Unexpected response: ${errorText}`)
+        }
+
         if (response.ok) {
           const result = await response.json()
           this.systemPrompt = result.bedrock_result
@@ -311,11 +317,21 @@ export default {
           throw new Error(errorData.detail || `Error: ${response.status} - ${response.statusText}`)
         }
       } catch (error) {
-        console.error('Error generating variation:', error)
-        this.error = `Error generating variation: ${error.message}`
+        // Handle specific error scenarios
+        if (error.name === 'AbortError') {
+          this.error = 'Request timed out. The operation took longer than 15 minutes.'
+        } else if (error.message.includes('Unexpected token')) {
+          this.error = 'Received an invalid response from the server. Please try again.'
+          console.error('Unexpected response:', error)
+        } else if (error.message.includes('504')) {
+          this.error = 'Gateway Timeout. The server took too long to respond. Please try again later.'
+        } else {
+          console.error('Error generating variation:', error)
+          this.error = `Error generating variation: ${error.message}`
+        }
       }
-    },
-    // Rest of the methods remain unchanged
+    },  
+      // Rest of the methods remain unchanged
     handleFileChange(event) {
       const file = event.target.files[0]
       if (file) {
