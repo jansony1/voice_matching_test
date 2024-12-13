@@ -39,7 +39,6 @@ RUN echo 'server { \
     \
     # File upload settings \
     client_max_body_size 10M; \    
-    proxy_read_timeout 600s;  # 10 minutes for generate_variation \
 
     \
     # CORS headers \
