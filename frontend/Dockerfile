@@ -38,8 +38,10 @@ RUN echo 'server { \
     listen 80; \
     \
     # File upload settings \
-    client_max_body_size 10M; \    
-
+    client_max_body_size 10M; \
+    # Increase timeout for backend response \
+    proxy_read_timeout 60s; \
+    proxy_send_timeout 600s; 
     \
     # CORS headers \
     add_header Access-Control-Allow-Origin * always; \

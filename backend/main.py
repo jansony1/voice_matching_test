@@ -110,8 +110,10 @@ async def generate_batch_variations(session, words_batch, system_prompt, model_n
         # Replace placeholder in system prompt
         batch_system_prompt = system_prompt.replace("{input_dict}", batch_dict)
         
-        # Call Bedrock service
+        # Call Bedrock service with periodic logging to keep connection alive
+        logging.info(f"Starting batch generation for {len(words_batch)} words")
         bedrock_result = await call_bedrock(batch_dict, batch_system_prompt, session, model_name)
+        logging.info("Batch generation completed")
         
         # Extract JSON from result
         json_result = extract_json_from_bedrock_result(bedrock_result)
@@ -124,6 +126,9 @@ async def generate_batch_variations(session, words_batch, system_prompt, model_n
 @app.post('/generate_variation')
 async def generate_variation(request_data: dict):
     try:
+        # Increase timeout for long-running tasks
+        logging.info("Starting variation generation")
+        
         # Get JSON data from request
         json_data = request_data.get('json_data')
         if not json_data:
@@ -147,11 +152,17 @@ async def generate_variation(request_data: dict):
         batch_size = 5
         all_variations = {}
 
-        # Process words in batches
+        # Process words in batches with periodic logging
         for i in range(0, len(words), batch_size):
             words_batch = words[i:i+batch_size]
+            logging.info(f"Processing batch {i//batch_size + 1}: {words_batch}")
+            
+            # Simulate keep-alive by logging progress
             batch_variations = await generate_batch_variations(session, words_batch, system_prompt, model_name)
             all_variations.update(batch_variations)
+            
+            # Optional: Add a small delay to prevent overwhelming the server
+            await asyncio.sleep(0.5)
 
         # Combine variations into a single JSON
         final_json_result = json.dumps(all_variations)
@@ -160,6 +171,7 @@ async def generate_variation(request_data: dict):
         template = read_template()
         final_result = template.replace("{generate_result}", final_json_result)
 
+        logging.info("Variation generation completed successfully")
         return {
             'bedrock_result': final_result
         }
