@@ -1,4 +1,5 @@
 <template>
+  <!-- Template remains unchanged -->
   <div class="input-form">
     <!-- Login Form -->
     <div v-if="!isLoggedIn" class="login-form">
@@ -272,6 +273,10 @@ export default {
         return
       }
 
+      // Create an AbortController with a 10-minute timeout
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 10 * 60 * 1000) // 10 minutes
+
       try {
         const fileContent = await this.jsonFile.text()
         let jsonData
@@ -290,8 +295,12 @@ export default {
           },
           body: JSON.stringify({
             json_data: jsonData
-          })
+          }),
+          signal: controller.signal // Add the abort signal
         })
+
+        // Clear the timeout if the request completes successfully
+        clearTimeout(timeoutId)
 
         if (response.ok) {
           const result = await response.json()
