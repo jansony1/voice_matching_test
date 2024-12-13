@@ -38,10 +38,10 @@ RUN echo 'server { \
     listen 80; \
     \
     # File upload settings \
-    client_max_body_size 10M; \
-    \
-    # Proxy timeout settings - increased for long-running APIs \
+    client_max_body_size 10M; \    
     proxy_read_timeout 600s;  # 10 minutes for generate_variation \
+
+    \
     # CORS headers \
     add_header Access-Control-Allow-Origin * always; \
     add_header Access-Control-Allow-Methods "GET, POST, OPTIONS" always; \
