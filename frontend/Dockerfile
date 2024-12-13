@@ -39,16 +39,12 @@ RUN echo 'server { \
     \
     # File upload settings \
     client_max_body_size 10M; \
-    \
+    
     # CORS headers \
     add_header Access-Control-Allow-Origin * always; \
     add_header Access-Control-Allow-Methods "GET, POST, OPTIONS" always; \
     add_header Access-Control-Allow-Headers "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization" always; \
     add_header Access-Control-Expose-Headers "Content-Length,Content-Range" always; \
-    \
-    # Increase timeout for backend response \
-    proxy_read_timeout 60s; \
-    proxy_send_timeout 600s; 
     \
     location / { \
         root /usr/share/nginx/html; \
