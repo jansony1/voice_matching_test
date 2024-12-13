@@ -1,3 +1,9 @@
+FROM node:18-alpine as builder
+
+WORKDIR /app
+
+# Install dependencies
+COPY frontend/package*.json ./
 RUN npm install
 
 # Create directory structure first
