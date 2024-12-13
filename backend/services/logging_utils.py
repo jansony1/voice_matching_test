@@ -35,7 +35,7 @@ def setup_logging():
     try:
         # Main application logger
         logging.basicConfig(
-            level=logging.DEBUG,
+            level=logging.INFO,
             format='%(asctime)s %(levelname)s: %(message)s',
             handlers=[
                 logging.FileHandler(APP_LOG_FILE),
