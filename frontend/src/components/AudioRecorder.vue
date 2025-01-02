@@ -114,13 +114,19 @@ export default {
         this.isRecording = true;
         this.$emit('recordingStarted');
 
+        const credentials = {
+          accessKeyId: this.awsCredentials.accessKeyId,
+          secretAccessKey: this.awsCredentials.secretAccessKey,
+          region: this.awsCredentials.region
+        };
+        
+        if (this.awsCredentials.sessionToken) {
+          credentials.sessionToken = this.awsCredentials.sessionToken;
+        }
+
         this.transcribeClient = new TranscribeStreamingClient({
           region: this.awsCredentials.region,
-          credentials: {
-            accessKeyId: this.awsCredentials.accessKeyId,
-            secretAccessKey: this.awsCredentials.secretAccessKey,
-            sessionToken: this.awsCredentials.sessionToken
-          },
+          credentials
         });
 
         const command = new StartStreamTranscriptionCommand({
@@ -230,7 +236,9 @@ export default {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${this.awsCredentials.sessionToken}`
+            'Authorization': this.awsCredentials.sessionToken ? 
+              `Bearer ${this.awsCredentials.sessionToken}` : 
+              `Basic ${btoa(`${this.awsCredentials.accessKeyId}:${this.awsCredentials.secretAccessKey}`)}`
           },
           body: JSON.stringify({
             transcript: transcription,
@@ -257,29 +265,56 @@ export default {
 
 <style scoped>
 .audio-recorder {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+  padding: 24px;
+  background-color: #FAFAFA;
+  border-radius: 12px;
+  border: 1px solid #E5E5E5;
 }
 
 .btn {
-  padding: 10px 20px;
+  padding: 12px 24px;
   border: none;
-  border-radius: 3px;
+  border-radius: 8px;
   cursor: pointer;
-  margin-right: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+  margin-right: 12px;
 }
 
 .btn-primary {
-  background-color: #007bff;
+  background-color: #2D8CFF;
   color: #fff;
+}
+
+.btn-primary:hover {
+  background-color: #2478DB;
 }
 
 .btn-secondary {
-  background-color: #6c757d;
-  color: #fff;
+  background-color: #F5F5F5;
+  color: #232333;
+  border: 1px solid #E5E5E5;
+}
+
+.btn-secondary:hover {
+  background-color: #EAEAEA;
+}
+
+.btn:disabled {
+  background-color: #E5E5E5;
+  color: #999999;
+  cursor: not-allowed;
 }
 
 .error-message {
-  color: red;
-  margin-top: 10px;
+  color: #DC3545;
+  font-size: 14px;
+  margin-top: 12px;
+  padding: 12px;
+  background-color: #FFF5F5;
+  border-radius: 6px;
+  border: 1px solid #FFE5E5;
 }
 </style>

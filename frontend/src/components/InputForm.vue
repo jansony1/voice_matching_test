@@ -33,16 +33,78 @@
 
     <!-- Main Content (only shown after login) -->
     <div v-else>
-      <button @click="fetchEC2Role" class="btn btn-primary" :disabled="isFetchingRole">
-        {{ isFetchingRole ? 'Fetching EC2 Role...' : 'Get EC2 Role and Start' }}
-      </button>
+      <div class="auth-mode-selection">
+        <h3>Select Authentication Mode</h3>
+        <div class="auth-mode-buttons">
+          <button 
+            @click="authMode = 'ec2'" 
+            class="btn" 
+            :class="{ 'btn-primary': authMode === 'ec2', 'btn-secondary': authMode !== 'ec2' }"
+          >
+            EC2 Role
+          </button>
+          <button 
+            @click="authMode = 'manual'" 
+            class="btn" 
+            :class="{ 'btn-primary': authMode === 'manual', 'btn-secondary': authMode !== 'manual' }"
+          >
+            Manual Credentials
+          </button>
+        </div>
+      </div>
 
-      <div v-if="ec2Role" class="role-info">
-        <h3>EC2 Role: {{ ec2Role }}</h3>
+      <!-- EC2 Role Mode -->
+      <div v-if="authMode === 'ec2'" class="auth-section">
+        <button @click="fetchEC2Role" class="btn btn-primary" :disabled="isFetchingRole">
+          {{ isFetchingRole ? 'Fetching EC2 Role...' : 'Get EC2 Role and Start' }}
+        </button>
+      </div>
+
+      <!-- Manual Credentials Mode -->
+      <div v-if="authMode === 'manual'" class="auth-section">
+        <div class="form-group">
+          <label class="highlight-label">Access Key ID</label>
+          <input 
+            type="text" 
+            v-model="manualCredentials.accessKeyId" 
+            class="form-control"
+            placeholder="Enter AWS Access Key ID"
+          />
+        </div>
+        <div class="form-group">
+          <label class="highlight-label">Secret Access Key</label>
+          <input 
+            type="password" 
+            v-model="manualCredentials.secretAccessKey" 
+            class="form-control"
+            placeholder="Enter AWS Secret Access Key"
+          />
+        </div>
+        <div class="form-group">
+          <label class="highlight-label">Region</label>
+          <input 
+            type="text" 
+            v-model="manualCredentials.region" 
+            class="form-control"
+            placeholder="Enter AWS Region (e.g., us-east-1)"
+          />
+        </div>
+        <button @click="setManualCredentials" class="btn btn-primary" :disabled="!isManualCredentialsValid">
+          Set Credentials and Start
+        </button>
+      </div>
+
+      <div v-if="ec2Role || manualCredentialsSet" class="role-info">
+        <template v-if="authMode === 'ec2'">
+          <h3>EC2 Role: {{ ec2Role }}</h3>
+        </template>
+        <template v-else>
+          <h3>Manual Credentials</h3>
+        </template>
         <p>Authentication successful. You can now use the application.</p>
       </div>
 
-      <div v-if="awsCredentials.sessionToken">
+      <div v-if="awsCredentials.sessionToken || manualCredentialsSet">
         <div class="form-group">
           <label for="modelSelect" class="highlight-label">Select Model</label>
           <select id="modelSelect" v-model="selectedModel" class="form-control">
@@ -217,6 +279,13 @@ export default {
       loginError: null,
       textInput: '',
       textStatus: 'idle',
+      authMode: 'ec2',
+      manualCredentials: {
+        accessKeyId: '',
+        secretAccessKey: '',
+        region: ''
+      },
+      manualCredentialsSet: false,
       loginForm: {
         username: '',
         password: ''
@@ -319,7 +388,9 @@ export default {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${this.awsCredentials.sessionToken}`
+            'Authorization': this.authMode === 'ec2' ? 
+              `Bearer ${this.awsCredentials.sessionToken}` : 
+              `Basic ${btoa(`${this.awsCredentials.accessKeyId}:${this.awsCredentials.secretAccessKey}`)}`
           },
           body: JSON.stringify({
             json_data: jsonData
@@ -398,6 +469,27 @@ export default {
         console.error('Error loading models configuration:', error)
       }
     },
+    async setManualCredentials() {
+      if (!this.isManualCredentialsValid) {
+        this.error = "Please fill in all credential fields"
+        return
+      }
+
+      try {
+        this.awsCredentials = {
+          accessKeyId: this.manualCredentials.accessKeyId,
+          secretAccessKey: this.manualCredentials.secretAccessKey,
+          region: this.manualCredentials.region,
+          sessionToken: null // Not needed for manual credentials
+        }
+        this.manualCredentialsSet = true
+        this.error = null
+      } catch (error) {
+        console.error('Error setting manual credentials:', error)
+        this.error = `Error setting credentials: ${error.message}`
+      }
+    },
+
     async fetchEC2Role() {
       this.isFetchingRole = true
       this.error = null
@@ -450,7 +542,9 @@ export default {
       const response = await fetch(`${BACKEND_URL}/upload_to_s3`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.awsCredentials.sessionToken}`
+          'Authorization': this.authMode === 'ec2' ? 
+              `Bearer ${this.awsCredentials.sessionToken}` : 
+              `Basic ${btoa(`${this.awsCredentials.accessKeyId}:${this.awsCredentials.secretAccessKey}`)}`
         },
         body: formData
       })
@@ -463,8 +557,8 @@ export default {
       return await response.json()
     },
     async submitTextInput() {
-      if (!this.awsCredentials.sessionToken) {
-        this.error = "Please fetch the EC2 role first."
+      if (!this.awsCredentials.accessKeyId) {
+        this.error = "Please set AWS credentials first."
         return
       }
       if (!this.textInput || !this.systemPrompt) {
@@ -481,7 +575,9 @@ export default {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${this.awsCredentials.sessionToken}`
+            'Authorization': this.authMode === 'ec2' ? 
+              `Bearer ${this.awsCredentials.sessionToken}` : 
+              `Basic ${btoa(`${this.awsCredentials.accessKeyId}:${this.awsCredentials.secretAccessKey}`)}`
           },
           body: JSON.stringify({
             transcript: this.textInput,
@@ -506,8 +602,8 @@ export default {
     },
 
     async submitS3Transcription() {
-      if (!this.awsCredentials.sessionToken) {
-        this.error = "Please fetch the EC2 role first."
+      if (!this.awsCredentials.accessKeyId) {
+        this.error = "Please set AWS credentials first."
         return
       }
       if (!this.selectedFile || !this.s3AudioFileUrl || !this.systemPrompt) {
@@ -534,7 +630,9 @@ export default {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${this.awsCredentials.sessionToken}`
+            'Authorization': this.authMode === 'ec2' ? 
+              `Bearer ${this.awsCredentials.sessionToken}` : 
+              `Basic ${btoa(`${this.awsCredentials.accessKeyId}:${this.awsCredentials.secretAccessKey}`)}`
           },
           body: JSON.stringify({
             s3_audio_url: uploadResult.s3_url,
@@ -573,6 +671,13 @@ export default {
       this.status = 'matching'
       this.transcriptionResult = ''
       this.bedrockResult = ''
+    }
+  },
+  computed: {
+    isManualCredentialsValid() {
+      return this.manualCredentials.accessKeyId &&
+             this.manualCredentials.secretAccessKey &&
+             this.manualCredentials.region
     }
   }
 }
@@ -794,6 +899,34 @@ pre {
   color: #2D8CFF;
   font-weight: 500;
   font-size: 14px;
+}
+
+/* Auth mode selection styles */
+.auth-mode-selection {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.auth-mode-selection h3 {
+  color: #232333;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.auth-mode-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.auth-section {
+  max-width: 440px;
+  margin: 0 auto 32px;
+  padding: 24px;
+  background-color: #FAFAFA;
+  border-radius: 12px;
+  border: 1px solid #E5E5E5;
 }
 
 /* Role info styles */
