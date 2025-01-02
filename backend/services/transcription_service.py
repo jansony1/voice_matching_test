@@ -76,7 +76,7 @@ async def transcribe_audio(session, s3_audio_url: str, system_prompt: str, model
         # Log before calling Bedrock
         logging.info("About to call Bedrock with transcription result")
         logging.info(f"Using model: {model_name}")
-        logging.info(f"System prompt: {system_prompt}")
+        logging.info(f"transcript_text : {transcript_text}")
 
         # Call Bedrock Claude with the specified model
         bedrock_result = await call_bedrock(transcript_text, system_prompt, session, model_name)
