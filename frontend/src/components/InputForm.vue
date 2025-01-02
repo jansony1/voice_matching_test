@@ -33,68 +33,70 @@
 
     <!-- Main Content (only shown after login) -->
     <div v-else>
-      <div class="auth-mode-selection">
-        <h3>Select Authentication Mode</h3>
-        <div class="auth-mode-buttons">
-          <button 
-            @click="authMode = 'ec2'" 
-            class="btn" 
-            :class="{ 'btn-primary': authMode === 'ec2', 'btn-secondary': authMode !== 'ec2' }"
-          >
-            EC2 Role
+      <div v-if="!isAuthenticationComplete">
+        <div class="auth-mode-selection">
+          <h3>Select Authentication Mode</h3>
+          <div class="auth-mode-buttons">
+            <button 
+              @click="authMode = 'ec2'" 
+              class="btn" 
+              :class="{ 'btn-primary': authMode === 'ec2', 'btn-secondary': authMode !== 'ec2' }"
+            >
+              EC2 Role
+            </button>
+            <button 
+              @click="authMode = 'manual'" 
+              class="btn" 
+              :class="{ 'btn-primary': authMode === 'manual', 'btn-secondary': authMode !== 'manual' }"
+            >
+              Manual Credentials
+            </button>
+          </div>
+        </div>
+
+        <!-- EC2 Role Mode -->
+        <div v-if="authMode === 'ec2'" class="auth-section">
+          <button @click="fetchEC2Role" class="btn btn-primary" :disabled="isFetchingRole">
+            {{ isFetchingRole ? 'Fetching EC2 Role...' : 'Get EC2 Role and Start' }}
           </button>
-          <button 
-            @click="authMode = 'manual'" 
-            class="btn" 
-            :class="{ 'btn-primary': authMode === 'manual', 'btn-secondary': authMode !== 'manual' }"
-          >
-            Manual Credentials
+        </div>
+
+        <!-- Manual Credentials Mode -->
+        <div v-if="authMode === 'manual'" class="auth-section">
+          <div class="form-group">
+            <label class="highlight-label">Access Key ID</label>
+            <input 
+              type="text" 
+              v-model="manualCredentials.accessKeyId" 
+              class="form-control"
+              placeholder="Enter AWS Access Key ID"
+            />
+          </div>
+          <div class="form-group">
+            <label class="highlight-label">Secret Access Key</label>
+            <input 
+              type="password" 
+              v-model="manualCredentials.secretAccessKey" 
+              class="form-control"
+              placeholder="Enter AWS Secret Access Key"
+            />
+          </div>
+          <div class="form-group">
+            <label class="highlight-label">Region</label>
+            <input 
+              type="text" 
+              v-model="manualCredentials.region" 
+              class="form-control"
+              placeholder="Enter AWS Region (e.g., us-east-1)"
+            />
+          </div>
+          <button @click="setManualCredentials" class="btn btn-primary" :disabled="!isManualCredentialsValid">
+            Set Credentials and Start
           </button>
         </div>
       </div>
 
-      <!-- EC2 Role Mode -->
-      <div v-if="authMode === 'ec2'" class="auth-section">
-        <button @click="fetchEC2Role" class="btn btn-primary" :disabled="isFetchingRole">
-          {{ isFetchingRole ? 'Fetching EC2 Role...' : 'Get EC2 Role and Start' }}
-        </button>
-      </div>
-
-      <!-- Manual Credentials Mode -->
-      <div v-if="authMode === 'manual'" class="auth-section">
-        <div class="form-group">
-          <label class="highlight-label">Access Key ID</label>
-          <input 
-            type="text" 
-            v-model="manualCredentials.accessKeyId" 
-            class="form-control"
-            placeholder="Enter AWS Access Key ID"
-          />
-        </div>
-        <div class="form-group">
-          <label class="highlight-label">Secret Access Key</label>
-          <input 
-            type="password" 
-            v-model="manualCredentials.secretAccessKey" 
-            class="form-control"
-            placeholder="Enter AWS Secret Access Key"
-          />
-        </div>
-        <div class="form-group">
-          <label class="highlight-label">Region</label>
-          <input 
-            type="text" 
-            v-model="manualCredentials.region" 
-            class="form-control"
-            placeholder="Enter AWS Region (e.g., us-east-1)"
-          />
-        </div>
-        <button @click="setManualCredentials" class="btn btn-primary" :disabled="!isManualCredentialsValid">
-          Set Credentials and Start
-        </button>
-      </div>
-
-      <div v-if="ec2Role || manualCredentialsSet" class="role-info">
+      <div v-if="isAuthenticationComplete" class="role-info">
         <template v-if="authMode === 'ec2'">
           <h3>EC2 Role: {{ ec2Role }}</h3>
         </template>
@@ -678,6 +680,9 @@ export default {
       return this.manualCredentials.accessKeyId &&
              this.manualCredentials.secretAccessKey &&
              this.manualCredentials.region
+    },
+    isAuthenticationComplete() {
+      return this.ec2Role || this.manualCredentialsSet
     }
   }
 }
