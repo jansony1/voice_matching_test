@@ -60,7 +60,7 @@
           <!-- Variation controls -->
           <div class="variation-controls">
             <div class="file-upload-container">
-              <label class="highlight-label">Upload JSON File</label>
+              <label class="highlight-label">Dict Upld for Expansion</label>
               <input 
                 type="file" 
                 @change="handleJsonFileChange" 
@@ -68,7 +68,7 @@
                 class="form-control"
                 id="jsonFileInput"
               />
-              <small class="file-hint">Upload JSON file for variation</small>
+              <small class="file-hint">Only Sonnet3.5 was Supported</small>
             </div>
             <div class="generate-button-container">
               <button @click="generateVariation" class="btn btn-secondary" :disabled="!jsonFile">

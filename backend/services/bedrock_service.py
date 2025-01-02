@@ -12,7 +12,8 @@ def generate_conversation(
     system_prompts, 
     messages, 
     inference_config, 
-    additional_model_request_fields=None):
+    additional_model_request_fields=None,
+    performanceConfig=None):
     """
     Sends messages to a model using the Bedrock Converse API.
     
@@ -40,6 +41,10 @@ def generate_conversation(
         # 如果有额外的请求字段，添加到请求参数中
         if additional_model_request_fields:
             request_params['additionalModelRequestFields'] = additional_model_request_fields
+
+        if performanceConfig:
+            request_params['performanceConfig'] = performanceConfig
+
 
         # 执行单次调用
         response = bedrock_client.converse(**request_params)
@@ -84,6 +89,8 @@ async def call_bedrock(transcript: str, system_prompt: str, session: boto3.Sessi
         model_id = model_info["id"]
         inference_config = model_info["config"]
         additional_request_fields = inference_config.pop("additionalModelRequestFields", None)
+        performanceConfig = inference_config.pop("performanceConfig", None)
+
 
         # Prepare system prompts and messages
         system_prompts = [{"text": system_prompt}]
@@ -99,7 +106,8 @@ async def call_bedrock(transcript: str, system_prompt: str, session: boto3.Sessi
             system_prompts,
             messages,
             inference_config,
-            additional_request_fields
+            additional_request_fields,
+            performanceConfig
         )
 
         # Extract the model's response

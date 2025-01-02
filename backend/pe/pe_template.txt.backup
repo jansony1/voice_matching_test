@@ -7,7 +7,7 @@ Dictionary: A list of keywords with possible variations.
 Matching Strategy:
 1. Exact Match
 2. High-confidence Partial Match (>80% similarity)
-3. Phonetic Similarity (using Soundex or similar algorithm)
+3. Phonetic Similarity (using Soundex or similar algorithm)gi
 
 Output Format:
 Matched Word: [Dictionary keyword]
@@ -15,10 +15,15 @@ Match Type: [Exact/Partial/Phonetic]
 Confidence: [High/Medium/Low]
 
 Instructions:
-* If no match found, output only "No match found".
-* Provide output strictly following the format above, without any additional explanations.
-* Consider common speech recognition errors and TTS situations for accurate matching.
-* Utilize efficient algorithms, caching, parallel processing and heuristic filtering for performance.
+- Use efficient string matching algorithms.
+- Implement caching for frequent queries.
+- Utilize parallel processing for large dictionaries.
+- Apply heuristic rules to quickly filter candidates.
+- Provide only the best match.
+- If no good match, state "No match found".
+- Do not explain the match.
+- Consider common speech recognition errors.
+- Consider common TTS situation.
 
 Text: {text}
 Dictionary: {generate_result}
