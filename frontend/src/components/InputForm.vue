@@ -1,5 +1,4 @@
 <template>
-  <!-- Template remains unchanged -->
   <div class="input-form">
     <!-- Login Form -->
     <div v-if="!isLoggedIn" class="login-form">
@@ -85,6 +84,9 @@
           <li class="nav-item">
             <a class="nav-link" :class="{ active: transcriptionMode === 's3file' }" href="#" @click.prevent="transcriptionMode = 's3file'">S3 Audio File</a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" :class="{ active: transcriptionMode === 'text' }" href="#" @click.prevent="transcriptionMode = 'text'">Text Input</a>
+          </li>
         </ul>
 
         <div class="tab-content">
@@ -152,6 +154,31 @@
               </div>
             </div>
           </div>
+
+          <div class="tab-pane" :class="{ 'active': transcriptionMode === 'text' }">
+            <div class="text-input-transcription">
+              <div class="form-group">
+                <label for="textInput" class="highlight-label">Text Input</label>
+                <textarea 
+                  id="textInput" 
+                  v-model="textInput" 
+                  placeholder="Enter your text here" 
+                  class="form-control"
+                  rows="4"
+                ></textarea>
+              </div>
+              <button @click="submitTextInput" :disabled="!systemPrompt || !textInput" class="btn btn-primary">
+                {{ textStatus === 'matching' ? 'Processing...' : 'Submit' }}
+              </button>
+              <div v-if="textStatus === 'matched'" class="status-text">
+                Match Result
+              </div>
+              <div v-if="bedrockResult" class="bedrock-result">
+                <h3>Bedrock Inference Result</h3>
+                <pre>{{ bedrockResult }}</pre>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -188,6 +215,8 @@ export default {
       isLoggedIn: false,
       isLoggingIn: false,
       loginError: null,
+      textInput: '',
+      textStatus: 'idle',
       loginForm: {
         username: '',
         password: ''
@@ -433,6 +462,49 @@ export default {
 
       return await response.json()
     },
+    async submitTextInput() {
+      if (!this.awsCredentials.sessionToken) {
+        this.error = "Please fetch the EC2 role first."
+        return
+      }
+      if (!this.textInput || !this.systemPrompt) {
+        this.error = "Please enter text and a system prompt."
+        return
+      }
+
+      this.textStatus = 'matching'
+      this.bedrockResult = ''
+      this.error = null
+
+      try {
+        const response = await fetch(`${BACKEND_URL}/bedrock`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.awsCredentials.sessionToken}`
+          },
+          body: JSON.stringify({
+            transcript: this.textInput,
+            system_prompt: this.systemPrompt,
+            model_name: this.selectedModel
+          })
+        });
+
+        if (response.ok) {
+          const result = await response.json()
+          this.bedrockResult = result.bedrock_result
+          this.textStatus = 'matched'
+        } else {
+          const errorData = await response.json()
+          throw new Error(errorData.detail || `Error: ${response.status} - ${response.statusText}`)
+        }
+      } catch (error) {
+        console.error('Error in text processing:', error)
+        this.error = `Error: ${error.message}`
+        this.textStatus = 'idle'
+      }
+    },
+
     async submitS3Transcription() {
       if (!this.awsCredentials.sessionToken) {
         this.error = "Please fetch the EC2 role first."
@@ -507,91 +579,107 @@ export default {
 </script>
 
 <style scoped>
-/* Previous styles remain unchanged */
 .input-form {
-  max-width: 800px;
+  max-width: 1000px;
   margin: 0 auto;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  padding: 30px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
 }
 
 /* Login form styles */
 .login-form {
-  max-width: 400px;
+  max-width: 440px;
   margin: 40px auto;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: #f8f9fa;
+  padding: 32px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
 }
 
 .login-form h2 {
   text-align: center;
-  margin-bottom: 20px;
-  color: #007bff;
+  margin-bottom: 24px;
+  color: #2D8CFF;
+  font-size: 24px;
+  font-weight: 600;
 }
 
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .highlight-label {
-  font-weight: bold;
-  color: #007bff;
-  font-size: 1.1em;
+  font-weight: 500;
+  color: #232333;
+  font-size: 14px;
   margin-bottom: 8px;
   display: block;
-  background-color: #f8f9fa;
-  padding: 5px 10px;
-  border-radius: 3px;
-  border-left: 3px solid #007bff;
 }
 
 .form-control {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 3px;
+  padding: 12px;
+  border: 1px solid #E5E5E5;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background-color: #FAFAFA;
+}
+
+.form-control:focus {
+  border-color: #2D8CFF;
+  box-shadow: 0 0 0 2px rgba(45, 140, 255, 0.2);
+  outline: none;
 }
 
 .input-group {
   display: flex;
-}
-
-.input-group-append {
-  margin-left: 10px;
+  gap: 12px;
 }
 
 .btn {
-  padding: 10px 20px;
+  padding: 12px 24px;
   border: none;
-  border-radius: 3px;
+  border-radius: 8px;
   cursor: pointer;
-  margin-right: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
 }
 
 .btn-primary {
-  background-color: #007bff;
+  background-color: #2D8CFF;
   color: #fff;
+}
+
+.btn-primary:hover {
+  background-color: #2478DB;
 }
 
 .btn-secondary {
-  background-color: #6c757d;
-  color: #fff;
+  background-color: #F5F5F5;
+  color: #232333;
+  border: 1px solid #E5E5E5;
+}
+
+.btn-secondary:hover {
+  background-color: #EAEAEA;
 }
 
 .btn:disabled {
-  background-color: #ccc;
+  background-color: #E5E5E5;
+  color: #999999;
   cursor: not-allowed;
 }
 
 /* Variation controls */
 .variation-controls {
-  display: flex;
-  flex-direction: column;
-  margin-top: 15px;
-  gap: 15px;
+  background-color: #FAFAFA;
+  padding: 20px;
+  border-radius: 8px;
+  margin-top: 20px;
 }
 
 .file-upload-container {
@@ -599,58 +687,53 @@ export default {
 }
 
 .generate-button-container {
-  width: 100%;
-  display: flex;
-  justify-content: flex-start;
+  margin-top: 16px;
 }
 
 .file-hint {
-  color: #6c757d;
-  margin-top: 5px;
-  display: block;
-}
-
-/* Rest of the styles remain unchanged */
-.btn-outline-secondary {
-  background-color: #f8f9fa;
-  border: 1px solid #ccc;
-  color: #333;
-}
-
-.transcription-mode-container {
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  padding: 20px;
-  margin-top: 20px;
+  color: #666666;
+  font-size: 12px;
+  margin-top: 8px;
 }
 
 .nav-tabs {
   display: flex;
   list-style: none;
   padding: 0;
-  margin-bottom: 20px;
+  margin: 32px 0 24px;
+  border-bottom: 1px solid #E5E5E5;
+  gap: 4px;
 }
 
 .nav-item {
-  margin-right: 10px;
+  margin-bottom: -1px;
 }
 
 .nav-link {
   display: block;
-  padding: 10px 15px;
+  padding: 12px 24px;
   text-decoration: none;
-  color: #333;
-  background-color: #f0f0f0;
-  border-radius: 5px;
+  color: #666666;
+  font-weight: 500;
+  font-size: 14px;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.nav-link:hover {
+  color: #2D8CFF;
 }
 
 .nav-link.active {
-  background-color: #007bff;
-  color: #fff;
+  color: #2D8CFF;
+  border-bottom-color: #2D8CFF;
+  background-color: transparent;
 }
 
 .tab-content {
-  margin-top: 20px;
+  background-color: #FFFFFF;
+  border-radius: 8px;
+  padding: 24px;
 }
 
 .tab-pane {
@@ -663,38 +746,74 @@ export default {
 
 .status-text {
   margin: 20px 0;
-  font-weight: bold;
-  color: #007bff;
+  font-weight: 500;
+  color: #2D8CFF;
+  font-size: 14px;
 }
 
 .transcription-result, .bedrock-result {
-  margin-top: 20px;
-  border: 1px solid #ccc;
-  padding: 10px;
-  border-radius: 5px;
+  margin-top: 24px;
+  background-color: #FAFAFA;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #E5E5E5;
+}
+
+.transcription-result h3, .bedrock-result h3 {
+  color: #232333;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
 }
 
 pre {
   white-space: pre-wrap;
   word-wrap: break-word;
-}
-
-.text-success {
-  color: green;
-}
-
-.text-danger {
-  color: red;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #333333;
+  background-color: #FFFFFF;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #E5E5E5;
 }
 
 .error-message {
-  color: red;
-  margin-top: 10px;
+  color: #DC3545;
+  font-size: 14px;
+  margin-top: 12px;
+  padding: 12px;
+  background-color: #FFF5F5;
+  border-radius: 6px;
+  border: 1px solid #FFE5E5;
 }
 
 .upload-progress {
-  margin: 10px 0;
-  color: #007bff;
-  font-weight: bold;
+  margin: 16px 0;
+  color: #2D8CFF;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+/* Role info styles */
+.role-info {
+  background-color: #F0F9FF;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 20px 0;
+}
+
+.role-info h3 {
+  color: #2D8CFF;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.role-info p {
+  color: #666666;
+  font-size: 14px;
+  margin: 0;
 }
 </style>
