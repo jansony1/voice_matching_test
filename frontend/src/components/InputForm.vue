@@ -117,6 +117,14 @@
         </div>
 
         <div class="form-group">
+          <label for="languageSelect" class="highlight-label">Select Language</label>
+          <select id="languageSelect" v-model="selectedLanguage" class="form-control">
+            <option value="en-US">English</option>
+            <option value="es-US">Spanish</option>
+          </select>
+        </div>
+
+        <div class="form-group">
           <label for="systemPrompt" class="highlight-label">System Prompt</label>
           <textarea id="systemPrompt" v-model="systemPrompt" placeholder="Enter system prompt" class="form-control"></textarea>
           
@@ -155,12 +163,13 @@
 
         <div class="tab-content">
           <div class="tab-pane" :class="{ 'active': transcriptionMode === 'realtime' }">
-            <div class="realtime-transcription">
-              <AudioRecorder 
-                ref="audioRecorder" 
-                :systemPrompt="systemPrompt"
-                :awsCredentials="awsCredentials"
-                :selectedModel="selectedModel"
+          <div class="realtime-transcription">
+            <AudioRecorder 
+              ref="audioRecorder" 
+              :systemPrompt="systemPrompt"
+              :awsCredentials="awsCredentials"
+              :selectedModel="selectedModel"
+              :selectedLanguage="selectedLanguage"
                 @transcriptionUpdate="handleTranscriptionUpdate"
                 @recordingStopped="handleRecordingStopped"
                 @recordingStarted="handleRecordingStarted"
@@ -312,7 +321,8 @@ export default {
       },
       supportedModels: {},
       selectedModel: '',
-      jsonFile: null
+      jsonFile: null,
+      selectedLanguage: 'en-US'
     }
   },
   methods: {

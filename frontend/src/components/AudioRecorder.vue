@@ -25,6 +25,11 @@ export default {
     selectedModel: {
       type: String,
       required: true
+    },
+    selectedLanguage: {
+      type: String,
+      required: true,
+      default: 'en-US'
     }
   },
   data() {
@@ -130,7 +135,7 @@ export default {
         });
 
         const command = new StartStreamTranscriptionCommand({
-          LanguageCode: "en-US",
+          LanguageCode: this.selectedLanguage,
           MediaSampleRateHertz: this.audioContext.sampleRate,
           MediaEncoding: "pcm",
           AudioStream: this.audioStreamGenerator(),
