@@ -1,6 +1,6 @@
 {
     "supported_models": {
-       "claude-3-5-sonnet": {
+       "claude-3-5-sonnet CRI": {
             "display_name": "Claude 3.5 Sonnet V2 CRI",
             "id": "us.anthropic.claude-3-5-sonnet-20241022-v2:0",
             "config": {
@@ -18,9 +18,33 @@
                 "maxTokens": 1000
             }
         },
-        "claude-3-5-haiku": {
+        "claude-3-5-haiku CRI": {
             "display_name": "Claude 3.5 Haiku CRI",
             "id": "us.anthropic.claude-3-5-haiku-20241022-v1:0",
+            "config": {
+                "temperature": 0.5,
+                "topP": 0.9,
+                "maxTokens": 1000
+            },
+            "performanceConfig" : {
+                "latency" : "standard" 
+            } 
+        },
+        "claude-3-5-haiku": {
+            "display_name": "Claude 3.5 Haiku",
+            "id": "anthropic.claude-3-5-haiku-20241022-v1:0",
+            "config": {
+                "temperature": 0.5,
+                "topP": 0.9,
+                "maxTokens": 1000
+            },
+            "performanceConfig" : {
+                "latency" : "standard" 
+            }   
+        },
+        "claude-3-7-Sonnet CRI": {
+            "display_name": "Claude 3.7 Sonnet CRI",
+            "id": "us.anthropic.claude-3-7-sonnet-20250219-v1:0",
             "config": {
                 "temperature": 0.5,
                 "topP": 0.9,
@@ -31,8 +55,8 @@
             }
             
         },
-        "nova-micro": {
-            "display_name": "Nova Micro",
+        "nova-micro CRI": {
+            "display_name": "Nova Micro CRI",
             "id": "us.amazon.nova-micro-v1:0",
             "config": {
                 "temperature": 0.5,
@@ -45,8 +69,8 @@
                 }
             }
         },
-        "nova-lite": {
-            "display_name": "Nova Lite",
+        "nova-lite CRI": {
+            "display_name": "Nova Lite CRI",
             "id": "us.amazon.nova-lite-v1:0",
             "config": {
                 "temperature": 0.5,
@@ -59,8 +83,8 @@
                 }
             }
         },
-        "nova-pro": {
-            "display_name": "Nova Pro",
+        "nova-pro CRI": {
+            "display_name": "Nova Pro CRI",
             "id": "us.amazon.nova-pro-v1:0",
             "config": {
                 "temperature": 0.5,
