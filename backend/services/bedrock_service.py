@@ -91,12 +91,20 @@ async def call_bedrock(transcript: str, system_prompt: str, session: boto3.Sessi
         additional_request_fields = inference_config.pop("additionalModelRequestFields", None)
         performanceConfig = inference_config.pop("performanceConfig", None)
 
+        # Extract dictionary from system_prompt
+        start_index = system_prompt.find("<dictionary>")
+        end_index = system_prompt.find("</dictionary>") + len("</dictionary>")
+        dictionary_data = system_prompt[start_index:end_index]
+
+        user_input = dictionary_data+ "<text>" + transcript + "</text>"
+        # Remove dictionary part from system_prompt
+        new_system_prompt = system_prompt[:start_index] + system_prompt[end_index:]
 
         # Prepare system prompts and messages
-        system_prompts = [{"text": system_prompt}]
+        system_prompts = [{"text": new_system_prompt}]
         messages = [{
             "role": "user",
-            "content": [{"text": transcript}]
+            "content": [{"text": user_input}]
         }]
 
         # Generate conversation using the Converse API

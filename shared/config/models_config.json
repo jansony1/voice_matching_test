@@ -52,8 +52,7 @@
             },
             "performanceConfig" : {
                 "latency" : "standard" 
-            }
-            
+            }      
         },
         "nova-micro CRI": {
             "display_name": "Nova Micro CRI",
